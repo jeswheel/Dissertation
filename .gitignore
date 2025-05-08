@@ -9,3 +9,6 @@
 Abstract_tmp
 Dissertation.Rproj
 .Rproj.user
+cache
+*concordance.tex
+main.aux

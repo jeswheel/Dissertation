@@ -1394,7 +1394,7 @@
 %% ---- CODE ENVIRONMENT -----------------------------------------------
 % This generates a 'code' environment that allows inline citations
 % of small snippets of code.
-\newenvironment{code} %
+\newenvironment{blockcode} %
  {\quote\small\verbatim} %
  {\endverbatim\endquote}
 

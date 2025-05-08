@@ -1,0 +1,564 @@
+\chapter{Likelihood Based Inference for ARMA Models}
+\label{chpt:conclusion}
+
+
+
+
+\AtBeginEnvironment{algorithm}{%
+  \singlespacing
+}
+
+\section{Introduction}
+\label{sec:intro}
+
+Auto-regressive moving average (ARMA) models are the most well known and frequently used approach to modeling time series data.
+The general ARMA model was first described by Whittle \cite{whittle51}, and popularized by Box and Jenkins \cite{box1970}.
+Today, ARMA models are a fundamental component of various academic curricula, leading to their widespread use in both academia and industry.
+ARMA models are as foundational to time series analysis as linear models are to regression analysis, and they are often used in conjunction for regression with ARMA errors.
+A Google Scholar search for articles from 2024 onward that include the phrase ``time series" and the term ``ARMA" (or variants) yields over 18,000 results.
+% SEARCH TERM: "time series" ARIMA OR ARMA OR SARIMA OR SARIMAX OR ARIMAX OR SARMA OR SARMAX
+While not all these articles focus on the same models discussed here, the importance of this model class to modern science cannot be overstated.
+Given the ubiquity of ARMA models, even small improvements in parameter estimation constitute a significant advancement of statistical practice.
+
+A commonly used extension of the ARMA model is the \emph{integrated} ARMA model, which extends the class of ARMA models to include first or higher order differences.
+That is, an autoregressive integrated moving average (ARIMA) model is an ARMA model fit after differencing the data in order to make the data stationary.
+Additional extensions include the modeling of seasonal components (SARIMA), or the inclusion of external regressors (SARIMAX).
+Our methodology can readily be extended to these model classes as well, but here we focus on ARMA modeling for simplicity.
+
+We demonstrate that the most commonly used methodologies and software for estimating ARMA model parameters frequently yield sub-optimal estimates.
+This assertion may seem surprising given the extensive application and study of ARMA models over the past five decades.
+A natural question arises: if these optimization issues exist, why have they not been addressed?
+There are three plausible explanations: the first is that the potential for sub-optimal results has largely gone unnoticed; the second is a satisfactory solution has not yet been discovered; and the third is a general indifference to the problem.
+It is likely that a combination of these factors has deterred prior exploration of this issue.
+For instance, most practitioners may be unaware of the problem, while those who have noticed it either did not prioritize it or were unable to provide a general method to resolve it.
+In this article, we address all three possible explanations by demonstrating the existence of an existing shortcoming, explaining why the problem has nontrivial consequences, and proposing a readily applicable and computationally efficient solution.
+
+Imperfect likelihood optimization has an immediate consequence of complicating standard model selection procedures.
+Algorithms in widespread use lead to frequent inconsistencies in which a smaller model is found to have a higher maximized likelihood than a larger model within which it is nested.
+This is mathematically impossible but occurs in practice when the likelihood is imperfectly maximized, and is commonly observed using contemporary methods for ARMA models.
+Such inconsistencies are a distraction for the interpretation of results even when they do not substantially change the conclusion of the data analysis.
+Removing numeric inconsistencies can, and should, increase confidence in the correctness of statistical inferences.
+
+There are various software implementations available for the estimation of ARMA model parameters.
+In this article, we focus on the standard implementations in R (\code{stats} package) and Python (\code{statsmodels} module), which we selected due to their widespread usage.
+While both implementations offer multiple ways to estimate parameters, the default approach in both software packages is to perform likelihood maximization, assuming that the error terms are Gaussian.
+The challenges in parameter estimation arise in this situation because there is no closed-form expression for the likelihood function, though computational algorithms do exist for maximizing ARMA likelihoods \cite{gardner1980}.
+
+We begin by providing essential background information on the estimation of ARMA model parameters.
+We then present our proposed approach for parameter estimation, which leads to parameter values with a likelihood that is never lower and sometimes higher than the standard method.
+This is followed by a motivating example and a discussion of the potential implications of our proposed method.
+We also discuss the construction of standard errors for our maximum likelihood estimate.
+Specifically, we show that estimates of the standard error for model parameters that are default output of R and Python can be misleading, and we provide a reliable alternative.
+Throughout the article, we use the \code{stats::arima} function from the R programming language as a baseline for comparison.
+The same methodology for fitting parameters is used in the \code{statsmodels.tsa} module in Python, and we demonstrate that our results apply to this software as well (\nameref{S_python}).
+
+\section{Maximum Likelihood for ARMA Models}
+
+Following the notation of Shumway and Stoffer \cite{shumway2017}, a time series $\{x_t; t = 0, \pm1, \pm2, \ldots\}$ is said to be $\text{ARMA}(p, q)$ if it is (weakly) stationary and
+\begin{equation}
+  x_t = \phi_1x_{t - 1} + \cdots + \phi_px_{t - p} + w_t + \theta_1w_{t-1} + \ldots + \theta_qw_{t - q}, \label{eq:arma}
+\end{equation}
+with $\{w_t; t = 0, \pm1, \pm2, \ldots\}$ denoting a mean zero white noise (WN) processes with variance $\sigma_w^2 > 0$, and $\phi_p \neq 0$, $\theta_q \neq 0$.
+We refer to the positive integers $p$ and $q$ of Eq.~\ref{eq:arma} as the autoregressive (AR) and moving average (MA) orders, respectively.
+A non-zero intercept could also be added to Eq.~\ref{eq:arma}, but for simplicity we assume that the time series $\{x_t; t = 0, \pm1, \pm2, \ldots\}$ has zero mean.
+We denote the set of all model parameters as $\allVar = \{\phi_1, \ldots, \phi_p, \theta_1, \ldots, \theta_q, \sigma_w^2\}$.
+Our objective is to estimate model parameters using the observed uni-variate time series data.
+
+Given the importance of ARMA models, numerous methods have been developed for parameter estimation.
+For instance, parameters can be estimated through methods such as Bayesian inference \cite{monahan83,chib94} or neural networks \cite{chon97}, among many others.
+Specialized methods include those for integer-valued data \cite{weiss24}, approaches robust to outliers \cite{chakhchoukh10}, and non-Gaussian ARMA processes \cite{lii90}.
+While each methodology has its merits, we focus on the approach most widely adopted in statistical practice: likelihood maximization, under the assumption that the WN process $\{w_t\}$ is Gaussian.
+
+A relevant method for estimating model parameters is minimization of the conditional sum-of-squares (CSS).
+The CSS estimate is fast to compute, but it does not posses the statistical efficiency of the maximum likelihood estimate (MLE).
+However, the CSS method plays a role in likelihood maximization, so we briefly describe it here.
+By solving for the WN term $w_t$, Eq.~\ref{eq:arma} can be written as
+\begin{equation}
+w_t = x_t - \sum_{i = 1}^p \phi_i x_{t - i} - \sum_{j = 1}^q \theta_j w_{t-j}. \label{eq:css}
+\end{equation}
+A natural estimator would involve minimizing the sum of squares $\sum_{t = 1}^n w_t^2$.
+However, since only $x_1, x_2, \ldots, x_n$ are observed and $w_{t}$ is recursively defined in Eq.~\ref{eq:css} using values of $x_{t-p}$ and $w_{t-q}$, directly minimizing this sum is intractable.
+The CSS method addresses this issue by conditioning on the first $p$ values of the process, assuming $w_p = w_{p-1} = \ldots = w_{p+1-q} = 0$, and minimizing the conditioned sum $\sum_{t = p+1}^n w_t^2$.
+While the CSS method provides an attractive solution do to its relative simplicity and easiness to compute, it ignores the error terms for the first few observations.
+This is particularly concerning when the time series is short or when there are missing observations.
+CSS minimization was previously popular because methods for likelihood maximization were considered prohibitively slow, though this is no longer the case with currently available hardware and software \cite{ripley2002}.
+
+For likelihood maximization, Eq.~\ref{eq:arma} is reformulated as an equivalent state-space model.
+Although there are several ways this can be done, the approach of \cite{gardner1980} is widely used.
+In this approach, we let $r = \max(p, q + 1)$ and extend the set of parameters so that $\allVarExt = \{\phi_1, \allowbreak \ldots, \allowbreak \phi_r, \allowbreak \theta_1, \allowbreak \ldots, \allowbreak \theta_{r-1}, \allowbreak \sigma^2_w\}$, with some of the $\phi_is$ or $\theta_is$ being equal to zero unless $p = q + 1$.
+We define a latent state vector $z_t \in \mathbb{R}^{r}$, along with transition matrices $T\in \mathbb{R}^{r\times r}$ and $Q \in \mathbb{R}^{r\times 1}$, enabling the recovery of the original sequence $\{x_t\}$ using Equations~\ref{eq:trans} and \ref{eq:meas}.
+For a detailed explanation of how to define the latent state $z_t$ and transition matrices $T$ and $Q$ in order to recover the ARMA model, we refer readers to Chapter~3 of Durbin and Koopman \cite{durbin12}.
+Along with initializations for the mean and variance of $z_0$, these equations allow for the exact computation of the likelihood of the ARMA model via the Kalman filter \cite{kalman60}, which can subsequently be optimized by a numeric procedure such as the BFGS algorithm \cite{fletcher00}.
+\begin{align}
+  z_t &= Tz_{t - 1} + Qw_t, \label{eq:trans} \\
+  x_t &= \begin{pmatrix} 1 & 0 & \ldots & 0\end{pmatrix} z_t. \label{eq:meas}
+\end{align}
+
+Numeric black-box optimizers require an initial guess for parameter values.
+For ARMA models, this task is non-trivial because the valid parameter region is defined in terms of the roots of a polynomial associated with the parameters, as discussed in the next section.
+The default strategy in R and Python is to use the CSS estimator for initialization.
+This is an effective approach because the CSS estimator asymptotically converges to the MLE \cite{shumway2017}, and may therefore be close to the global maximum when there are sufficiently many observations.
+However, the CSS initialization is less useful with limited data, or when there are missing observations.
+The CSS estimate may also lie outside the valid parameter region, and in such cases, parameters are reinitialized at the origin.
+Both software implementations also allow for manual selection of initial parameter values, but finding suitable initializations manually can be challenging due to complex parameter inter-dependencies.
+
+The log-likelihood function of ARMA models is often multimodal \cite{ripley2002}, and therefore this single initialization approach can result in parameter estimates corresponding to local maxima (see Fig~\ref{fig:multiMode}).
+This is true even for a carefully chosen initialization, such as the CSS estimate.
+A common strategy to optimize multimodal loss functions is to perform multiple optimizations using different initial parameters.
+However, we have found no instances of practitioners using a multiple initialization strategy for estimating ARMA model parameters.
+This may be explained by a general unawareness of the possibility of converging to a local maximum or because obtaining a suitable collection of initializations for ARMA models is nontrivial.
+For example, independently initializing parameters at random can place the parameter vector outside the region of interest.
+Furthermore, uniform random sampling generally fails to adequately cover the plausible parameter region (\nameref{S_sampling}).
+
+
+
+
+\begin{figure}[ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/mutliMode-fig-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:multiMode}The profile log-likelihood of data simulated from four distinct MA(1) models, demonstrating a few examples of multimodal likelihood surfaces. The solid, black line indicates the true value of $\theta_1$; the dotted line is the CSS-initialization. The dashed lines correspond to the estimate $\hat{\theta}_1$ using \code{stats:arima} (red) and our proposed algorithm (implemented in \code{arima2::arima}, blue).}
+\end{figure}
+
+\subsection{A Novel Multi-start Algorithm}
+
+To obtain random parameter initializations, parameter sets must
+correspond to \emph{causal} and \emph{invertible} ARMA processes;
+definitions are in Chapter~3 of Shumway and Stoffer \cite{shumway2017}.
+Let $\{\phi_i\}_{i = 1}^p$ and $\{\theta_i\}_{i = 1}^q$ be the coefficients of the $\text{ARMA}(p, q)$ model (Eq.~\ref{eq:arma}), and define $\Phi(x) = 1 - \phi_1 x - \phi_2x^2 - \ldots - \phi_px^p$ as the AR polynomial, and $\Theta(x) = 1 + \theta_1 x + \theta_2x^2 + \ldots + \theta_qx^q$ as the MA polynomial.
+An ARMA model is \emph{causal} and \emph{invertible} if the roots of the AR and MA polynomials lie outside the complex unit circle.
+Therefore in order to obtain valid, random parameter initializations, we sample the roots of $\Phi(x)$ and $\Theta(x)$ and use these values to reconstruct parameter initializations.
+
+It is an easier task to sample \emph{inverted} roots, as the sufficient conditions for causality and invertibility now require that the inverted roots lie inside the complex unit circle, a region easier to sample uniformly.
+The roots of the polynomials can be real or complex; complex roots must come in complex conjugate pairs in order for all of the corresponding model parameters to be real.
+The simplest approach would be to sample all inverted root pairs ($z_1, z_2$) within the complex unit circle by uniformly sampling angles and radii (lines 10-14 of Algorithm~\ref{alg:mle}).
+However, this would imply almost surely all root pairs are complex, and some model parameters would only be sampled as positive (or negative).
+For instance, consider an AR(2) model.
+The AR polynomial is:
+$$
+\Phi(x) = 1-\phi_1x - \phi_2x^2 = (1 - z_1x)(1 - z_2x) = 1 - (z_1 + z_2)x - (z_1z_2)x^2
+$$
+In this equation, if both $z_1, z_2$ are complex conjugates, then $\phi_2 = z_1z_2 > 0$.
+As such, the only way that $\phi_2 < 0$ is if $z_1, z_2 \in \mathbb{R}$.
+Similar results hold for the MA coefficients with opposite signs for the coefficients.
+This issue is directly addressed in lines 5-8 of Algorithm~\ref{alg:mle}:
+root pairs are sampled as real with probability $p = \sqrt{1/2}$, and real pairs sampled with the same sign with probability $p$, such that the product (and sums) of each pair is positive with probability $1/2$.
+We sample conjugate pairs within an annular disk on the complex plane to avoid trivial and approximately non-stationary cases.
+The radii of both the inner and outer circles defining the disk are defined using $\gamma$ in lines 7, 10, and 13 of Algorithm~\ref{alg:mle}.
+
+\begin{algorithm}[ht]
+    \SetAlgoNoEnd
+   \caption[ARMA MLE]{\textbf{MLE for ARMA Models}. \\
+    {\bf Inputs (defaults)}:\\\hspace{\textwidth}
+    First parameter initialization $\psi_0 = (\phi^0_1, \ldots, \phi^0_p, \theta^0_1, \ldots, \theta^0_q)$ (CSS estimate).\\\hspace{\textwidth}
+    Minimum acceptable polynomial root distance $\alpha > 0$, ($\alpha = 0.01$).\\\hspace{\textwidth}
+    Probability of sampling a root pairs as real $0 \leq p \leq 1$, ($p = \sqrt{1/2}$).\\\hspace{\textwidth}
+    Bounds on inverted polynomial roots $\gamma \in (0, 0.5)$, $(\gamma = 0.05)$.\\\hspace{\textwidth}
+    Numeric optimization routine $f(\psi)$ \cite{gardner1980}.
+    \\\hspace{\textwidth}
+    Stopping Criterion (stop if last $M$ iterations do not improve log-likelihood $\ell(\psi)$).
+    \label{alg:mle}}
+Get preliminary estimate: $\hat{\psi}_0 = f(\psi_0)$; set $k = 0$\;
+\Repeat( Until stopping criterion met){}{
+  Set AR and MA roots $\{z^{\text{AR}}\}_{i = 1}^p = 0_p$, $\{z^{\text{MA}}\}_{i = 1}^q = 0_q$; increment $k$\;
+  \While{$\min_{i, j}|z^{\text{AR}}_i - z^{\text{MA}}_j| < \alpha$, for both AR and MA polynomials} {
+  Sample paired roots as real with probability $p$\;
+    \For{all real pairs} {
+      Sample root magnitudes from $U(\gamma, 1-\gamma)$\;
+      Sample signs with
+      $P(\text{sign}(z_1) = \text{sign}(z_2)) = p$\;
+    }
+    \For{all complex pairs}{
+      sample angle: $\tau \sim U(0, \pi)$; sample radius: $r \sim U(\gamma, 1-\gamma)$\;
+      set $z_{1} = r \cos(\tau) + i r \sin(\tau)$; set $z_{2} = \bar{z}_{1}$\;
+    }  % End t loop
+    \uIf{Number of roots is odd (non-paired root)}{
+    sample $\tau$ uniformly from the set $\{0, \pi\}$; sample $r \sim U(\gamma, 1-\gamma)$\;
+    set $z = r \cos(\tau)$\;
+    }  % End if statement
+  }  % End While
+
+  Calculate coefficients $\psi_k = (\phi^k_1, \ldots,\phi^k_p, \theta^k_1, \ldots, \theta^k_q)$ using sampled roots\;
+  Estimate $\hat{\psi}_k = f(\psi_k)$\;
+}  % End k loop
+  Set $\hat{\psi} = \argmax_{j\in 0:k} \ell\big(\hat{\psi}_j\big)$\;
+\end{algorithm}
+
+Parameter redundancy in ARMA models occurs when the polynomials $\Phi(x)$ and $\Theta(x)$ share one or more roots, leading to an overall reduction in model order.
+This complicates parameter initialization, optimization, and identifiability.
+The ARMA model (Eq.~\ref{eq:arma}) can be rewritten as:
+\begin{equation}
+  \Phi(B)x_t = \Theta(B)w_t, \label{eq:armaB}
+\end{equation}
+where $B$ is the \emph{backshift} operator, i.e., $Bx_t = x_{t - 1}$.
+Using the fundamental theorem of algebra, Equation \ref{eq:armaB} can be factored into 
+$$
+(1 - \lambda_1B) \ldots (1 - \lambda_pB)x_t = (1 - \nu_1B) \ldots (1 - \nu_qB)w_t,
+$$ 
+where $\{\lambda_i\}_{i = 1}^p$ and $\{\nu_j\}_{j = 1}^q$ are the inverted roots of $\Phi(B)$ and $\Theta(B)$, respectively.
+If $\lambda_i = \nu_j$ for any $(i, j) \in \{1, \ldots, p\} \times \{1, \ldots, q\}$, then the roots will cancel each other out, resulting in an ARMA model of smaller order.
+As an elementary example, consider the $\text{ARMA}(1, 1)$ and $\text{ARMA}(2, 2)$ models in equations~\ref{eq:arma11} and \ref{eq:arma22}.
+\begin{align}
+  x_t &= \frac{1}{3}x_{t - 1} + w_t + \frac{2}{3}w_{t - 1}, \label{eq:arma11}\\
+  x_t &= \frac{5}{6}x_{t - 1} - \frac{1}{6}x_{t - 2} + w_t + \frac{1}{6}w_{t - 1} - \frac{1}{3}w_{t - 2}. \label{eq:arma22}
+\end{align}
+While these two models appear distinct at first glance, re-writing the models in polynomial form (Eq.~\ref{eq:armaB}) shows that these two models are actually equivalent after canceling out the common factors on each side of the equation.
+
+In a similar fashion, it is possible that the roots are not exactly equal but are approximately equal.
+In this case, the ratio of factors becomes close to one, resulting in a similar effect to when the roots exactly cancel.
+We avoid the possibility of \emph{nearly canceling roots} in parameter initializations by requiring the minimum Euclidean distance between inverted polynomial roots to be greater than $\alpha$.
+This is done in line~4 of Algorithm~\ref{alg:mle}, though the condition is rarely triggered if the order of the model is of typical size $(p, q < 4)$.
+
+Our sampling scheme is combined with existing procedures for numeric optimization of model log-likelihoods (lines 1 and 16), as well as the default initialization strategy for $\psi_0$ used by existing software (such as the CSS initialization).
+Doing so guarantees that final estimates correspond to likelihood values greater than or equal to the currently accepted standards in the software environment where the algorithm is implemented.
+For this article, both the numeric optimization procedure $f(\cdot)$ and the parameter initialization strategy to obtain $\psi_0$ are those implemented in \code{stats::arima}.
+The stopping criterion was chosen so that the algorithm stops trying new initial values when no new maximum has been found using the last $M$ parameter initializations.
+Alternative stopping criterion can be used (see for example, \cite{hart98}), but we found that this simple heuristic works well in practice.
+
+Algorithm~\ref{alg:mle} is implemented in the R package \code{arima2}, available on the Comprehensive R Archive Network (CRAN) \cite{arima2Cran}.
+The package features the function \code{arima2::arima}, which is an adaptation of the \code{stats::arima} function modified to incorporate the adjustments specified by Algorithm~\ref{alg:mle}.
+
+\subsection{Simulation Studies}\label{sec:sims}
+
+
+
+To investigate the extent to which the standard approach for ARMA parameter estimation results in improperly maximized likelihoods, we conduct a series of simulation studies.
+It is challenging to obtain precise estimates of how frequently current standards lead to sub-optimal parameter estimates due to the varied applications of ARMA models in practice, the diversity in data sizes ($n$) and model orders $(p, q)$, and the differing degrees to which an ARMA model adequately describes the data-generating process.
+Therefore, we restrict our simulation studies to idealized scenarios where the data-generating process is Gaussian-ARMA, recognizing that likelihood maximization is easiest for this model class, thereby resulting in conservative estimates of how frequently our algorithm improves model likelihood.
+
+In the first simulation study, we simulate time series data of lengths $n \in \{50, 100, 500, 1000\}$ from Gaussian-ARMA models with known orders $(p, q) \in \{1, 2, 3\}^2$, generating 36,000 unique models and datasets.
+We avoid any models that contain parameter redundancies by requiring the data generating model to have a minimum distance of $0.1$ between all roots of $\Phi(x)$ and $\Theta(x)$.
+We further restrict model coefficients so that they do not lie near boundary conditions.
+Models of the same order of the generating data are fit to the data, simplifying the the problem further by avoiding the order selection step that is necessary in most data analyses.
+In doing so, we attempt to answer the question of how often sub-optimal estimates may arise using existing software in the case where the parameter estimation procedure should be as easy as possible for the given combinations of $(n, p, q)$.
+
+Even in this extremely simplified scenario, existing software failed to properly maximize model likelihoods in at least $20.8\%$ of the simulated datasets---evidenced by an improvement obtained using Algorithm~1.
+Though this improvement may appear modest, an improvement in $20.8\%$ of the large number of published ARMA models would affect many papers---a number measured in thousands of papers since 2024 following our estimate in the introduction.
+Furthermore, time series analysis courses and textbooks often recommend fitting multiple ARMA models to a dataset, and here we only fit one for each algorithm. 
+Consequently, the probability that at least one candidate model is not properly optimized increases significantly in practice.
+The rate of improvement obtained using our algorithm increases with model complexity and decreases with more observations (Fig.~\ref{fig:simProps}).
+For example, likelihoods improved in $55.1\%$ of the simulations when $p = q = 3$ and $n = 50$; models of this size and number of observations are not uncommon in published research studies.
+
+
+
+\begin{figure}[!ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/simProps-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:simProps}Proportion of simulated data with improved likelihood from using multiple restarts (Algorithm~\ref{alg:mle}).}
+\end{figure}
+
+Importantly, we do not claim to improve likelihood for all ARMA models and datasets.
+In this simulation study, our likelihood maximum routine did not improve likelihoods for many of the simulated data.
+However, these results demonstrate that there is a very real potential for obtaining sub-optimal parameter estimates when using only a single parameter initialization, even in the most idealistic scenarios.
+Rather than having to worry if a single initialization is sufficient to fit a given model, it is preferable to adopt methods that make such situations rare.
+The primary limitation of our algorithm is that the potential for improved fits comes at the cost of increased computation times.
+In our simulation study, however, the average time to estimate parameters using our approach was $0.6$ seconds, a computational expense that is worth the effort in many situations.
+
+The median log-likelihood improvement in this simulation study was $0.66$, with an interquartile range of $(0.22, 1.46)$.
+Among the most common motivations for fitting ARMA models is to model serial correlations in a regression model; in this setting, the discovered shortcomings in log-likelihood are often enough to change the outcome of the analysis.
+For instance, consider modeling $y_i = \beta x_i + \epsilon_i$, where $\beta \in \mathbb{R}$, and we model the error terms $\epsilon_i \sim \text{ARMA}(p, q)$.
+For now, we will assume the order $(p, q)$ is fixed.
+We may wish to test the hypothesis $H_0: \beta = 0$ vs $H_1: \beta \neq 0$.
+A standard approach to doing this is a likelihood ratio test, and using Wilks' theorem to get an approximate test.
+We denote $ll_0$ and $ll_1$ as the maximum log-likelihood of the model under $H_0$ and $H_1$, respectively.
+The standard approximation is to assume $2\Delta = 2(ll_1 - ll_0) \sim \chi^2_1$.
+Using a significance level of $\alpha = 0.05$, we would reject $H_0$ if $\Delta \geq 1.92$.
+Given that $E_{H_0}[\Delta] = 0.5$, subtracting the reported log-likelihood deficiencies (which has a median value of $0.66$) of existing software to either or both $ll_0, ll_1$ could change the outcome of this test.
+
+\subsubsection{Parameter Uncertainty}
+
+Improved parameter estimation leads to modified standard error estimates, which are default outputs in R and Python.
+These standard errors result from the numeric optimizer's estimate of the gradient of the log-likelihood, used to approximate the Fisher information matrix.
+These standard errors, though not inherently of interest, are sometimes used justify the inclusion of a parameter in a model \cite[Chatper~9]{brockwell1991}.
+We extend our simulation study to examine this approach and how our algorithm impacts the estimates.
+For each of the 36,000 generative models from the previous study, we generate 100 additional datasets, estimating the MLE and Bonferroni-adjusted $95\%$ confidence intervals using both estimated standard errors and profile likelihood confidence intervals (PLCIs) from Wilks' theorem.
+Fig~\ref{fig:pctCovered} shows PLCIs had better or equivalent nominal coverage than Fisher-based confidence intervals across all combinations of $p$, $q$, and $n$. We found that the interval estimation method mattered more for confidence interval performance than the specific parameter estimation algorithm.
+The relevance of this result is explored further in Section~\ref{sec:HuronCI}.
+
+\begin{figure}[!ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/pctCovered-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:pctCovered}Proportion of models that achieved nominal coverage of Bonferroni adjusted $95\%$ confidence intervals. The dashed line denotes the target coverage level. (A) Confidence intervals created using Fisher's information matrix. (B) Confidence intervals created using profile likelihoods.}
+\end{figure}
+
+\subsubsection{AIC Table Consistency}
+
+A more realistic situation than the previous simulation study involves estimating the model order $(p, q)$ as well as obtaining parameter estimates.
+Fitting multiple models raises the chance that at least one candidate model was not properly optimized.
+It may also necessitate fitting larger models than needed, leading to parameter redundancies that make proper optimization more challenging.
+
+A contemporary approach involves fitting several candidate models and selecting the one that minimizes a criterion like Akaike's information criterion (AIC) \cite{aic74}. 
+This can be done by explicitly creating a table of all candidate models and their corresponding AIC values;
+in this case issues of improper maximization become more apparent.
+For instance, a table of AIC values may contain numeric inconsistencies, where a larger model may have lower estimated likelihoods than a smaller model within which it is nested (for an example, see Section~\ref{sec:depths}).
+This type of result can make a careful practitioner feel uneasy, as there is evidence that at least one candidate model was not properly optimized.
+Evidence of improper optimization may be less evident when relying on software that automates this process, such as the automated Hyndman-Khandakar algorithm \cite{hyndman08}, but the potential for sub-optimal estimates remains.
+
+
+
+We conducted an additional simulation study to investigate numeric inconsistencies that may arise when fitting multiple model parameters.
+As before, we simulated 1000 unique models and datasets of size $n \in \{50, 100, 500, 1000\}$ from Gaussian ARMA$(p, q)$ models for $(p, q) \in \{1, 2, 3\}^2$.
+To avoid models with parameter redundancies, we ensured a minimum distance of 0.1 between all roots of $\Phi(x)$ and $\Theta(x)$ and excluded models with coefficients near boundary conditions.
+For each dataset, AIC tables were created for model sizes $(p, q) \in \{0, 1, 2, 3\}^2$.
+
+The single parameter initialization approach resulted in AIC table inconsistencies in $45.6\%$ of the simulated datasets.
+Although our proposed algorithm significantly mitigates this issue, it does not guarantee that all model likelihoods are fully maximized.
+This is illustrated in Fig~\ref{fig:AICtabRes}, where a non-zero percentage of AIC tables remain inconsistent, even as the algorithm's stopping criterion grows.
+The ARMA$(1, 1)$ panel in Fig~\ref{fig:AICtabRes} illustrates the increasing difficulty of parameter estimation when dealing with parameter redundancies.
+In such cases, it is often necessary to adjust additional parameters in the numeric optimization routine.
+For example, our R implementation of the algorithm relies on the generic BFGS optimizer in the \code{stats::optim} function.
+Modifying the optimization method or the default hyperparameters can lead to improved fits or faster convergence rates.
+While the default parameters of the numeric optimizer are generally adequate, increasing the maximum number of algorithmic iterations can be beneficial for fully maximizing the likelihood for challenging models and data. 
+
+\begin{figure}[!ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/AICtabRes-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:AICtabRes}Data is generated from ARMA$(p, q)$ models with $(p, q) \in \{1, 2, 3\}^2$, and the corresponding AIC table is created. The Y-axis shows the percentage of tables that were consistent. M is the number of times a maxima is observed before the algorithm terminates, so $M=1$ corresponds to the standard maximization procedure.}
+\end{figure}
+
+The contemporary approach of using AIC---or any other information based criteria---to select model order involves fitting unnecessarily large models, leading to parameter redundancies that complicate likelihood optimization.
+The use of AIC for ARMA model order selection has theoretical support, particularly for forecasting, as ARMA models inspired the original AIC paper \cite{aic74}.
+However, without proper likelihood maximization, a strategy that considers only a single parameter initialization may not truly minimize AIC.
+In this framework, likelihood maximization and over-parameterization are interconnected: all candidate models must be maximized for likelihood, or users risk selecting over-parameterized models that fail to minimize the intended information criterion.
+For the current study, the choice of AIC versus other popular information criteria such as the corrected AIC (AICC) or Bayesian information criterion (BIC) is unimportant: all of these approaches rely on proper optimization of the likelihood function, which is the problem we are addressing here. 
+
+Classical ARMA modeling addresses this by recommending diagnostic plots to determine appropriate model order and advising against simultaneously adding AR and MA components.
+In this approach, the additional difficulty in parameter estimation associated with fitting models containing parameter redundancies is avoided by not fitting overly complex models when possible.
+Despite this, shortcomings in likelihood maximization can occur even in models without parameter redundancies (Figs~\ref{fig:multiMode},~\ref{fig:simProps},~and~\ref{fig:AICtabRes}), necessitating the exploration of multiple parameter initializations.
+Further, the increasing preference of using automated software to pick the model size using an information criterion suggests the importance of using software that reliably maximizes model likelihoods even in the presence of over-parameterization. 
+
+\section{Annual Depths of Lake Michigan}\label{sec:depths}
+
+\noindent In this example, we illustrate how improperly maximized likelihoods can lead to inconsistencies and uncertainty in a real data analysis scenario.
+Additionally, we show how the common practice of using the estimated standard error for calibrated parameters can misleadingly support the inclusion of model parameters.
+We consider a dataset containing annual observations on the average depth of Lake Michigan-Huron, recorded the first day of each year from 1860-2014 (Fig~\ref{fig:huron}) \cite{NOAA16}.
+We wish to develop an ARMA model for these data, which is a standard task in time series analysis \cite{shumway2017}.
+
+\begin{figure}[!ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/huron-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:huron}
+Average depth of Lake Michigan-Huron from 1860-2014.
+}
+\end{figure}
+
+Diagnostic tests, such as sample autocorrelation and normal quantile plots for residuals, suggest that it is reasonable to model the data in Fig~\ref{fig:huron} as a weakly stationary Gaussian $\text{ARMA}(p, q)$ process for some non-negative integers $p$ and $q$.
+While an ARIMA model may also be reasonable for these data, we first consider fitting an ARMA model because we would like to avoid the possibility of over-differencing the data.
+The next step is to determine appropriate values of $p$ and $q$;
+after some initial investigation, multiple combinations of $p$ and $q$ seem plausible, and therefore we decide to choose the values of $p$ and $q$ that minimize the AIC.
+For simplicity, we create a table of AIC values for all possible combinations of $(p, q) \in \{0, 1, 2, 3\}^2$ (Table~\ref{tab:huronTab}).
+Using the AIC as the model selection criterion, the selected model size is $\text{ARMA}(2, 1)$.
+
+
+
+\begin{table}[h]
+    \centering
+    % Start the first minipage for Table 1
+    \begin{subtable}{0.4\textwidth}
+        \centering
+        \caption{\label{tab:AIC1}Single parameter initialization.}
+        \begin{tabular}{c|c|c|c|c}\hline
+            & MA0 & MA1 & MA2 & MA3 \\
+            \hline
+            AR0 &  166.8 &  46.6 &  7.3 &  -15.0 \\
+            \hline
+            AR1 &  -38.0 &  -37.4 &  -35.5 &  -33.8 \\
+            \hline
+            AR2 &  -37.3 &  -38.4 &  -36.9 &  -34.9 \\
+            \hline
+            AR3 &  -35.5 & \improvedCell -35.2 & \improvedCell -33.0 & \improvedCell -33.3 \\
+            \hline
+        \end{tabular}
+    \end{subtable}
+    \hspace{15mm} % this fills the space between minipages if needed
+    % Start the second minipage for Table 2
+        \begin{subtable}{0.4\textwidth}
+        \centering
+        \caption{\label{tab:AIC2}Multiple parameter initializations.}
+        \begin{tabular}{c|c|c|c|c}\hline
+            & MA0 & MA1 & MA2 & MA3 \\
+            \hline
+            AR0 &  166.8 &  46.6 &  7.3 &  -15.0 \\
+            \hline
+            AR1 &  -38.0 &  -37.4 &  -35.5 &  -33.8 \\
+            \hline
+            AR2 &  -37.3 &  -38.4 &  -36.9 &  -34.9 \\
+            \hline
+            AR3 &  -35.5 & \improvedCell -36.9 & \improvedCell -36.4 & \improvedCell -36.2 \\
+            \hline
+        \end{tabular}
+    \end{subtable}
+    \caption{\label{tab:huronTab}AIC values for an ARMA(p, q) model fit to Lake Michigan-Huron depths. Table~\ref{tab:AIC1} was computing using only a single parameter initialization. Table~\ref{tab:AIC2} was computed using Algorithm~\ref{alg:mle}. Highlighted cells show where the likelihood was improved (AIC reduced) using our algorithm.}
+\end{table}
+
+
+
+Recall that the AIC is defined as:
+\begin{equation}
+  \text{AIC} = -2 \max_{\allVar} \ell(\allVar; x^*) + 2d,\label{eq:AIC}
+\end{equation}
+where $\ell(\allVar; x^*)$ denotes the log-likelihood of a model indexed by parameter vector $\allVar \in \mathbb{R}^d$, $d \geq 1$, given the observed data $x^*$.
+In the case of an ARMA model with an intercept, $d = p + q + 2$, where the additional parameter corresponds to a variance estimate.
+If either $p$ or $q$ increases by one, then a corresponding increase in AIC values greater than two suggests that the \emph{inclusion} of an additional parameter resulted in a \emph{decrease} in the maximum of the log-likelihood, which is mathematically impossible under proper optimization.
+Several such cases are present in Table~\ref{tab:AIC1}, for example increasing from an $\text{ARMA}(2, 2)$ model to a $\text{ARMA}(3, 2)$ model results in
+a decrease of 1.0 log-likelihood units.
+In this case, using our multiple restart algorithm eliminates all instances of mathematical inconsistencies (Table~\ref{tab:AIC2}).
+We refer to tables that have log-likelihood values larger for any smaller nested model within the table as \emph{inconsistent}.
+
+Suppose a scientist is confronted with a mathematically implausible table of nominally maximized likelihoods (Table~\ref{tab:AIC1}).
+How much should they worry about this?
+Is it acceptable to publish scientific results that demonstrate a nominally maximized likelihood is not, in fact, maximized?
+Can researchers confidently trust the scientific implications of a fitted model if there is evidence of improper optimization in some of the candidate models?
+Given a choice, a researcher should prefer to use maximization algorithms reliable enough to make such situations rare.
+In the Lake Michigan example, improved estimation does not change which model is selected or the final parameter estimates, but it does remove inconsistencies that could lead to these concerns (Table~\ref{tab:AIC2}).
+
+Minimizing the AIC (or an alternative information criterion) is not the only accepted approach to order selection.
+A classical perspective on model selection involves consulting sample autocorrelation plots, partial autocorrelation plots, conducting tests such as Ljung-Box over various lags, studying the polynomial roots of fitted models, and checking properties of the residuals of the fitted models \cite{box1970, brockwell1991, shumway2017}.
+This approach helps avoid fitting models that are possibly over-parameterized.
+However, additional computational power and increasing volumes of data have favored automated data analysis strategies that fit many models and evaluate them using a model selection criterion.
+In principle, a simple model selection criterion such as AIC can address parsimony and guard against over-parameterization as well.
+Diagnostic inspection can be combined with these automated approaches.
+For example, a table of AIC values can be generated, and models with promising likelihoods can be explored further \cite{brockwell1991}.
+
+When possible, there may be general agreement that the best approach is to combine modern computational resources with careful attention to model diagnostics, considering the data and the scientific task at hand.
+Improved maximization facilitates this process by eliminating distractions resulting from incomplete maximization.
+
+\subsection{Parameter uncertainty}\label{sec:HuronCI}
+
+
+
+Default output from fitting an ARMA model in R or Python includes estimates for parameter values and their standard errors, calculated using Fisher's information matrix.
+If the ARMA model with the lowest AIC value is chosen to describe the Lake Michigan data, then an $\text{ARMA}(2, 1)$ model is selected.
+The estimated coefficients and standard errors obtained after fitting this model are reported in Table~\ref{tab:huronCoefsTab}.
+The small standard error for $\hat{\theta}_1$ reported in this table suggests a high-level of confidence that the parameter has a value near $1$.
+Taken at face value, these estimates seem to strongly favor the inclusion of the MA(1) term in the model.
+
+\begin{table}
+\centering
+\caption{\label{tab:huronCoefsTab}Parameter values of $\text{ARMA}(p, q)$ model fit to Lake Michigan-Huron depth data.}
+\begin{tabular}{c|c|c|c|c}\hline
+ & $\phi_1$ & $\phi_2$ & $\theta_1$ & Intercept \\\hline
+ Estimate & -0.053 & 0.791 & 1.000  & 176.460 \\\hline
+ s.e. & 0.052 & 0.053 & 0.024  & 0.121 \\\hline
+\end{tabular}
+\end{table}
+
+
+
+However, our simulation studies have suggested that these confidence intervals can be misleading, and that PLCIs are more reliable alternatives.
+The $95\%$ PLCI for the parameter (Fig~\ref{fig:huronMAevid}A) is much larger than the confidence interval created using these standard errors.
+The steep curve in the immediate vicinity of $\hat{\theta}_1$ may explain the small standard error estimates for this parameter and the corresponding tight confidence intervals created using Fisher's identity matrix.
+Alternative evidence indicates the potential for nearly canceling roots (Fig~\ref{fig:huronRoots}), in which case the MA(1) term may not be needed in the model.
+
+
+
+
+
+
+
+
+\begin{figure}[!ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/huronMAevid-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:huronMAevid}Evidence for an AR(1) model for the Lake Michigan-Huron data. (A) Profile likelihood confidence interval (PLCI) for $\theta_1$ which includes the value $\theta_1 = 0$. The vertical dotted line represents the lower end of the approximate confidence interval; all points on the solid black line lie within the confidence interval, and points on the dashed red line are outside the interval. (B) Histogram of re-estimated $\theta_1$ values using simulated data simulated from the $\text{ARMA}(2, 1)$ model that was calibrated to the Lake Michigan-Huron data. (C) Histogram of re-estimated $\theta_1$ values using data simulated from the AR(1) model that was calibrated to the Lake Michigan-Huron data.}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/huronRoots-1} 
+
+}
+
+
+\end{knitrout}
+\caption{\label{fig:huronRoots}Inverted AR and MA polynomial roots to the fitted $\text{AR}(1)$ and $\text{ARMA}(2, 1)$ models to the Lake Michigan-Huron data using a single parameter initialization.}
+\end{figure}
+
+Both types of confidence intervals considered in this example rely on asymptotic justifications, but we can further investigate the finite sample properties using a simulation study.
+We fit both $\text{ARMA}(2, 1)$ and $\text{AR}(1)$ models to the data, and conduct a boot-strap simulation study by simulating $1000$ datasets from each of the fitted models.
+We then re-estimate an $\text{ARMA}(2, 1)$ model to each of these datasets and record the estimated coefficients.
+A histogram containing the estimated values of $\hat{\theta}_1$ when the data are generated from the $\text{ARMA}(2, 1)$ and $\text{AR}(1)$ models fit to the Lake Huron-Michigan data are shown in Fig~\ref{fig:huronMAevid}B and Fig~\ref{fig:huronMAevid}C, respectively.
+
+The shape of this histogram in Fig~\ref{fig:huronMAevid}B mimics that of the profile log-likelihood surface in Fig~\ref{fig:huronMAevid}A, confirming that a large confidence interval is needed in order to obtain a $95\%$ confidence interval.
+In Fig~\ref{fig:huronMAevid}C, a large number of $\hat{\theta}_1$ coefficients are estimated near $1$ when the generating model is $\text{AR}(1)$.
+Combining this result with the nearly canceling roots of the $\text{ARMA}(2, 1)$ model (Fig~\ref{fig:huronRoots}), we cannot reject the hypothesis that the data were generated from a $\text{AR(1)}$ model, even though the Fisher information standard errors suggest that the data should be modeled with a nonzero $\theta_1$ coefficient.
+
+\section{Discussion}
+
+\noindent A significant motivation for our work is the observation that commonly used statistical software that purports to maximize ARMA model likelihoods fails to do so for a large number of examples.
+In addition to improving parameter estimates, proper maximization of ARMA model likelihoods is crucial because ARMA models are often used to model serial correlations in regression analyses.
+In this context, researchers may perform likelihood ratio hypothesis tests for regression coefficients, and the validity of these tests depends on proper likelihood optimization.
+
+An important consequence of improved likelihood maximization is better model selection.
+A common approach to selecting an ARMA model involves fitting different sizes of models and choosing the one that minimizes an information criterion, such as the AIC.
+Fitting multiple models results in having a higher probability that at least one candidate model was not properly maximized.
+Since AIC assumes the parameters correspond to maximized likelihoods, enhancements in likelihood maximization can lead to different model selections.
+Consequently, methodology relying on existing estimation methods---like the popular \code{auto.arima} function in the \code{forecast} package in R \cite{hyndman08}, which minimizes the AIC of a group of candidate models without explicitly displaying an AIC table---will be impacted by improved estimates.
+
+Our proposed algorithm is supported by existing theory on likelihood evaluation of linear state-space models via the Kalman Filter \cite{kalman60}, the same as the current existing standard approach for parameter estimation.
+The simulation studies that we have conducted, however, demonstrate the importance of considering multiple parameter initializations in order to fully maximize model likelihoods. 
+These simulations provide a conservative estimate of how frequently our algorithm results in improved likelihoods compared to existing standards.
+A common situation where our algorithm is expected to provide even larger improvements than those reported here is in the presence of missing data, a primary motivator of the likelihood maximization procedure of existing software \cite{ripley2002}.
+In this situation, the well-informed CSS initialization is not available, and the default approach is to initialize at the origin, resulting in a greater need to attempt multiple parameter initializations.  
+
+Parameter estimates corresponding to higher likelihood values are not necessarily scientifically preferrable to alternative regions of parameter space with lower likelihood values \cite{lecam1990}.
+Sometimes, our improved estimates may result in models with nearly canceling roots, parameters near boundary conditions, or otherwise unfavorable statistical properties.
+On other occasions, our method can rescue a naive optimization attempt from a local maximum having those unfavorable properties.
+Practitioners should carefully evaluate fitted models to ensure they are appropriate for the data and problem at hand.
+
+The primary limitation of our approach is that it achieves higher likelihoods at the cost of processing speed, which is more pronounced with large datasets.
+However, our algorithm is most necessary for small datasets ($n \ll 10000$), where default parameter initialization strategies may perform poorly.
+Therefore, our algorithm is most beneficial for small to moderate sample sizes, where the additional computational cost is generally negligible.
+The compute time of our algorithm is approximately $K$ times slower than the default approach, where $K$ is the number of unique parameter initializations.
+This is only an approximation of the actual additional cost as not all initializations require the same amount of processing time in order to converge.
+In particular, initializations that are already close to local maximum will generally converge much quicker than those that are further away.
+
+Our proposed algorithm for ARMA parameter estimation significantly advances statistical practice by addressing a frequently occurring optimization deficiency.
+Because existing software can also be leveraged to mitigate the issue, the largest contribution of this work may be highlighting the prevalence of this optimization problem.
+Traditional random initialization approaches software fail to uniformly cover the entire range of possible models and often produce many initializations outside the accepted range.
+Our algorithm offers a computationally efficient and practically convenient solution, providing a robust approach to parameter initialization and estimation that ensures adequate coverage of all possible models.
+We have shown that it provides a new standard for best practice in the field of time series analysis.
+
