@@ -32,9 +32,9 @@
 \usepackage[ruled,noline,linesnumbered]{algorithm2e}
 \usepackage[table]{xcolor}
 % \usepackage{mathtools}
-\DeclareMathOperator*{\argmax}{arg\,max}
+% \DeclareMathOperator*{\argmax}{arg\,max}
 % 
-\newcommand\code{\texttt}
+% \newcommand\code{\texttt}
 % \newcommand\eic[1]{\textcolor{orange}{[EI: #1]}}
 % \newcommand\jwc[1]{\textcolor{brown}{[JW: #1]}}
 % \newcommand\TODO[1]{\textcolor{red}{[TODO: #1]}}
@@ -43,3 +43,79 @@
 \newcommand\improvedCell{\cellcolor{blue!25}}
 \newcommand\R{\mathbb{R}}
 \renewcommand{\emph}[1]{\textit{#1}}
+
+
+% HAITI
+\usepackage[nopatch=eqnum]{microtype}
+\usepackage{caption}
+\RequirePackage{amsthm,enumerate,xr,lmodern}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{bm}
+
+%%%% parameters %%%%%%%%%%%
+\newcommand\Wsat{W_{\mathrm{sat}}}
+\newcommand\muIR{\mu_{IR}}
+\newcommand\muEI{\mu_{EI}}
+\newcommand\transmission{\beta}
+\newcommand\seasAmplitude{a}
+\newcommand\rainfallExponent{r}
+\newcommand\muRS{\mu_{RS}}
+\newcommand\vaccineEfficacy{\vartheta}
+\newcommand\muBirth{\mu_S}
+\newcommand\muDeath{\delta}
+\newcommand\choleraDeath{\delta_{C}}
+\newcommand\symptomFrac{f}
+\newcommand\asymptomRelativeInfect{\epsilon}
+\newcommand\asymptomRelativeShed{\epsilon_{W}}
+\newcommand\Wbeta[1]{\beta_{W#1}}
+\newcommand\Whur[1]{\beta_{W#1}^{hm}}
+\newcommand\hHur[1]{h_{#1}^{hm}}
+\newcommand\tHur{t_{hm}}
+\newcommand\Iinit{I_{0,0}}
+\newcommand\Einit{E_{0, 0}}
+\newcommand\Wremoval{\delta_W}
+\newcommand\Wshed{\mu_W}
+\newcommand\mixExponent{\nu}
+\newcommand\sigmaProc{\sigma_{\mathrm{proc}}}
+\newcommand\reportRate{\rho}
+\newcommand\obsOverdispersion{\psi}
+\newcommand\phaseParm{\phi}
+\newcommand\transmissionTrend{\zeta}
+\newcommand\Binit{\xi}
+\newcommand\vaccClass{Z}
+\newcommand\vaccCounter{z}
+\newcommand\modelCounter{m}
+\newcommand\missing{}
+\newcommand\fixed{^\dagger}
+\newcommand\demography{\bullet}
+\newcommand\code[1]{\texttt{#1}}
+\newcommand\figTitle{\bf}
+\newcommand\paramVec{\theta}
+\newcommand\childReduce{q}
+\newcommand\NBintercept{\alpha}
+\newcommand\NBar{\beta}
+\newcommand\NBsize{\varphi}
+
+\DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
+\DeclareMathSymbol{\varv}{\mathord}{matha}{118}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand\myeqref[1]{(\ref{#1})}
+\newcommand{\blind}{1}
+
+%% customized math macros
+\newcommand\seq[2]{{#1}\!:\!{#2}}
+% \newcommand\R{\mathbb{R}}
+\newcommand\Var{\mathrm{Var}}
+\newcommand\var{\Var}
+\newcommand\Cov{\mathrm{Cov}}
+\newcommand\cov{\Cov}
+\newcommand\iid{\mathrm{iid}}
+\newcommand\dist{d}
+\def\lik{L}
+\def\loglik{\ell}
+
+\newcolumntype{t}{>{\tiny}c}
+
+

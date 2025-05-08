@@ -1,5 +1,5 @@
 \chapter{Likelihood Based Inference for ARMA Models}
-\label{chpt:conclusion}
+\label{chpt:arima}
 
 
 <<armaSetup, include=FALSE,echo=FALSE,results='hide'>>=
