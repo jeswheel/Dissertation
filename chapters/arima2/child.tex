@@ -226,7 +226,13 @@ The package features the function \code{arima2::arima}, which is an adaptation o
 
 \subsection{Simulation Studies}\label{sec:sims}
 
-
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## data/sim1_results.rds
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 To investigate the extent to which the standard approach for ARMA parameter estimation results in improperly maximized likelihoods, we conduct a series of simulation studies.
 It is challenging to obtain precise estimates of how frequently current standards lead to sub-optimal parameter estimates due to the varied applications of ARMA models in practice, the diversity in data sizes ($n$) and model orders $(p, q)$, and the differing degrees to which an ARMA model adequately describes the data-generating process.
@@ -561,22 +567,4 @@ Because existing software can also be leveraged to mitigate the issue, the large
 Traditional random initialization approaches software fail to uniformly cover the entire range of possible models and often produce many initializations outside the accepted range.
 Our algorithm offers a computationally efficient and practically convenient solution, providing a robust approach to parameter initialization and estimation that ensures adequate coverage of all possible models.
 We have shown that it provides a new standard for best practice in the field of time series analysis.
-
-\section*{Supporting information}
-
-\paragraph*{S1 Appendix}
-\label{S_sampling}
-{\bf Uniform Sampling.} An appendix demonstrating why uniform sampling of ARMA model parameters is impractical.
-
-\paragraph*{S2 Appendix}
-\label{S_python}
-{\bf Python Comparison.} An appendix comparing our algorithm to existing Python software. 
-
-\paragraph*{S3 Source Files}
-\label{S_simCode}
-{\bf Source code and data} The manuscript was created as a dynamic document. All code and data used to create the article are included in this zipped folder. 
-
-\paragraph*{S4 R Package}
-\label{S_source}
-{\bf arima2, v3.3.0.} Source code of the \texttt{arima2} package used in this manuscript.
 

@@ -24,7 +24,7 @@ clean:
 # Specifically clean only the output PDF
 cleanpdf:
 	rm -f $(PDF_OUTPUT)
-	
+
 # Remove only typical LaTeX auxiliary files
 dust:
 	rm -f $(wildcard *.log *.lof *.fls *.aux *.bbl *.blg *.fdb_latexmk *.lop *.out *.toc)
