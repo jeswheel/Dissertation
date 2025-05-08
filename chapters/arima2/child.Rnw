@@ -3,6 +3,7 @@
 
 
 <<armaSetup, include=FALSE,echo=FALSE,results='hide'>>=
+root <- here::here(here::here(), "chapters", "arima2")
 
 knitr::opts_chunk$set(
   echo = FALSE,
@@ -200,7 +201,7 @@ get_profile <- function(model, npts) {
   as.data.frame(results)
 }
 
-ma1_res <- readRDS("data/sim_MA1_results.rds")
+ma1_res <- readRDS(here::here(root, "data/sim_MA1_results.rds"))
 
 ma1_improve <- ma1_res %>%
   filter(num_starts > 10) %>%
@@ -432,7 +433,7 @@ The package features the function \code{arima2::arima}, which is an adaptation o
 \subsection{Simulation Studies}\label{sec:sims}
 
 <<loadSimulation>>=
-simulation1 <- readRDS("data/sim1_results.rds")
+simulation1 <- readRDS(here::here(root, "data/sim1_results.rds"))
 
 results_stats <- simulation1 %>%
   filter(algorithm == 'statsArima')
@@ -506,7 +507,7 @@ The rate of improvement obtained using our algorithm increases with model comple
 For example, likelihoods improved in $\Sexpr{round(100 * arma33_n50_pct, 1)}\%$ of the simulations when $p = q = 3$ and $n = 50$; models of this size and number of observations are not uncommon in published research studies.
 
 <<getTiming>>=
-sim_times <- readRDS("data/sim1_timing.rds")
+sim_times <- readRDS(here::here(root, "data/sim1_timing.rds"))
 mean_time <- sim_times$time.running %>% as.numeric() %>% mean()
 @
 
@@ -623,7 +624,7 @@ This type of result can make a careful practitioner feel uneasy, as there is evi
 Evidence of improper optimization may be less evident when relying on software that automates this process, such as the automated Hyndman-Khandakar algorithm \cite{hyndman08}, but the potential for sub-optimal estimates remains.
 
 <<simTables>>=
-simTables <- readRDS("data/sim2_AICtable_consistency.rds")
+simTables <- readRDS(here::here(root, "data/sim2_AICtable_consistency.rds"))
 arma_inc <- simTables %>%
   filter(max_repeat == 1) %>%
   summarize(1 - sum(consistent, na.rm = TRUE) / n()) %>%
@@ -882,7 +883,7 @@ set.seed(34432)
 registerDoRNG(448912)
 
 theta_21 <- bake(
-  file = 'data/PLCIsims.rds',
+  file = here::here(root, 'data/PLCIsims.rds'),
   {
 
     J <- 1000
@@ -926,7 +927,7 @@ pct_sim_cov_FI <- sum(theta_21$ma1 >= lwr_fisher) / nrow(theta_21)
 registerDoRNG(566223)
 
 theta_1 <- bake(
-  file = 'data/ar1sims.rds',
+  file = here::here(root, 'data/ar1sims.rds'),
   {
 
     J <- 1000
