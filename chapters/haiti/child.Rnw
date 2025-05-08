@@ -216,31 +216,31 @@ suppressWarnings(
 gc()  # Garbage Collection to free un-used memory
 @
 
-\section*{Abstract}
-Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
-These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
-Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
-Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
-This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
-We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
-We consider three dynamic models developed by expert teams to advise on vaccination policies.
-We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
-Specifically, we present approaches for diagnosing model misspecification and the consequent development of improved models.
-Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for spatiotemporal incidence data using this class of models.
-Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
+% \section*{Abstract}
+% Public health decisions must be made about when and how to implement interventions to control an infectious disease epidemic.
+% These decisions should be informed by data on the epidemic as well as current understanding about the transmission dynamics.
+% Such decisions can be posed as statistical questions about scientifically motivated dynamic models.
+% Thus, we encounter the methodological task of building credible, data-informed decisions based on stochastic, partially observed, nonlinear dynamic models.
+% This necessitates addressing the tradeoff between biological fidelity and model simplicity, and the reality of misspecification for models at all levels of complexity.
+% We assess current methodological approaches to these issues via a case study of the 2010-2019 cholera epidemic in Haiti.
+% We consider three dynamic models developed by expert teams to advise on vaccination policies.
+% We evaluate previous methods used for fitting these models, and we demonstrate modified data analysis strategies leading to improved statistical fit.
+% Specifically, we present approaches for diagnosing model misspecification and the consequent development of improved models.
+% Additionally, we demonstrate the utility of recent advances in likelihood maximization for high-dimensional nonlinear dynamic models, enabling likelihood-based inference for spatiotemporal incidence data using this class of models.
+% Our workflow is reproducible and extendable, facilitating future investigations of this disease system.
 
-\section*{Author summary}
-Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
-The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
-Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
-In this article, we conduct a re-analysis of the 2010-2019 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mechanistic models to time series data, while identifying limitations of these methodologies and proposing remedies.
-Our analysis presents methodology for diagnosing how well a model describes observed data. Using objective measures to assess model fit ensures that our evaluation is based on quantifiable criteria. Incorporating reproducibility into this assessment results in a framework that enables the validation or refinement of model based inferences when revisiting the data, facilitating scientific discovery.
-Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
-However, inference for high-dimensional systems remains a methodological challenge.
-One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
-We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
+% \section*{Author summary}
+% Quantitative understanding of infectious disease transmission dynamics relies upon mathematical models informed by scientific knowledge and relevant data.
+% The models aim to provide a statistical description of the trajectory of an epidemic and its uncertainty, together with a representation of the underlying biological mechanisms.
+% Evaluation of success at these goals is necessary in order for a model to provide a reliable tool for guiding evidence-based public policy interventions.
+% In this article, we conduct a re-analysis of the 2010-2019 cholera outbreak in Haiti. We use this case study to investigate current procedures for fitting mechanistic models to time series data, while identifying limitations of these methodologies and proposing remedies.
+% Our analysis presents methodology for diagnosing how well a model describes observed data. Using objective measures to assess model fit ensures that our evaluation is based on quantifiable criteria. Incorporating reproducibility into this assessment results in a framework that enables the validation or refinement of model based inferences when revisiting the data, facilitating scientific discovery.
+% Our data analysis workflow is supported by recent advances in algorithms, software and hardware, which facilitate statistical fitting of nonlinear stochastic dynamic models to observed incidence data.
+% However, inference for high-dimensional systems remains a methodological challenge.
+% One of the models under consideration involves spatially coupled stochastic meta-populations, and we demonstrate how a recently developed algorithm permits likelihood-based inference and model diagnostics in this setting.
+% We contend that raising the currently accepted standards of infectious disease modeling will result in a greater ability of scientists and policy makers to understand and respond to future infectious disease outbreaks.
 
-\section*{Introduction}
+\section{Introduction}
 
 Regulation of biological populations is a fundamental topic in epidemiology, ecology, fisheries and agriculture.
 Population dynamics may be nonlinear and stochastic, with the resulting complexities compounded by incomplete understanding of the underlying biological mechanisms and by partial observability of the system variables.
@@ -521,8 +521,8 @@ mod3_lee_coupled_aic <- 2 * lee3_results$n_params - 2 * lee3_results$all_ll_eval
 mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub_ll_eval
 @
 
-\section*{Materials and methods}
-\subsection*{Mechanistic models for disease modeling}
+\section{Materials and methods}
+\subsection{Mechanistic models for disease modeling}
 
 Mechanistic models representing biological phenomena are valuable for epidemiology and consequently for public health policy \cite{lofgren14,mccabe21}. More broadly, they have useful roles throughout biology, especially when combined with statistical methods that properly account for stochasticity and nonlinearity \cite{may04}. In some situations, modern machine learning methods can outperform mechanistic models on epidemiological forecasting tasks \cite{lau22,baker18}. The predictive skill of non-mechanistic models can reveal limitations in mechanistic models, but cannot readily replace the scientific understanding obtained by describing the biological dynamics of the system in a mathematical model \cite{baker18,prosperi20}.
 
@@ -1003,7 +1003,7 @@ In reality, it is plausible that some bacteria or infected individuals were pres
 Therefore, for departments with zero case counts in week 1, we estimate the number of infected individuals rather then treating this value as a constant (\nameref{S_init}).
 Finally, reported cholera cases are modeled using a negative binomial distribution with mean equal to a fraction ($\reportRate$) of individuals in each unit who develop symptoms and seek healthcare, and with over-dispersion parameter $\obsOverdispersion$ (\nameref{S_meas}).
 
-\subsection*{Model Fitting}\label{sec:model_fitting}
+\subsection{Model Fitting}\label{sec:model_fitting}
 
 Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP) \cite{king16}, with the understanding that the deterministic Model~2 is a special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
@@ -1387,7 +1387,7 @@ rm(h3_quants)
 gc()
 @
 
-\subsection*{Model Diagnostics}\label{sec:model_diagnostics}
+\subsection{Model Diagnostics}\label{sec:model_diagnostics}
 
 The goal of parameter calibration---whether done using Bayesian or frequentist methods---is to find the best description of the observed data in the context of the model.
 Obtaining the best fitting set of parameters for a given model does not, however, guarantee that the model provides an accurate representation of the system under investigation.
@@ -1449,7 +1449,7 @@ Additional techniques include the inspection of conditional log-likelihoods of e
 Other tools include plotting the effective sample size of each observation \cite{liu01}; plotting the values of the hidden states from simulations (\nameref{S_mod3cal});
 and comparing summary statistics of the observed data to simulations from the model \cite{wood10,king15}.
 
-\subsection*{Corroborating Fitted Models with Scientific Knowledge}
+\subsection{Corroborating Fitted Models with Scientific Knowledge}
 
 The resulting mechanisms in a fitted model can be compared to current scientific knowledge about a system.
 Agreement between model-based inference and our current understanding of a system may be taken as a confirmation of both model-based conclusions and our scientific understanding.
@@ -1558,9 +1558,9 @@ In the supplement material (\nameref{S_mod3cal}), we explore in more detail the 
 However, when focusing on the spatial units with the highest incidence of cholera, Model~3 performs roughly the same as a simple benchmark. By comparing simulations from the fitted model to the filtering distribution, we see that the reconstructed latent states of the model favor higher levels of cholera transmission than what is typically observed in the incidence data.
 These results hint at the possibility of model mispecification, and warrant a degree of caution in interpreting the model's outputs.
 
-\section*{Results}
+\section{Results}
 
-\subsection*{Forecasts}\label{sec:filter}
+\subsection{Forecasts}\label{sec:filter}
 
 Forecasts are an attempt to provide an accurate estimate of the future state of a system based on currently available data, together with an assessment of uncertainty.
 Forecasts from mechanistic models that are compatible with current scientific understanding may also provide estimates of the future effects of potential interventions.
@@ -1677,7 +1677,7 @@ Compare to Fig.~3A of \cite{lee20}.}
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
 We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
 
-\section*{Discussion}\label{sec:discussion}
+\section{Discussion}\label{sec:discussion}
 
 The ongoing global COVID-19 pandemic has demonstrated how government policy may be affected by the inferences drawn from mathematical modeling \cite{saltelli20}.
 However, the development of credible models---which are supported by data and can provide quantitative insights into a dynamic system---remains a challenging task.
@@ -1724,7 +1724,7 @@ Once a model has been adequately calibrated to data, care is required to assess 
 Studies that combine model development with thoughtful data analysis, supported by a high standard of reproducibility, build knowledge about the system under investigation.
 Cautionary warnings about the difficulties inherent in understanding complex systems \cite{saltelli20,ioannidis20,ganusov16} should motivate us to follow best practices in data analysis, rather than avoiding the challenge.
 
-\subsection*{Reproducibility and Extendability}
+\subsection{Reproducibility and Extendability}
 
 Lee et al.~\cite{lee20} published their code and data online, and this reproducibility facilitated our work.
 Robust data analysis requires not only reproducibility but also extendability: if one wishes to try new model variations, or new approaches to fitting the existing models, or plotting the results in a different way, this should not be excessively burdensome.

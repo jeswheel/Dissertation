@@ -4,7 +4,7 @@ RMW_FILES = $(foreach dir,$(CHAPTER_DIRS),$(wildcard $(dir)/*.Rnw))
 TEX_FILES = $(RMW_FILES:.Rnw=.tex)
 MAIN_TEX = main.tex
 PDF_OUTPUT = main.pdf
-INFPUT_FILES = packages.tex thesis-umich.cls
+INFPUT_FILES = packages.tex thesis-umich.cls references.bib
 
 # Default target
 all: $(PDF_OUTPUT) dust
