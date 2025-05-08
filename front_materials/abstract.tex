@@ -1,3 +1,23 @@
-Put your abstract text here. \blindtext
+State space models are widely used for conducting time series analysis.
+Developing a state space model involves proposing mathematical equations that describe how a data-generating system evolves over time and how observations of the system are obtained.
+These models are particularly useful when a scientific hypothesis about system dynamics exists, as is common when modeling ecological populations or tracking infectious disease outbreaks over time.
+However, except for the simplest cases, state space models do not permit closed-form expressions of their likelihood functions, presenting challenges for inference.
+This thesis presents three projects that introduce innovations in likelihood-based inference for state space models.
 
-\blindtext
+The first project proposes a novel approach for performing inference on Auto Regressive Moving Average (ARMA) time series models, which are formally linearly Gaussian state space models.
+ARMA models are among the most frequently taught and widely used methods for time series analysis.
+In this project, I demonstrate that existing algorithms and software for parameter estimation often produce sub-optimal parameter estimates with surprising frequency.
+I introduce a novel random initialization algorithm designed to leverage the structure of the ARMA likelihood function to help overcome these optimization shortcomings.
+Additionally, I demonstrate that profile likelihoods offer superior confidence intervals compared to those based on the Fisher information matrix, which is the current standard practice for ARMA modeling.
+
+The second project presents a likelihood-based analysis of the 2010-2019 cholera outbreak in Haiti.
+This work explores three distinct state space models for cholera incidence data and demonstrates the effectiveness of recently developed algorithms for performing inference in a high-dimensional setting.
+A key focus of this project is to assess the strengths and limitations of using state space models to inform public health policy decisions.
+Existing methodologies and workflows for this purpose are evaluated, and revised data analysis strategies that lead to better statistical fit and outcomes are presented.
+For example, I demonstrate a reproducible framework for diagnosing model misspecification and subsequently developing enhancements that result in better recommendations for policy decisions.
+
+The third project proposes a simulation-based algorithm designed to perform maximum likelihood estimation for a class of high-dimensional state space models.
+This algorithm, called the Marginalized Panel Iterated Filter (MPIF), significantly enhances the capability of iterated filtering algorithms to estimate parameters for large collections of independent but related state space models.
+Improvements in parameter estimates and empirical convergence rates are achieved by addressing the issue of particle depletion that occurs when performing iterated filtering on models that have high-dimensional parameter spaces.
+Theoretical support for the algorithm is provided through an analysis of iterating marginalized Bayes maps.
+Additionally, asymptotic theory demonstrating the convergence of general iterated filtering algorithms for panel models without the marginalization step is presented. 
