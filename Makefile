@@ -1,5 +1,8 @@
 # Variables
 CHAPTER_DIRS = $(wildcard chapters/*)
+APPENDIX_DIRS = $(wildcard appendices/*)
+APPENDIX_FILES = $(foreach dir,$(APPENDIX_DIRS),$(wildcard $(dir)/*.Rnw))
+APPENDIX_TEX = $(APPENDIX_FILES:.Rnw=.tex)
 RMW_FILES = $(foreach dir,$(CHAPTER_DIRS),$(wildcard $(dir)/*.Rnw))
 TEX_FILES = $(RMW_FILES:.Rnw=.tex)
 MAIN_TEX = main.tex
@@ -14,7 +17,7 @@ all: $(PDF_OUTPUT) dust
 	Rscript -e "knitr::knit('$<', output='$@')"
 
 # Rule to build PDF from main.tex, including all dependencies
-$(PDF_OUTPUT): $(MAIN_TEX) $(TEX_FILES) $(INPUT_FILES)
+$(PDF_OUTPUT): $(MAIN_TEX) $(TEX_FILES) $(INPUT_FILES) $(APPENDIX_TEX)
 	latexmk -pdf $(MAIN_TEX)
 
 # Clean auxiliary files created by LaTeX

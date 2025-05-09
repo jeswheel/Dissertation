@@ -86,7 +86,7 @@ This is followed by a motivating example and a discussion of the potential impli
 We also discuss the construction of standard errors for our maximum likelihood estimate.
 Specifically, we show that estimates of the standard error for model parameters that are default output of R and Python can be misleading, and we provide a reliable alternative.
 Throughout the article, we use the \code{stats::arima} function from the R programming language as a baseline for comparison.
-The same methodology for fitting parameters is used in the \code{statsmodels.tsa} module in Python, and we demonstrate that our results apply to this software as well (\nameref{S_python}).
+The same methodology for fitting parameters is used in the \code{statsmodels.tsa} module in Python, and we demonstrate that our results apply to this software as well (Appendix~\ref{sec:appendix_arima_python}).
 
 \section{Maximum Likelihood for ARMA Models}
 
@@ -144,7 +144,7 @@ A common strategy to optimize multimodal loss functions is to perform multiple o
 However, we have found no instances of practitioners using a multiple initialization strategy for estimating ARMA model parameters.
 This may be explained by a general unawareness of the possibility of converging to a local maximum or because obtaining a suitable collection of initializations for ARMA models is nontrivial.
 For example, independently initializing parameters at random can place the parameter vector outside the region of interest.
-Furthermore, uniform random sampling generally fails to adequately cover the plausible parameter region (\nameref{S_sampling}).
+Furthermore, uniform random sampling generally fails to adequately cover the plausible parameter region (Appendix~\ref{sec:appendix_arima_sample}).
 
 <<setupMulti>>=
 sample_data <- function(data, job, n, P, Q, ...) {
@@ -435,8 +435,6 @@ The package features the function \code{arima2::arima}, which is an adaptation o
 
 <<loadSimulation>>=
 simulation1 <- readRDS(paste0(root, "data/sim1_results.rds"))
-
-cat(paste0(root, "data/sim1_results.rds"))
 
 results_stats <- simulation1 %>%
   filter(algorithm == 'statsArima')

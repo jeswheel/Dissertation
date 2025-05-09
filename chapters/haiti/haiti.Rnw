@@ -541,10 +541,11 @@ Here, we have created a common notational framework that facilitates model compa
 Translations back to the original notation of Lee et al.~\cite{lee20} are given in the supplement (\nameref{S1_Table}).
 
 \begin{table}
-\begin{adjustwidth}{-2.25in}{0in}
+% \begin{adjustwidth}{-2.25in}{0in}
 \centering
+\footnotesize
 \caption{\label{tab:params} {\bf Model parameters.}}
-\begin{tabular}{|p{0.15\linewidth}|p{0.14\linewidth}t|p{0.15\linewidth}t|p{0.17\linewidth}t|}
+\begin{tabular}{|p{0.16\linewidth}|p{0.16\linewidth}t|p{0.16\linewidth}t|p{0.165\linewidth}t|}
 \hline
 Mechanism & Model 1 && Model 2 && Model 3 &
 \\
@@ -761,13 +762,16 @@ Reporting rate
   & \multirow{2}{*}{\eqref{eq:model3:foi}}
 \\\hline
 \end{tabular}
-\begin{flushleft} References to the relevant equation are given in parentheses.
+\caption{
+References to the relevant equation are given in parentheses.
 Parameters that were fixed and not calibrated using the data are indicated with $\fixed$; all fixed parameters values were chosen to match the fixed parameter values of \cite{lee20}.
 Parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
 Confidence intervals for model parameters are given in the supplement (\nameref{S_CI}).
 Translations back into the notation of \cite{lee20} are given in \nameref{S1_Table}.
-\end{flushleft}
-\end{adjustwidth}
+}
+% \begin{flushleft}
+% \end{flushleft}
+% \end{adjustwidth}
 \end{table}
 
 Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}(t)$ for each continuous time point $t$.

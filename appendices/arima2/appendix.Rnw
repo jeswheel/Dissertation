@@ -1,0 +1,136 @@
+\chapter{Appendix for Chapter 2}
+\label{chpt:appendix_arima}
+
+<<packages, include=FALSE, echo=FALSE>>=
+root <- ""
+library(tidyverse)
+library(arima2)
+
+myround <- function(x, digits = 1) {
+  # taken from the broman package
+  if (digits < 1)
+    stop("This is intended for the case digits >= 1.")
+  if (length(digits) > 1) {
+    digits <- digits[1]
+    warning("Using only digits[1]")
+  }
+  tmp <- sprintf(paste("%.", digits, "f", sep = ""), x)
+  zero <- paste0("0.", paste(rep("0", digits), collapse = ""))
+  tmp[tmp == paste0("-", zero)] <- zero
+  tmp
+}
+
+theme_set(theme_bw() + theme(plot.title = element_text(hjust = 0.5)))
+@
+
+%%%%%%%%%% START
+
+\section{Comparing ARIMA algorithm to Python software}
+\label{sec:appendix_arima_python}
+
+<<loadPythonRes, echo=FALSE>>=
+python_MLEs <- read.csv(paste0(root, 'data/pythonResults.csv'))
+sub_fits <- read.csv(paste0(root, 'data/sub_fits.csv'))[, -1]
+best_lls <- readRDS(paste0(root, 'data/sub_fits_lls.rds'))
+num_improve <- sum(best_lls - python_MLEs$loglik > 0)
+num_better <- sum(best_lls - python_MLEs$loglik > 0.01)
+
+diffs_df <- data.frame(
+  model = 1:100,
+  diff = best_lls - python_MLEs$loglik
+)
+@
+
+\noindent Although Algorithm~\ref{alg:mle} is language agnostic, our implementation is in R.
+Consequently, all simulation studies for this article use R's \code{stats::arima} function for baseline comparisons.
+To demonstrate applicability to other software environments, we briefly compare model likelihoods fit using Python's \code{statsmodels.tsa} module against our implementation of Algorithm~1.
+We generate 100 unique Gaussian ARMA$(2, 1)$ models and datasets (each with $n = 100$) where R's \code{stats::arima} provides sub-optimal estimates. These observations are used to fit ARMA$(2, 1)$ models in Python.
+Despite these datasets being chosen for sub-optimal results in R, the log-likelihoods in both R and Python are roughly equivalent---a result of both software packages using the same general approach to fitting model parameters.
+
+Our implementation of Algorithm~1 resulted in higher log-likelihoods for $\Sexpr{num_improve}$ out of the 100 datasets compared to Python.
+The log-likelihood deficiencies for the remaining three datasets were all smaller than $\epsilon = 10^{-5}$, which is smaller than the tolerance level to be considered as an improvement in our other simulation studies.
+While potentially insignificant, these differences can be eliminated by increasing the number of parameter initializations and the convergence criteria of our algorithm.
+Directly implementing our algorithm in Python would further eliminate the possibility of these discrepancies entirely.
+
+\section{Uniform Sampling}
+\label{sec:appendix_arima_sample}
+
+A common approach to optimizing a non-convex loss function is to perform the optimization routine with distinct parameter initializations.
+For ARMA models, picking suitable initialization is a challenging problem that we address with Algorithm~1.
+An alternative approach would involve sampling each coefficient independently.
+To see why an independent sampling scheme is not used, consider an AR(2) model.
+An initialization with parameters $(\phi_1, \phi_2) = (1.1, 0.1)$ is not a valid initialization---as the polynomial roots lie outside the complex unit circle---whereas $(\phi_1, \phi_2) = (1.1, -0.2)$ is perfectly acceptable.
+Our algorithm accounts for the complex relationship between model parameters when obtaining random initializations.
+
+To visualize why an independent sampling scheme is not used, consider sampling parameters from a Uniform$(-1, 1)$ distribution.
+In Fig~\ref{fig:AR2}, we plot inverted roots that are a result of sampling from this distribution for AR(2) and AR(3) models.
+The figure illustrates that a significant percentage of uniformly sampled parameter initializations lie outside the accepted region, and, critically, the entire region of possible initializations is not well covered by uniform sampling.
+Picking a uniform distribution with different bounds---or any other independent sampling distribution---results in similar problems.
+In order to uniformly sample from the possibly regions, it is necessary to account for the geometry of parameter space, a problem solved by Algorithm~\ref{alg:mle}.
+
+\begin{figure}[ht]
+<<ARrootsUnif, fig.height=2.3, echo=FALSE>>=
+N <- 1000
+
+coefs_AR2  <- runif(N*2, -1, 1) |> matrix(nrow = N, ncol = 2)
+
+ARs_AR2  <- coefs_AR2[, 1:2]
+# MAs <- coefs[, 4:6]
+
+colnames(ARs_AR2)  <- c("ar1", "ar2")
+
+ar_roots_AR2 <- t(apply(ARs_AR2, 1, arima2::ARMApolyroots))
+inv_ar_roots_AR2 <- 1/ar_roots_AR2
+
+complex_numbers_AR2  <- as.vector(inv_ar_roots_AR2)
+
+# Extract real and imaginary parts
+real_parts_AR2 <- Re(complex_numbers_AR2)
+imag_parts_AR2 <- Im(complex_numbers_AR2)
+
+df_AR2 <- data.frame(
+  Re = real_parts_AR2,
+  Im = imag_parts_AR2,
+  alg = 'AR(2) Roots'
+)
+
+
+coefs_AR3 <- runif(N*3, -1, 1) |> matrix(nrow = N, ncol = 3)
+
+ARs_AR3  <- coefs_AR3[, 1:3]
+
+colnames(ARs_AR3)  <- c("ar1", "ar2", "ar3")
+
+ar_roots_AR3 <- t(apply(ARs_AR3, 1, arima2::ARMApolyroots))
+inv_ar_roots_AR3 <- 1/ar_roots_AR3
+
+complex_numbers_AR3  <- as.vector(inv_ar_roots_AR3)
+real_parts_AR3 <- Re(complex_numbers_AR3)
+imag_parts_AR3 <- Im(complex_numbers_AR3)
+
+
+df_AR3 <- data.frame(
+  Re = real_parts_AR3,
+  Im = imag_parts_AR3,
+  alg = "AR(3) Roots"
+)
+
+df_combined <- bind_rows(df_AR2, df_AR3)
+
+ggplot(df_combined, aes(x = Re, y = Im, col = Re^2 + Im^2 >= 1, shape = Re^2 + Im^2 >= 1)) +
+  geom_point() +
+  theme_bw() +
+  annotate("path", x = cos(seq(0, 2*pi, length.out = 100)),
+           y = sin(seq(0, 2*pi, length.out = 100))) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  coord_fixed() +
+  facet_wrap(~alg) +
+  scale_color_manual(values = c("black", 'red')) +
+  scale_shape_manual(values = c(20, 4)) +
+  theme(legend.position = 'none', axis.title = element_blank())
+@
+\caption{\label{fig:AR2}Inverted roots of 1000 samples of AR(2) and AR(3) coefficients sampled independently from a U$(-1, 1)$ distribution. The red ``x"s are points that lie outside the accepted region, which represents $\Sexpr{round(100*sum((real_parts_AR2^2 + imag_parts_AR2^2 >= 1)) / length(real_parts_AR2), 1)}\%$ of the AR(2) coefficients and $\Sexpr{round(100*sum((real_parts_AR3^2 + imag_parts_AR3^2 >= 1)) / length(real_parts_AR3), 1)}\%$ of the AR(3) coefficients. Increasing the width of the uniform sampling distribution results in a larger fraction outside the accepted region, and decreasing the width results in worse coverage of the range of acceptable parameter values.}
+\end{figure}
+
+%%%%%%%%%% END

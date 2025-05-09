@@ -108,7 +108,7 @@
 \orcid{0000-0003-3941-3884}
 
 % Frontispiece
-\frontispiece{\includegraphics[width=4in]{front_materials/frontispiece.png}}
+% \frontispiece{\includegraphics[width=4in]{front_materials/frontispiece.png}}
 
 % Default style for front pages
 \frontpagestyle{7} % 7 is preferred by Rackham, but should be set individually for each front page
@@ -169,14 +169,16 @@ Professor Kerby Shedden \\
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
-\input{chapters/introduction/main}
-\input{chapters/arima2/child}
-\input{chapters/haiti/child}
+% \input{chapters/introduction/main}
+\input{chapters/arima2/arima2}
+\input{chapters/haiti/haiti}
 % Place your additional chapters here using the \input{} command
 \input{chapters/example_chapter_99}
 
 % Appendices
 \appendix
+% \input{appendices/arima2/pythonComparison}
+\input{appendices/arima2/appendix}
 \input{appendices/example_appendix_01}
 \input{appendices/example_appendix_02}
 

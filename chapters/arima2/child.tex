@@ -50,7 +50,7 @@ This is followed by a motivating example and a discussion of the potential impli
 We also discuss the construction of standard errors for our maximum likelihood estimate.
 Specifically, we show that estimates of the standard error for model parameters that are default output of R and Python can be misleading, and we provide a reliable alternative.
 Throughout the article, we use the \code{stats::arima} function from the R programming language as a baseline for comparison.
-The same methodology for fitting parameters is used in the \code{statsmodels.tsa} module in Python, and we demonstrate that our results apply to this software as well (\nameref{S_python}).
+The same methodology for fitting parameters is used in the \code{statsmodels.tsa} module in Python, and we demonstrate that our results apply to this software as well (Appendix~\ref{sec:appendix_arima_python}).
 
 \section{Maximum Likelihood for ARMA Models}
 
@@ -108,7 +108,7 @@ A common strategy to optimize multimodal loss functions is to perform multiple o
 However, we have found no instances of practitioners using a multiple initialization strategy for estimating ARMA model parameters.
 This may be explained by a general unawareness of the possibility of converging to a local maximum or because obtaining a suitable collection of initializations for ARMA models is nontrivial.
 For example, independently initializing parameters at random can place the parameter vector outside the region of interest.
-Furthermore, uniform random sampling generally fails to adequately cover the plausible parameter region (\nameref{S_sampling}).
+Furthermore, uniform random sampling generally fails to adequately cover the plausible parameter region (Appendix~\ref{sec:appendix_arima_sample}).
 
 
 
@@ -226,13 +226,7 @@ The package features the function \code{arima2::arima}, which is an adaptation o
 
 \subsection{Simulation Studies}\label{sec:sims}
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{verbatim}
-## data/sim1_results.rds
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
+
 
 To investigate the extent to which the standard approach for ARMA parameter estimation results in improperly maximized likelihoods, we conduct a series of simulation studies.
 It is challenging to obtain precise estimates of how frequently current standards lead to sub-optimal parameter estimates due to the varied applications of ARMA models in practice, the diversity in data sizes ($n$) and model orders $(p, q)$, and the differing degrees to which an ARMA model adequately describes the data-generating process.
