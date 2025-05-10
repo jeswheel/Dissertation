@@ -1,0 +1,1948 @@
+\chapter{Appendix for Chapter 3}
+\label{chpt:appendix_haiti}
+
+
+\section{Model Diagrams}\label{sec:appendix_haiti_diagrams}
+
+Each of the dynamic models considered in this manuscript can be fully described using the model descriptions in the manuscript, coupled with the additional information described in Sections 2 and 3 of this supplement.
+Despite this, diagrams of dynamic systems are often helpful to understand the equations.
+In this section, we give three diagrams representing Models~1--3, respectively.
+Because the models are defined by their mathematical equations and numeric implementation, these diagrams are not unique visual representations of the model.
+Alternative representations that may be helpful in understanding the models explored in this paper are provided in the supplement material of \citet{lee20}.
+
+\input{appendices/haiti/mod1diagram}
+
+\input{appendices/haiti/mod2diagram}
+
+\input{appendices/haiti/mod3diagram}
+
+\section{Markov chain and differential equation interpretations of compartment flow rates}\label{sec:appendix_haiti_details}
+
+\input{appendices/haiti/modelDetails}
+
+<<packages, include=FALSE, echo=FALSE>>=
+root <- ""
+library(tidyverse)
+library(pomp)
+library(haitipkg)
+library(spatPomp)
+library(doParallel)
+library(doRNG)
+library(knitr)
+library(latex2exp)
+
+myround <- function(x, digits = 1) {
+  # taken from the broman package
+  if (digits < 1)
+    stop("This is intended for the case digits >= 1.")
+  if (length(digits) > 1) {
+    digits <- digits[1]
+    warning("Using only digits[1]")
+  }
+  tmp <- sprintf(paste("%.", digits, "f", sep = ""), x)
+  zero <- paste0("0.", paste(rep("0", digits), collapse = ""))
+  tmp[tmp == paste0("-", zero)] <- zero
+  tmp
+}
+
+cores <- detectCores()
+registerDoParallel(cores)
+
+knitr::opts_chunk$set(echo = FALSE)
+theme_set(theme_bw())
+@
+
+%%%%%%%%%% START
+
+\section{Confidence Intervals for Model Parameters}\label{sec:appendix_haiti_ci}
+
+In this section we provide confidence intervals for all model parameters, excluding those that take unique values for each spatial unit.
+For each model and parameter, we use principles of profile likelihood to obtain confidence intervals \citep{pawitan01}.
+Due to the non-linear and stochastic nature of Models~1 and 3, exact evaluations of the profile log-likelihood are difficult to obtain.
+Instead, the log-likelihood at each point of the profile is estimated using via Monte-Carlo based particle filter methods.
+We therefore obtain confidence intervals for the parameters of Model~1 and Model~3 using the Monte Carlo adjust profile (MCAP) algorithm \citep{ionides17}.
+
+Profile confidence intervals for nonlinear POMP models are require a large number of computations. In the Model~1 and Model~3 subsections, we mention the total computational expense of each profile log-likelihood evaluation. Each subsection also provide figures that show the curvature of the profile log-likelihood near the MLE (Figures~\ref{fig:m1Profs}--\ref{fig:m3Profs}).
+In these figures, the parameter values are shown on the transformed scale in which the profile was calculated.
+
+\subsection{Model~1 parameters}
+
+Parameter estimates for Model~1, along with the MCAP confidence intervals for the estimate, are given in Table~\ref{tab:mod1CI}.
+Figure~\ref{fig:m1Profs} displays the Monte Carlo evaluations of the profile likelihood values, obtained using a particle filter.
+The total computational burden of this profile likelihood search was 3631 hours, which was computed in parallel using 9675 separate jobs via the \texttt{batchtools} R package \cite{batchtools}.
+
+<<Load Model 1 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
+H1_profiles <- readRDS(paste0(root, "data/h1_profiles.rds"))
+
+# TAKEN FROM STACK OVERFLOW:
+# https://stackoverflow.com/a/44958156
+midcut<-function(x,from,to,by) {
+  ## cut the data into bins...
+  x=cut(x,seq(from,to,by),include.lowest=T)
+  ## make a named vector of the midpoints, names=binnames
+  vec=seq(from+by/2,to-by/2,by)
+  names(vec)=levels(x)
+  ## use the vector to map the names of the bins to the midpoint values
+  unname(vec[x])
+}
+
+prof_params <- c(
+  'betat', 'tau_epi', 'tau_end', 'rho', 'nu', 'sig_sq_epi',
+  'sig_sq_end', 'E_0', 'I_0', 'beta1', 'beta2', 'beta3',
+  'beta4', 'beta5', 'beta6'
+)
+
+H1_profiles_long <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, all_of(prof_params), -E_0, -I_0, -tau_end, -tau_epi, -rho) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+# Tau done on log-scale
+H1_long_tau <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, tau_end, tau_epi) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(value <= 1e+12) %>%
+  mutate(value = log(value)) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+H1_long_rho <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, rho) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(value > 0.15) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+# E_0, I_0 need to be treated slightly differently
+H1_E0_I0_long <- H1_profiles %>%
+  select(prof_var, logLik, logLik_se, E_0, I_0) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  mutate(value = value * 10911819) %>%
+  mutate(value = midcut(value, from = -499, to = 24501, by = 1000)) %>%
+  # mutate(value = value / 10911819) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+H1_profiles_long <- bind_rows(H1_profiles_long, H1_E0_I0_long, H1_long_tau, H1_long_rho)
+@
+
+<<Create H1 Profile CIs>>=
+all_mcaps <- list()
+all_ci <- list()
+for (p in prof_params) {
+
+  mcap_tmp <- mcap(
+    logLik = H1_profiles_long %>% filter(prof_var == p) %>% pull(logLik),
+    parameter = H1_profiles_long %>% filter(prof_var == p) %>% pull(value)
+  )
+
+  all_mcaps[[p]] <- mcap_tmp
+  tmp_ci <- mcap_tmp$ci
+  names(tmp_ci) <- c("lower", "upper")
+
+  all_ci[[p]] <- c(tmp_ci, 'mle' = mcap_tmp$mle)
+}
+
+all_mcaps <- purrr::map_df(
+  prof_params,
+  function(x) all_mcaps[[x]]$fit %>% mutate(prof_var = x)
+)
+
+all_ci <- all_ci |> as.data.frame() |> t() |> as.data.frame()
+all_ci$prof_var <- rownames(all_ci)
+
+h1_mles <- H1_profiles %>% slice_max(order_by = logLik) %>%
+  select(logLik, all_of(prof_params)) %>%
+  mutate(E_0 = E_0 * 10911819, I_0 = I_0 * 10911819,
+         tau_epi = log(tau_epi), tau_end = log(tau_end)) %>%
+  pivot_longer(
+    cols = -logLik,
+    names_to = 'prof_var',
+    values_to = 'value'
+  )
+@
+
+\begin{figure}[ht]
+<<m1Profs, fig.height=5, fig.width=6, echo=FALSE, warning=FALSE, message=FALSE>>=
+# Create a mapping between department names and what should be shown in figures
+h1_plots <- list()
+for (i in 1:length(prof_params)) {
+  p = prof_params[i]
+  if (p == 'betat') {
+    my_lab <- TeX('$\\zeta')
+  } else if (grepl('^beta[[:digit:]]$', p)) {
+    num <- gsub('^beta', '', p)
+    my_lab <- TeX(paste0('$\\beta_', num, '$'))
+  } else if (p == 'E_0') {
+    my_lab <- TeX('$E_0(0)$')
+  } else if (p == 'I_0') {
+    my_lab <- TeX('$I_0(0)$')
+  } else if (p == 'nu' || p == 'rho') {
+    my_lab <- TeX(paste0('$\\', p, '$'))
+  } else if (p == 'sig_sq_epi') {
+    my_lab <- TeX('$\\sigma_{proc}$: Epidemic')
+  } else if (p == 'sig_sq_end') {
+    my_lab <- TeX('$\\sigma_{proc}$: Endemic')
+  } else if (p == 'tau_end') {
+    my_lab <- TeX('$\\log(\\psi)$: Endemic')
+  } else if (p == 'tau_epi') {
+    my_lab <- TeX('$\\log(\\psi)$: Epidemic')
+  }
+
+  gg_tmp <- ggplot() +
+    geom_point(
+      data = H1_profiles_long %>% filter(prof_var == p),
+      aes(x = value, y = logLik)
+    ) +
+    geom_line(
+      data = all_mcaps %>% filter(prof_var == p),
+      aes(x = parameter, y = smoothed),
+      col = 'blue'
+    ) +
+    # geom_line(data = all_mcaps, aes(x = parameter, y = quadratic), col = 'red') +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p),
+      aes(xintercept = lower), linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p),
+      aes(xintercept = upper),
+      linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p),
+      aes(xintercept = mle), col = 'blue'
+    ) +
+    # This code chunk below will plot the MLE along with the smoothed marginal
+    # MLEs and the confidence interval.
+    # geom_point(
+    #   data = h1_mles %>% filter(prof_var == p),
+    #   aes(x = value, y = logLik), col = 'red'
+    # ) +
+    labs(y = 'Log-Likelihood', title = my_lab) +
+    theme(
+      axis.text = element_text(size = 8),
+      axis.title = element_text(size = 10)
+    ) +
+    theme_bw() +
+    scale_y_continuous(limits = c(-2770, max(H1_profiles$logLik))) +
+    theme(
+      axis.title.x = element_blank(),
+      plot.title = element_text(
+        hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+      axis.title.y = element_text(size = 8),
+      axis.text.y = element_text(size = 7),
+      axis.text.x = element_text(size = 6.5),
+      plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+    )
+
+  if (p == 'E_0') {
+    gg_tmp <- gg_tmp +
+      scale_x_continuous(breaks = c(0, round(all_ci[p, 'upper'])))
+  } else if (p == 'I_0') {
+    gg_tmp <- gg_tmp +
+      scale_x_continuous(
+        breaks = c(round(all_ci[p, 'lower']), round(all_ci[p, 'upper']))
+      )
+  } else if (p == 'nu') {
+    gg_tmp <- gg_tmp +
+      scale_x_continuous(breaks = c(0.9, 0.95, 1.0))
+  }
+
+  if (i %in% seq(1, 16, 4)) {
+    h1_plots[[i]] <- gg_tmp
+  } else {
+    h1_plots[[i]] <- gg_tmp + theme(
+      axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+      axis.title.y = element_blank()
+      )
+  }
+}
+
+cowplot::plot_grid(
+  plotlist = h1_plots,
+  align = 'h', ncol = 4,
+  rel_widths = c(1.25, 1, 1, 1)
+)
+@
+\caption[MCAP confidence intervals for Model 1 parameters.]{\label{fig:m1Profs}MCAP confidence intervals for Model 1 parameters. The vertical blue line indicates the smoothed MLE.}
+\end{figure}
+
+\begin{table}[!h]
+\centering
+\caption[Model~1 parameter estimates and confidence intervals.]{\label{tab:mod1CI}Model~1 parameter estimates and their corresponding confidence intervals, obtained via the MCAP algorithm.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
+\\
+\hline
+\hline
+
+ Seasonality & $\transmissionTrend$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'betat') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'betat') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'betat') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\transmission_1$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta1') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta1') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta1') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\transmission_2$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta2') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta2') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta2') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\transmission_3$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta3') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta3') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta3') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\transmission_4$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta4') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta4') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta4') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\transmission_5$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta5') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta5') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta5') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\transmission_6$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'beta6') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'beta6') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'beta6') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'tau_epi') %>% pull(value) %>% exp(), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'tau_epi') %>% pull(lower) %>% exp(), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'tau_epi') %>% pull(upper) %>% exp(), 3)})$
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'tau_end') %>% pull(value) %>% exp(), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'tau_end') %>% pull(lower) %>% exp(), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'tau_end') %>% pull(upper) %>% exp(), 3)})$
+\\
+\hline
+
+  Reporting Rate & $\reportRate$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'rho') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'rho') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'rho') %>% pull(upper), 3)})$
+\\
+\hline
+
+  Mixing Exponent & $\mixExponent$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'nu') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'nu') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'nu') %>% pull(upper), 3)})$
+\\
+\hline
+
+  Process noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_epi') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(upper), 3)})$
+\\
+\hline
+
+  Process noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_end') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(upper), 3)})$
+\\
+\hline
+
+  Initial Values & $I_{0}(0)$ & $\Sexpr{round(h1_mles %>% filter(prof_var == 'I_0') %>% pull(value))}$
+   &
+  $(\Sexpr{round(all_ci %>% filter(prof_var == 'I_0') %>% pull(lower))}, \Sexpr{round(all_ci %>% filter(prof_var == 'I_0') %>% pull(upper))})$
+\\
+\hline
+
+  Initial Values & $E_{0}(0)$ & $\Sexpr{round(h1_mles %>% filter(prof_var == 'E_0') %>% pull(value))}$
+   &
+  $(\Sexpr{round(all_ci %>% filter(prof_var == 'E_0') %>% pull(lower))}, \Sexpr{round(all_ci %>% filter(prof_var == 'E_0') %>% pull(upper))})$
+\\
+\hline
+
+\end{tabular}
+\end{table}
+
+\subsection{Model~2 parameters}
+
+Parameter estimates for Model~2, along with the profile likelihood confidence intervals for each estimate, are given in Table~\ref{tab:mod2CI}.
+Figure~\ref{fig:m2Profs} displays the profile log-likelihood curve near the MLE.
+In Table~\ref{tab:mod2CI}, the confidence interval for $\muRS^{-1}$, the duration of natural immunity due to cholera infection, is arbitrarily large (going to infinity).
+This is possible because the parameter that was estimated was $\muRS$, and the true MLE for this parameter is zero (see Figure~\ref{fig:m2Profs}).
+This suggests that the fitted model favors a regime where reinfection events are not possible.
+Similarly, the MLE for the parameter $\transmission$, which controls the amount of cholera transmission from human to human, is zero.
+Because Model~2 fails to describe the incidence data as well as a simple statistical benchmark, we must be careful to not interpret these results as evidence that reinfections and human-to-human infection events do not occur.
+Instead, we may consider this as additional evidence of model mispecification.
+
+<<Load Model 2 Confidence Intervals, include=FALSE, message=FALSE, echo=FALSE>>=
+h2_profiles <- readRDS(paste0(root, "data/h2_profiles.rds")) %>% as.data.frame()
+h2_mles <- readRDS(paste0(root, "data/model2_fit.rds"))$h2_params
+
+prof_params <- c(
+  "Mu",
+  "BetaW",
+  "v",
+  "phase",
+  "Beta",
+  "sigma"
+)
+
+h2_plots_lb <- numeric(length(prof_params))
+h2_plots_ub <- numeric(length(prof_params))
+
+names(h2_plots_lb) <- prof_params
+names(h2_plots_ub) <- prof_params
+
+h2_plots <- list()
+for (i in 1:length(prof_params)) {
+  p = prof_params[i]
+  if (p == 'Mu') {
+    my_lab <- TeX('$\\mu_W')
+  } else if (p == 'Beta') {
+    my_lab <- TeX('$\\beta^{1/5}$')
+  } else if (p == 'BetaW') {
+    my_lab <- TeX('$\\beta_W$')
+  } else if (p == 'v') {
+    my_lab <- TeX("$\\psi")
+  } else if (p == 'sigma') {
+    my_lab <- TeX('$\\mu^{1/5}_{RS}$')
+  } else if (p == 'phase') {
+    my_lab <- TeX('$\\phi')
+  }
+
+  if (p == 'Beta') {
+    tmp_df_beta <- h2_profiles %>%
+      filter(prof_var == 'Beta') %>%
+      # filter(logLik >= -21965) %>%
+      arrange(p)
+
+    vals_beta <- tmp_df_beta[, 'Beta']^(1/5)
+
+    profile_like_beta <- splinefun(x = vals_beta, y = tmp_df_beta[, 'logLik'])
+    # max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    max_profile_beta <- max(h2_profiles$logLik)
+    threshold_beta <- max_profile_beta - 1.92
+    plot_threshold_beta <- max_profile_beta - 6
+    profile_roots_beta <- function(x) {profile_like_beta(x) - threshold_beta}
+    plot_limits_beta <- function(x) {profile_like_beta(x) - plot_threshold_beta}
+
+    upper_bound_beta <- uniroot(
+      profile_roots_beta,
+      interval = c(vals_beta[which.max(tmp_df_beta$logLik)], max(vals_beta))
+    )$root
+
+    max_x_beta <- uniroot(
+      plot_limits_beta,
+      interval = c(0, 7e-06^(1/5))
+    )$root
+
+    gg_tmp_beta <- ggplot() +
+      geom_point(
+        data = tmp_df_beta %>% filter(prof_var == p) %>% filter(Beta <= max_x_beta^5),
+        aes(x = Beta^(1/5), y = logLik)
+      ) +
+      geom_function(fun = profile_like_beta) +
+      # geom_function(fun = function(x) profile_like_beta(x^(1/5))) +
+      # geom_vline(xintercept = upper_bound_beta^5, linetype = 'dashed') +
+      geom_vline(xintercept = upper_bound_beta, linetype = 'dashed') +
+      geom_vline(xintercept = 0, col = 'blue') +
+      labs(y = 'Log-Likelihood', title = my_lab) +
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      scale_y_continuous(limits = c(max_profile_beta-6, max_profile_beta)) +
+      # scale_x_continuous(limits = c(0, max_x_beta^5)) +
+      scale_x_continuous(limits = c(0, max_x_beta)) +
+      theme(
+        axis.title.x = element_blank(),
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+
+    h2_plots_lb['Beta'] <- 0
+    h2_plots_ub['Beta'] <- upper_bound_beta^5
+
+    if (i %in% c(1, 4)) {
+      h2_plots[['beta']] <- gg_tmp_beta
+    } else {
+      h2_plots[['beta']] <- gg_tmp_beta + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+
+  } else if (p == 'sigma') {
+    tmp_df_sigma <- h2_profiles %>%
+      filter(prof_var == 'sigma') %>%
+      # filter(logLik >= -21965) %>%
+      arrange(p)
+
+    vals_sigma <- tmp_df_sigma[, 'sigma']^(1/5)
+
+    profile_like_sigma <- splinefun(x = vals_sigma, y = tmp_df_sigma[, 'logLik'])
+    # max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    max_profile_sigma <- max(h2_profiles$logLik)
+    threshold_sigma <- max_profile_sigma - 1.92
+    plot_threshold_sigma <- max_profile_sigma - 6
+    profile_roots_sigma <- function(x) {profile_like_sigma(x) - threshold_sigma}
+    plot_limits_sigma <- function(x) {profile_like_sigma(x) - plot_threshold_sigma}
+
+    upper_bound_sigma <- uniroot(
+      profile_roots_sigma,
+      interval = c(vals_sigma[which.max(tmp_df_sigma$logLik)], max(vals_sigma))
+    )$root
+
+    max_x_sigma <- uniroot(
+      plot_limits_sigma,
+      interval = c(0, 0.0022^(1/5))
+    )$root
+
+    gg_tmp_sigma <- ggplot() +
+      geom_point(
+        data = tmp_df_sigma %>% filter(prof_var == 'sigma') %>% filter(sigma <= max_x_sigma^5),
+        aes(x = sigma^{1/5}, y = logLik)
+      ) +
+      # geom_function(fun = function(x) profile_like_sigma(x^(1/5))) +
+      # geom_vline(xintercept = upper_bound_sigma^5, linetype = 'dashed') +
+      geom_function(fun = profile_like_sigma) +
+      geom_vline(xintercept = upper_bound_sigma, linetype = 'dashed') +
+      geom_vline(xintercept = 0, col = 'blue') +
+      labs(y = 'Log-Likelihood', title = my_lab) +
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      scale_y_continuous(limits = c(max_profile_sigma-6, max_profile_sigma)) +
+      # scale_x_continuous(limits = c(0, max_x_sigma^5)) +
+      scale_x_continuous(limits = c(0, max_x_sigma)) +
+      theme(
+        axis.title.x = element_blank(),
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+
+    h2_plots_lb['sigma'] <- 0
+    h2_plots_ub['sigma'] <- upper_bound_sigma^5
+
+    if (i %in% c(1, 4)) {
+      h2_plots[['sigma']] <- gg_tmp_sigma
+    } else {
+      h2_plots[['sigma']] <- gg_tmp_sigma + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+
+  } else if (p == 'Mu') {
+
+    tmp_df <- h2_profiles %>%
+      filter(prof_var == p) %>%
+      # filter(logLik >= -21957.26 - 4) %>%
+      arrange(p)
+
+    vals <- tmp_df[, p]
+
+    profile_like <- splinefun(x = tmp_df[, p], y = tmp_df[, 'logLik'])
+    max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    threshold <- max_profile$objective - 1.92
+    plot_threshold <- max_profile$objective - 6
+    profile_roots <- function(x) {profile_like(x) - threshold}
+    plot_limits <- function(x) {profile_like(x) - plot_threshold}
+
+    lower_bound <- uniroot(
+      profile_roots,
+      interval = c(min(vals), max_profile$maximum)
+    )$root
+
+    upper_bound <- uniroot(
+      profile_roots,
+      interval = c(vals[which.max(tmp_df$logLik)], max(vals))
+    )$root
+
+    add_piece <- c(
+      'Mu' = 3000, 'BetaW' = 0.3, 'phase' = 0.2, v = 0.5
+    )
+
+    max_x <- uniroot(
+      plot_limits,
+      interval = c(max_profile$maximum, max(vals) + add_piece[p])
+    )$root
+
+    min_x <- uniroot(
+      plot_limits,
+      interval = c(min(vals) - add_piece[p], max_profile$maximum)
+    )$root
+
+    h2_plots_lb[p] <- lower_bound
+    h2_plots_ub[p] <- upper_bound
+
+    gg_tmp <- ggplot() +
+      geom_point(
+        data = h2_profiles %>%
+          filter(prof_var == p) %>%
+          filter(.data[[p]] <= max_x & .data[[p]] >= min_x) ,
+        aes(x = .data[[p]] / 52, y = logLik)
+      ) +
+      geom_function(fun = profile_like) +
+      geom_vline(xintercept = lower_bound / 52, linetype = 'dashed') +
+      geom_vline(xintercept = upper_bound / 52, linetype = 'dashed') +
+      geom_vline(xintercept = max_profile$maximum / 52, col = 'blue') +
+      labs(y = 'Log-Likelihood', title = my_lab) +
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      # scale_y_continuous(limits = c(-21963, -21957)) +
+      scale_y_continuous(limits = c(max(h2_profiles$logLik)-6, max(h2_profiles$logLik))) +
+      scale_x_continuous(limits = c(min_x/52, max_x/52)) +
+      theme(
+        axis.title.x = element_blank(),
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+
+    if (i %in% c(1, 4)) {
+      h2_plots[[p]] <- gg_tmp
+    } else {
+      h2_plots[[p]] <- gg_tmp + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+  } else {
+    tmp_df <- h2_profiles %>%
+      filter(prof_var == p) %>%
+      # filter(logLik >= -21957.26 - 4) %>%
+      arrange(p)
+
+    vals <- tmp_df[, p]
+
+    profile_like <- splinefun(x = tmp_df[, p], y = tmp_df[, 'logLik'])
+    max_profile <- optimize(profile_like, interval = range(vals), maximum = TRUE)
+    threshold <- max_profile$objective - 1.92
+    plot_threshold <- max_profile$objective - 6
+    profile_roots <- function(x) {profile_like(x) - threshold}
+    plot_limits <- function(x) {profile_like(x) - plot_threshold}
+
+    lower_bound <- uniroot(
+      profile_roots,
+      interval = c(min(vals), max_profile$maximum)
+    )$root
+
+    upper_bound <- uniroot(
+      profile_roots,
+      interval = c(vals[which.max(tmp_df$logLik)], max(vals))
+    )$root
+
+    add_piece <- c(
+      'Mu' = 3000, 'BetaW' = 0.3, 'phase' = 0.2, v = 0.5
+    )
+
+    max_x <- uniroot(
+      plot_limits,
+      interval = c(max_profile$maximum, max(vals) + add_piece[p])
+    )$root
+
+    min_x <- uniroot(
+      plot_limits,
+      interval = c(min(vals) - add_piece[p], max_profile$maximum)
+    )$root
+
+    h2_plots_lb[p] <- lower_bound
+    h2_plots_ub[p] <- upper_bound
+
+    gg_tmp <- ggplot() +
+      geom_point(
+        data = h2_profiles %>%
+          filter(prof_var == p) %>%
+          filter(.data[[p]] <= max_x & .data[[p]] >= min_x) ,
+        aes(x = .data[[p]], y = logLik)
+      ) +
+      geom_function(fun = profile_like) +
+      geom_vline(xintercept = lower_bound, linetype = 'dashed') +
+      geom_vline(xintercept = upper_bound, linetype = 'dashed') +
+      geom_vline(xintercept = max_profile$maximum, col = 'blue') +
+      labs(y = 'Log-Likelihood', title = my_lab) +
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 10)
+      ) +
+      theme_bw() +
+      # scale_y_continuous(limits = c(-21963, -21957)) +
+      scale_y_continuous(limits = c(max(h2_profiles$logLik)-6, max(h2_profiles$logLik))) +
+      scale_x_continuous(limits = c(min_x, max_x)) +
+      theme(
+        axis.title.x = element_blank(),
+        plot.title = element_text(
+          hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+        axis.title.y = element_text(size = 8),
+        axis.text.y = element_text(size = 7),
+        axis.text.x = element_text(size = 6.5),
+        plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+      )
+
+    if (i %in% c(1, 4)) {
+      h2_plots[[p]] <- gg_tmp
+    } else {
+      h2_plots[[p]] <- gg_tmp + theme(
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()
+      )
+    }
+  }
+}
+@
+
+\begin{figure}[ht]
+<<m2Profs, fig.height=3, fig.width=5, echo=FALSE, warning=FALSE, message=FALSE>>=
+cowplot::plot_grid(
+  plotlist = h2_plots, ncol = 3,
+  align = 'h',
+  rel_widths = c(1.15, 1, 1)
+)
+@
+\caption[MCAP confidence intervals for Model 2 parameters.]{\label{fig:m2Profs}MCAP confidence intervals for Model 2 parameters. The vertical blue line indicates the MLE.}
+\end{figure}
+
+\begin{table}[!h]
+\centering
+\caption[Model~2 parameter estimates and confidence intervals.]{\label{tab:mod2CI}Model~2 parameter estimates and their corresponding confidence intervals, obtained via profile likelihood.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
+\\
+\hline
+\hline
+
+ Human to water shedding {\small (wk\textsuperscript{-1})} & $\Wshed$ & $\Sexpr{myround(h2_mles['Mu']/52, 1)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['Mu']/52, 1)}, \Sexpr{myround(h2_plots_ub['Mu']/52, 1)})$
+\\
+\hline
+
+ Water to Human Infection {\small (yr\textsuperscript{-1})} & $\beta_W$ & $\Sexpr{myround(h2_mles['BetaW'], 3)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['BetaW'], 3)}, \Sexpr{myround(h2_plots_ub['BetaW'], 3)})$
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion$ & $\Sexpr{myround(h2_mles['v'], 3)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['v'], 3)}, \Sexpr{myround(h2_plots_ub['v'], 3)})$
+\\
+\hline
+
+ Seasonality & $\phaseParm$ & $\Sexpr{myround(h2_mles['phase'], 3)}$
+   &
+  $(\Sexpr{myround(h2_plots_lb['phase'], 3)}, \Sexpr{myround(h2_plots_ub['phase'], 3)})$
+\\
+\hline
+
+Human to Human Infection {\small (yr\textsuperscript{-1})} & $\transmission$ & $\Sexpr{signif(h2_mles['Beta'], 3)}$\textsuperscript{*}
+   &
+  $[0, \Sexpr{signif(h2_plots_ub['Beta'], 3)})$
+\\
+\hline
+
+Immunity {\small (yr)} & $\muRS^{-1}$ & $\Sexpr{signif(1/h2_mles['sigma'], 3)}$\textsuperscript{*}
+   &
+  $(\Sexpr{signif(1/h2_plots_ub['sigma'], 3)}, \inf)$
+\\
+\hline
+
+\end{tabular}
+\begin{flushleft}
+\textsuperscript{*}As evident in Figure~\ref{fig:m2Profs}, the true MLE for these parameters is $0$ and $\infty$, respectively; this value could not be obtained numerically due to the parameter transformation applied to the parameter for the model fitting processes.
+\end{flushleft}
+\end{table}
+
+\subsection{Model~3 parameters}
+
+Parameter estimates for Model~3, along with the MCAP confidence intervals for the estimate, are given in Table~\ref{tab:mod3CI}.
+Figure~\ref{fig:m3Profs} displays the Monte Carlo evaluations of the profile likelihood values, obtained using a particle filter.
+The total computational burden of this profile likelihood search was 28938 hours, which was computed in parallel using 7568 separate jobs via the \texttt{batchtools} R package \cite{batchtools}.
+
+<<Load Model 3 Profiles, include=FALSE, message=FALSE, echo=FALSE>>=
+H3_profiles1 <- readRDS(paste0(root, 'data/h3_profiles.rds')) %>%
+  filter(prof_var == 'std_W')
+H3_profiles2 <- readRDS(paste0(root, "data/h3_profiles2.rds"))
+H3_profiles3 <- readRDS(paste0(root, "data/h3_profiles3.rds"))
+
+H3_MLE_evals <- readRDS(paste0(root, '../../chapters/haiti/data/model3/h3_MLE_eval.rds'))
+
+H3_profiles <- bind_rows(H3_profiles1, H3_profiles2, H3_profiles3)
+
+prof_params <- unique(H3_profiles$prof_var)
+
+H3_profiles_long <- H3_profiles %>%
+  select(prof_var, logLik, logLik_se, all_of(paste0(prof_params, '1'))) %>%
+  rename_with(~ sub("1$", "", .x)) %>%
+  mutate(mu_B = mu_B / 52) %>%
+  mutate(thetaI = thetaI / 52) %>%
+  mutate(std_W =  std_W * sqrt(52)) %>%
+  select(-epsilon, -XthetaA) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 1)
+
+H3_remaining_long <- H3_profiles %>%
+  select(prof_var, logLik, logLik_se, epsilon1, XthetaA1) %>%
+  rename(epsilon = epsilon1, XthetaA = XthetaA1) %>%
+  mutate(XthetaA = sqrt(XthetaA)) %>%
+  mutate(epsilon = epsilon^2) %>%
+  # mutate(std_W =  std_W * sqrt(52)) %>%
+  pivot_longer(
+    cols = -c(prof_var, logLik, logLik_se),
+    names_to = 'variable',
+    values_to = 'value'
+  ) %>%
+  filter(variable == prof_var) %>%
+  group_by(prof_var, value) %>%
+  slice_max(order_by = logLik, n = 2)
+
+H3_profiles_long <- bind_rows(
+  H3_profiles_long, H3_remaining_long
+)
+@
+
+<<Create Confidence intervals>>=
+all_mcaps <- list()
+all_ci <- list()
+for (p in prof_params) {
+
+  mcap_tmp <- mcap(
+    logLik = H3_profiles_long %>% filter(prof_var == p) %>% pull(logLik),
+    parameter = H3_profiles_long %>% filter(prof_var == p) %>% pull(value),
+    span = case_when(
+      p == 'r' ~ 1,
+      p == 'XthetaA' ~ 0.7,
+      TRUE ~ 0.75
+    )
+  )
+
+  all_mcaps[[p]] <- mcap_tmp
+  tmp_ci <- mcap_tmp$ci
+  names(tmp_ci) <- c("lower", "upper")
+
+  all_ci[[p]] <- c(tmp_ci, 'mle' = mcap_tmp$mle)
+}
+
+all_mcaps <- purrr::map_df(
+  prof_params,
+  function(x) all_mcaps[[x]]$fit %>% mutate(prof_var = x)
+)
+
+all_ci <- all_ci |> as.data.frame() |> t() |> as.data.frame()
+all_ci$prof_var <- rownames(all_ci)
+
+# Transform epsilong (rho) to natural scale
+all_ci <- all_ci %>%
+  mutate(
+    lower = case_when(
+      prof_var == 'epsilon' ~ sqrt(lower),
+      # prof_var == 'XthetaA' ~ lower^2,
+      TRUE ~ lower
+    ),
+    upper = case_when(
+      prof_var == 'epsilon' ~ sqrt(upper),
+      # prof_var == 'XthetaA' ~ upper^2,
+      TRUE ~ upper
+    ),
+    mle = case_when(
+      prof_var == 'epsilon' ~ sqrt(mle),
+      # prof_var == 'XthetaA' ~ mle^2,
+      TRUE ~ mle
+    )
+  )
+
+all_mcaps <- all_mcaps %>%
+  mutate(
+    parameter = case_when(
+      prof_var == 'epsilon' ~ sqrt(parameter),
+      # prof_var == 'XthetaA' ~ parameter^2,
+      TRUE ~ parameter
+      )
+  )
+
+H3_profiles_long <- H3_profiles_long %>%
+  mutate(
+    value = case_when(
+      prof_var == 'epsilon'~ sqrt(value),
+      # prof_var == 'XthetaA' ~ value^2,
+      TRUE ~ value
+    )
+  )
+
+# This chunk of code returns the MLE for model 3
+h3_mles <- H3_MLE_evals %>%
+  slice_max(order_by = logLik, n = 1) %>%
+  select(logLik, all_of(paste0(prof_params, '1'))) %>%
+  rename_with(~ sub("1$", "", .x)) %>%
+  mutate(XthetaA = sqrt(XthetaA)) %>%
+  pivot_longer(
+    cols = -c(logLik),
+    names_to = 'prof_var',
+    values_to = 'value'
+  )
+@
+
+\begin{figure}[ht]
+<<m3Profs, fig.height=4.6, fig.width=5.8, echo=FALSE, warning=FALSE, message=FALSE>>=
+h3_plots <- list()
+for (i in 1:length(prof_params)) {
+  p = prof_params[i]
+  if (p == 'mu_B') {
+    my_lab <- TeX('$\\delta_W$')
+  } else if (p == 'XthetaA') {
+    my_lab <- TeX('$\\sqrt{\\epsilon_W}$')
+  } else if (p == 'thetaI') {
+    my_lab <- TeX('$\\mu_W$')
+  } else if (p == 'lambdaR') {
+    my_lab <- TeX('$a$')
+  } else if (p == 'r') {
+    my_lab <- TeX('$r$')
+  } else if (p == 'std_W') {
+    my_lab <- TeX('$\\sigma_{proc}$')
+  } else if (p == 'epsilon') {
+    my_lab <- TeX('$\\rho$')
+  } else if (p == 'k') {
+    my_lab <- TeX('$\\psi$')
+  }
+
+  gg_tmp <- ggplot() +
+    geom_point(
+      data = H3_profiles_long %>% filter(prof_var == p),
+      aes(x = value, y = logLik)
+    ) +
+    geom_line(
+      data = all_mcaps %>% filter(prof_var == p),
+      aes(x = parameter, y = smoothed),
+      col = 'blue'
+    ) +
+    # geom_line(data = all_mcaps, aes(x = parameter, y = quadratic), col = 'red') +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p),
+      aes(xintercept = lower), linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p),
+      aes(xintercept = upper),
+      linetype = 'dashed'
+    ) +
+    geom_vline(
+      data = all_ci %>% filter(prof_var == p),
+      aes(xintercept = mle), col = 'blue'
+    ) +
+    # This commented out code below will plot the MLE along with the confidence
+    # intervals for the given parameter.
+    # geom_point(
+    #   data = h3_mles %>% filter(prof_var == p),
+    #   aes(x = value, y = logLik), col = 'red'
+    # ) +
+    labs(y = 'Log-Likelihood', title = my_lab) +
+    theme(
+      axis.text = element_text(size = 8),
+      axis.title = element_text(size = 10)
+    ) +
+    theme_bw() +
+    scale_y_continuous(limits = c(-17450, max(H3_profiles$logLik))) +
+    # scale_y_continuous(limits = c(-17450, max(H3_MLE_evals$logLik))) +
+    theme(
+      axis.title.x = element_blank(),
+      plot.title = element_text(
+        hjust = 0.5, size = 8, margin = margin(t = 0, unit = "pt")
+        ),
+      axis.title.y = element_text(size = 8),
+      axis.text.y = element_text(size = 7),
+      axis.text.x = element_text(size = 6.5),
+      plot.margin = margin(5.5, 3, 0, -1, unit = 'pt')
+    ) +
+    theme(legend.position = 'none')
+
+  if (i %in% seq(1, 9, 3)) {
+    h3_plots[[i]] <- gg_tmp
+  } else {
+    h3_plots[[i]] <- gg_tmp + theme(
+      axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+      axis.title.y = element_blank()
+      )
+  }
+}
+
+cowplot::plot_grid(
+  plotlist = h3_plots,
+  align = 'h', ncol = 3,
+  rel_widths = c(1.25, 1, 1, 1)
+)
+@
+\caption[MCAP confidence intervals for Model 3 parameters.]{\label{fig:m3Profs}MCAP confidence intervals for Model 3 parameters. The vertical blue line indicates the smoothed MLE.}
+\end{figure}
+
+\begin{table}[!h]
+\centering
+\caption[Model~3 parameter estimates and confidence intervals.]{\label{tab:mod3CI}Model~3 parameter estimates and their corresponding confidence intervals, obtained via the MCAP algorithm.}
+\vspace{2mm}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
+\\
+\hline
+\hline
+
+ Process Noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'std_W') %>% pull(value)) * sqrt(52), 3)}$
+   &
+  $(\Sexpr{myround((all_ci %>% filter(prof_var == 'std_W') %>% pull(lower)), 3)}, \Sexpr{myround((all_ci %>% filter(prof_var == 'std_W') %>% pull(upper)), 3)})$
+\\
+\hline
+
+ Water Survival {\small (wk)} & $\Wremoval^{-1}$ & $\Sexpr{myround(52 / (h3_mles %>% filter(prof_var == 'mu_B') %>% pull(value)), 3)}$
+   &
+  $(\Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(upper)), 3)}, \Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(lower)), 3)})$
+\\
+\hline
+
+ Human to Water Shedding {\small $\frac{\mathrm{km^2}}{\mathrm{wk}}$} & $\Wshed$ & $\Sexpr{signif((h3_mles %>% filter(prof_var == 'thetaI') %>% pull(value))/52, 3)}$
+   &
+  $(\Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(lower), 3)}, \Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Asymptomatic Shedding & $\asymptomRelativeShed$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'XthetaA') %>% pull(value))^2, 3)}$
+   &
+  $(\Sexpr{myround((all_ci %>% filter(prof_var == 'XthetaA') %>% pull(lower))^2, 1)}, \Sexpr{myround((all_ci %>% filter(prof_var == 'XthetaA') %>% pull(upper))^2, 3)})$
+\\
+\hline
+
+ Seasonality & $\seasAmplitude$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'lambdaR') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'lambdaR') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'lambdaR') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Seasonality & $\rainfallExponent$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'r') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'r') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'r') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Reporting Rate & $\reportRate$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'epsilon') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'epsilon') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'epsilon') %>% pull(upper), 3)})$
+\\
+\hline
+
+ Observation Variance & $\obsOverdispersion$ & $\Sexpr{myround(h3_mles %>% filter(prof_var == 'k') %>% pull(value), 3)}$
+   &
+  $(\Sexpr{myround(all_ci %>% filter(prof_var == 'k') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'k') %>% pull(upper), 3)})$
+\\
+\hline
+
+\end{tabular}
+\end{table}
+
+\section{Replication of Lee et al.~(2020) results}\label{sec:appendix_haiti_lee20}
+
+In this article we claimed that we were able to obtain better fits to the observed data using the same models that were proposed by \citet{lee20}.
+Along with visual comparisons to the data, this claim was supported by comparing likelihoods and AIC values in Table~2 in the manuscript.
+Because model likelihoods were not provided by \citet{lee20}, it is necessary to replicate these models in order to obtain likelihood estimates.
+Here we would like to thank the authors of \citet{lee20}, who provided detailed descriptions of their models, which enabled us to build on their work.
+In the following subsections, we use our \code{R} package \code{haitipkg} to reproduce some of the results of \citet{lee20}.
+This reproduction allows us to estimate the likelihoods of the \citet{lee20} version of Models~1--3, and also provides a demonstration of the importance and usefulness of reproducible research.
+
+\subsection{Model~1 Replication}
+
+The model was implemented by a team at Johns Hopkins Bloomberg School of Public Health (hereafter referred to as the Model~1 authors) in the \code{R} programming language using the \code{pomp} package \citep{king16}.
+Original source code is publicly available with DOI: 10.5281/zenodo.3360991.
+The final results reported by the Model~1 authors were obtained by using several different parameter sets rather than a single point estimate.
+According to the supplement materials, this was because model realizations from a single parameter set retained substantial variability, but multiple realizations from a collection of parameter sets resulted in a reasonable visual fit to the data.
+We are also inclined to believe that the use of multiple parameter values was in part intended to account for parameter uncertainty---the importance of which was discussed in the main text---an effort by the Model~1 authors that we applaud.
+Simulations from each of the parameter sets, however, were treated with equal importance when being used to diagnose the model fit and make inference on the system.
+This is problematic given Figures S8 and S9 of the supplement material, which suggest that some parameter sets that were used for inference may have been several hundred units of log-likelihood lower than other parameter sets that were simultaneously used to make forecasts.
+Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, resulting in the equal use of statistically inferior parameter sets in order to make forecasts and conduct inference on the system.
+
+To fully reproduce the results of the Model~1 authors, it is necessary to use the exact same set of model parameters that were originally used to obtain the results presented by \citet{lee20}.
+Because these parameter sets were not made publicly available, we relied on the source code provided by the Model~1 authors to approximately recreate the parameter set.
+Due to software updates since the publication of the source code, we were unable to produce the exact same set of parameters.
+Running the publicly available source code, however, resulted in a set of parameters that are visually similar to those used by the Model~1 authors (See Figures~\ref{fig:PlotEpiDist} and \ref{fig:plotEndParams}).
+Furthermore, simulations using the set of parameters produced by the source code appear practically equivalent to those displayed by \citet{lee20} (See Figure~\ref{fig:plotMod1Sims}).
+
+<<Simulate Lee Model 1, echo=FALSE, cache=TRUE>>=
+h1_epi <- haiti1()
+N_LEE_SIMS <- 20
+
+registerDoRNG(18599687)
+foreach(
+  i = 1:length(h1LeeStartsEpi),
+  .combine = rbind
+) %dopar% {
+  guess <- h1LeeStartsEpi[i, ]
+  sims <- simulate(h1_epi, nsim = N_LEE_SIMS, format = 'data.frame',
+                   params = guess)  # 20 sims for each set of parameters
+  sims$param_set <- i
+  sims %>%
+    dplyr::select(.id, week, cases, param_set)
+} -> all_sims
+@
+
+\begin{figure}[!h]
+<<PlotEpiDist, echo=FALSE, fig.width=7, fig.height=7, fig.align='center',message=FALSE,warning=FALSE>>=
+GGally::ggpairs(
+  h1LeeStartsEpi,
+  columns = c("rho", "tau", "beta1", "nu", "loglik")
+)
+@
+\caption[Replicating Model 1 epidemic phase parameter distributions]{\label{fig:PlotEpiDist}
+Bivariate distributions of parameter estimates after fitting epidemic phase of the Model~1 following the procedure described by \citet{lee20}. Compare to Figure S8 in the supplement of \citet{lee20}.
+}
+\end{figure}
+
+<<SimulateEpi, echo=FALSE, include=FALSE, message=FALSE, cache=FALSE>>=
+h1_end <- haiti1(period = "endemic")
+
+true_agg_cases <- haitiCholera %>%
+  select(-report) %>%
+  pivot_longer(
+    data = .,
+    cols = -date_saturday,
+    values_to = 'cases',
+    names_to = 'dep'
+  ) %>%
+  mutate(
+    date = as.Date(date_saturday),
+    dep = gsub("\\.", "_", dep)
+  ) %>%
+  mutate(
+    dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
+  ) %>%
+  tidyr::pivot_wider(
+    data = .,
+    id_cols = c(date),
+    names_from = dep,
+    values_from = cases,
+    names_prefix = 'cases_'
+  ) %>%
+  mutate(
+    ReportedAll = cases_Artibonite + cases_Centre +
+      cases_Grande_Anse + cases_Nippes + cases_Nord +
+      cases_Nord_Est + cases_Ouest + cases_Sud +
+      cases_Sud_Est + cases_Nord_Ouest
+  )
+@
+
+<<FitEnd, echo=FALSE, message=FALSE, include=FALSE>>=
+foreach(
+  i = 1:nrow(h1LeeStartsEnd),
+  .combine = rbind
+) %dopar% {
+  r_params <- h1LeeStartsEnd[i, ][names(coef(h1_end))]
+  coef(h1_end) <- r_params
+
+  sims <- simulate(
+    h1_end, nsim = N_LEE_SIMS,
+    format = 'data.frame',
+    params = r_params
+  )
+  sims$param_set <- i
+  sims %>%
+    dplyr::select(.id, week, cases, param_set)
+} -> end_sims
+
+@
+
+\begin{figure}[!h]
+<<plotEndParams, fig.width=7, fig.height=7, fig.align='center', cache=FALSE, echo=FALSE,warning=FALSE>>=
+GGally::ggpairs(
+  h1LeeStartsEnd,
+  columns = c("rho", "tau", "beta1", "nu", "loglik")
+)
+@
+\caption[Replicating Model 1 endemic phase parameter distributions]{\label{fig:plotEndParams}
+Bivariate distributions of parameter estimates after fitting endemic phase of the Model~1 following the procedure described by \citet{lee20}. Compare to Figure~S9 in the supplement of \citet{lee20}.
+}
+\end{figure}
+
+<<calcMod1LeeLikes, echo=FALSE, include=FALSE, message=FALSE>>=
+h1_epi_evals <- readRDS("../../chapters/haiti/data/model1/lee1_epi_evals.rds")
+h1_end_evals <- readRDS("../../chapters/haiti/data/model1/lee1_end_evals.rds")
+
+mod1_all_likes <- dplyr::inner_join(
+  x = h1_epi_evals,
+  y = h1_end_evals,
+  by = "parid"
+  ) %>%
+  dplyr::mutate(
+    joint_ll = pfLL.x + pfLL.y
+  )
+
+# Approximate the likelihood of the Lee et al (2020) version of Model 1 by
+# using the parameter sets that resulted in the maximum likelihood.
+mod1_lee_ll <- max(mod1_all_likes$joint_ll, na.rm = TRUE)
+@
+
+\begin{figure}[!h]
+<<plotMod1Sims, echo=FALSE, cache=FALSE, fig.width=6.5, fig.height=3.75,warning=FALSE>>=
+
+quants <- all_sims %>%
+  filter(!param_set %in% c(1, 2)) %>%  # Remove parameter sets inconsistent with Lee et al (2020).
+  group_by(week) %>%
+  summarize(
+    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+quants_end <- end_sims %>%
+  group_by(week) %>%
+  summarize(
+    q025 = quantile(cases, probs = 0.025, na.rm = TRUE),
+    q50  = quantile(cases, probs = 0.500, na.rm = TRUE),
+    q975 = quantile(cases, probs = 0.975, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(date = lubridate::ymd("2010-10-16") + lubridate::weeks(week))
+
+ggplot() +
+  geom_point(data = true_agg_cases, aes(x = date, y = ReportedAll)) +
+  geom_line(data = quants, aes(x = date, y = q50), col = '#0b8a2b', linewidth = 1) +
+  geom_ribbon(
+    data = quants,
+    aes(x = date, ymin = q025, ymax = q975),
+    alpha = 0.5, fill = '#0b9c30'
+  ) +
+  geom_line(data = quants_end, aes(x = date, y = q50), col = '#882871') +
+  geom_ribbon(data = quants_end, aes(x = date, ymin = q025, ymax = q975), alpha = 0.5, fill = '#882871') +
+  ylab("Reported, Symptomatic Incidence") +
+  scale_x_date(date_breaks = "1 year") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(hjust = 1, angle = 45))
+@
+\caption[Simulations from replicated Model 1]{\label{fig:plotMod1Sims}
+Simulations from Model~1 using parameter sets that were generated by running source code provided by \citet{lee20}. Compare to Figure~S7 in the supplement of \citet{lee20}. The upper bound for the likelihood of this model is \Sexpr{round(mod1_lee_ll)}.
+}
+\end{figure}
+
+Because the model forecasts provided by \citet{lee20} come from various sets of parameters---which each correspond to a unique log-likelihood value---it is not obvious how one would obtain an estimate for the log-likelihood of the model that was used for simulations by the Model~1 authors.
+One approach could be to calculate the logarithm of the weighted mean of the likelihoods for each parameter sets used to obtain the forecasts, where the weights are proportional to the number of times the parameter set was used.
+However, in an effort to not underestimate the likelihood of the model of the Model~1 authors, we report the estimated log-likelihood as the log-likelihood value corresponding to the parameter set with the largest likelihood value, even though the majority of simulations were obtained using parameter sets with lower likelihood values.
+In this sense, we consider the log-likelihood reported in Table~1 of the main text to be an upper-bound of the log-likelihood of the model used by \citet{lee20}.
+For each parameter set, the log-likelihood was estimated using a particle filter, implemented as the \texttt{pfilter} function in the \texttt{pomp} package.
+
+\subsection{Model~2 Replication}\label{sec:mod2rep}
+
+Model~2 was developed by a team that consisted of members from the Fred Hutchinson Cancer Research Center and the University of Florida (hereafter referred to as the Model~2 authors).
+While Model~2 is the only deterministic model we considered in our analysis, it contains perhaps the most complex descriptions of cholera in Haiti: Model~2 accounts for movement between spatial units; human-to-human and environment-to-human cholera infections; and transfer of water between spatial units based on elevation charts and river flows.
+
+The source code that the Model~2 authors used to generate their results was written in the \code{Python} programming language, and is publicly available at \url{10.5281/zenodo.3360857} and its accompanying GitHub repository \url{https://github.com/lulelita/HaitiCholeraMultiModelingProject}.
+In order to perform our analysis in a unified framework, we re-implemented this model in the \code{R} programming language using the \code{spatPomp} package \citep{asfaw24}, which facilitates the creation of meta-population models.
+We note that the travel and water matrices used to implement the complex dynamics in Model~2 are not available in either the Zenodo archive or the GitHub repository;
+instead, we obtained these matrices via personal correspondence with the Model~2 authors.
+Using these matrices, and the point estimates for model parameters provided by \citet{lee20}, we created trajectories of the cholera dynamics and compared this to available data.
+These trajectories, shown in Figure~\ref{fig:mod2rep}, are very similar to the trajectories shown in Figure~S15 of the supplement of \citet{lee20}.
+
+<<Model2Replication, cache=FALSE, echo=FALSE>>=
+h2_epi <- haiti2()
+h2_end <- haiti2(region = 'after')
+
+h2_epi_traj <- trajectory(h2_epi, format = 'data.frame')
+h2_end_traj <- trajectory(h2_end, format = 'data.frame')
+
+h2_epi_traj$Ctotal <- rowSums(h2_epi_traj[, paste0("C", 1:10)]) * 0.2
+h2_end_traj$Ctotal <- rowSums(h2_end_traj[, paste0("C", 1:10)]) * 0.2
+
+dep_plot_df <- haitipkg::haitiCholera %>%
+  select(-report) %>%
+  tidyr::pivot_longer(
+    data = .,
+    cols = -date_saturday,
+    values_to = 'cases',
+    names_to = 'dep'
+  ) %>%
+  mutate(
+    date = as.Date(date_saturday),
+    dep = gsub("\\.", "_", dep)
+  ) %>%
+  mutate(
+    dep = case_when(dep == "Grand_Anse" ~ "Grande_Anse", TRUE ~ dep)
+  )
+
+true_agg_cases <- dep_plot_df %>%
+  tidyr::pivot_wider(
+    data = .,
+    id_cols = c(date),
+    names_from = dep,
+    values_from = cases,
+    names_prefix = 'cases_'
+  ) %>%
+  mutate(
+    ReportedAll = cases_Artibonite + cases_Centre +
+      cases_Grande_Anse + cases_Nippes + cases_Nord +
+      cases_Nord_Est + cases_Ouest + cases_Sud +
+      cases_Sud_Est + cases_Nord_Ouest
+  ) %>%
+  select(date, ReportedAll)
+
+h2_epi_traj$date <- as.Date(
+  lubridate::round_date(
+    lubridate::date_decimal(h2_epi_traj$year),
+    unit = 'day'
+  )
+)
+
+h2_end_traj$date <- as.Date(
+  lubridate::round_date(
+    lubridate::date_decimal(h2_end_traj$year),
+    unit = 'day'
+  )
+)
+
+all_traj <- bind_rows(
+  select(h2_epi_traj, date, Ctotal),
+  select(h2_end_traj, date, Ctotal)
+)
+
+projections <- left_join(
+  x = true_agg_cases,
+  y = all_traj,
+  by = 'date'
+)
+@
+
+
+\begin{figure}[!h]
+<<plotModel2Rep, cache=FALSE, echo=FALSE, fig.width=6.5, fig.height=4.5>>=
+gg_epi <- projections %>%
+  filter(date < as.Date("03-01-2014", format = '%m-%d-%Y')) %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = ReportedAll), col = 'black', linetype = 'dashed') +
+  geom_line(aes(y = Ctotal), col = 'red', linewidth = 1) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 30000), breaks = seq(0, 30000, 5000)) +
+  theme(axis.title.x = element_blank()) +
+  ylab("Reported number of cases")
+
+gg_end <- projections %>%
+  filter(date >= as.Date("03-01-2014", format = '%m-%d-%Y')) %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = ReportedAll), col = 'black', linetype = 'dashed') +
+  geom_line(aes(y = Ctotal), col = 'red', linewidth = 1) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 7000), breaks = seq(0, 7000, 1000)) +
+  theme(axis.title.x = element_blank()) +
+  ylab("Reported number of cases") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y")
+
+cowplot::plot_grid(gg_epi, gg_end, ncol = 1)
+@
+\caption[Model~2 trajectories.]{\label{fig:mod2rep}
+Model 2 trajectories using the \code{haitipkg}. Compare to Figure S15 in the supplement of \citet{lee20}.
+}
+\end{figure}
+
+There are minor differences between Figure~\ref{fig:mod2rep} and Figure~S15 of \citet{lee20}.
+While the discrepancy appears minor, the deterministic nature of Model~2 implies that an exact replication of model trajectories should be possible.
+In this case, these discrepancies may possibly be attributed to implementing the model and plotting the model trajectory in two different programming languages.
+Another potential explanation for the discrepancy is that the parameters that we used are only approximately the same as those used by \citet{lee20}.
+For example, the parameters $\transmission$, $\Wbeta{}$ had reported values of $9.9 \times 10^{-7}$ and $4.03 \times 10^{-2}$, respectively (Table~S13 of the supplement material of \citet{lee20}), but were actually fit to data and therefore likely these values have been rounded.
+Additionally, our implementation of Model~2 used a time scale of years and many of the parameters were reported on a weekly scale, so small differences may result due to unit conversions.
+The collective effect of these small differences in model parameters likely will result in small differences in model trajectories.
+
+Some additional concerns about being able to accurately replicate the results of \citet{lee20} are valid.
+Details about the measurement models and how latent states were initialized for the epidemic model were not provided by \citet{lee20} and therefore these details must be inferred by looking at the provided source code.
+According to repository comments, the files \code{fit\allowbreak In\allowbreak Pieces\allowbreak 3params\allowbreak Clean\allowbreak May2019\allowbreak Public.py} and \code{fit\allowbreak In\allowbreak Pieces\allowbreak Mu\allowbreak With\allowbreak Frac\allowbreak Sus\allowbreak Fixed\allowbreak All\allowbreak Infections\allowbreak Public.py} were used to fit the epidemic and endemic phases of the model respectively, although it is apparent that these exact files were not used to obtain the reported results since the files contain some variable-naming errors that make it impossible to run the files without making modifications \footnote{One example of why the code cannot be run that the file loads functions from a non-extant file named \code{choleraEqs.py} in line 13 rather than \code{cholera\allowbreak Eqs\allowbreak Public.py}.}.
+The inability to replicate the results by \citet{lee20} by running the provided source code makes checking whether or not a our numeric implementation faithfully represents their results very difficult.
+Additionally, the script that was said to been used to obtain the results reported by \citet{lee20} appears to use a different measurement model than what was described in the supplemental material, again making it difficult to fully replicate the result of \citet{lee20} without being able to easily run the provided source code.
+In this case, we chose to use measurement model that considers only symptomatic individuals for both phases of the epidemic, as this seemed to visually match the results of \citet{lee20} most closely.
+
+\subsection{Model~3 Replication}
+
+Model~3 was developed by a team of researchers at the Laboratory of the Swiss Federal Institute of Technology in Lausanne, hereafter referred to as the Model~3 authors.
+The code that was originally used to implement Model~3 is archived with the DOI: \url{10.5281/zenodo.3360723}, and also available in the public GitHub repository: \code{jcblemai/haiti-mass-ocv-campaign}.
+Because the code was made publicly available, and final model parameters were reported in the supplementary material of \citet{lee20}, we were able to reproduce Model~3 by directly using the source code.
+In Fig.~\ref{fig:mod3rep}, we plot simulations from this model.
+This figure can be compared to Figure S18 of \citet{lee20}.
+We note that slight differences may be accounted for due to variance in the model simulations and the difference in programming language used to produce the figure.
+Overall, the high standard of reproducibility that was achieved by the Model~3 authors facilitated the ability to readily replicate their model and results.
+
+<<Model3Replication, echo=FALSE, cache=FALSE>>=
+plot_order <- c(
+  'Artibonite',
+  'Sud_Est',
+  'Nippes',
+  'Nord_Est',
+  'Ouest',
+  'Centre',
+  'Nord',
+  'Sud',
+  'Nord_Ouest',
+  'Grande_Anse'
+)
+
+dep_labeller <- as_labeller(
+  c(
+    'Artibonite' = 'Artibonite',
+    'Sud_Est' = 'Sud-Est',
+    'Sud.Est' = 'Sud-Est',
+    'Nippes' = 'Nippes',
+    'Nord_Est' = 'Nord-Est',
+    'Nord.Est' = 'Nord-Est',
+    'Ouest' = 'Ouest',
+    'Centre' = 'Centre',
+    'Nord' = 'Nord',
+    'Sud' = 'Sud',
+    'Nord_Ouest' = 'Nord-Ouest',
+    'Nord.Ouest' = 'Nord-Ouest',
+    'Grande_Anse' = 'Grand\'Anse',
+    'Grand.Anse' = 'Grand\'Anse'
+  )
+)
+
+lee3 <- lee3_spatPomp()
+lee3_sims_quants <- readRDS(paste0(root, "data/lee3Sims.rds"))
+
+# Get the subset of cholera cases that match simulations from Lee et al. (2020) model.
+sub_cases <- haitiCholera %>%
+  dplyr::mutate(date = as.Date(date_saturday)) %>%
+  dplyr::select(-report, -date_saturday) %>%
+  dplyr::filter(lubridate::decimal_date(date) >= min(lee3@times)) %>%
+  tidyr::pivot_longer(
+    data = .,
+    cols = -date,
+    names_to = "dep",
+    values_to = "cases"
+  ) %>%
+  dplyr::mutate(
+    dep = dplyr::case_when(
+      dep == "Grand.Anse" ~ "Grande_Anse",
+      dep == "Nord.Est" ~ "Nord_Est",
+      dep == "Nord.Ouest" ~ "Nord_Ouest",
+      dep == "Sud.Est" ~ "Sud_Est",
+      TRUE ~ dep
+    )
+  )
+@
+
+\begin{figure}[!h]
+<<PlotMod3Rep, echo=FALSE, message=FALSE, fig.height=3.75>>=
+ggplot() +
+  # Region for upper and lower simulation bounds
+  geom_ribbon(
+    data = lee3_sims_quants,
+    aes(x = date, ymin = q05, ymax = q95),
+    fill = 'darkblue', alpha = 0.5
+  ) +
+  # Median line
+  geom_line(
+    data = lee3_sims_quants,
+    aes(x = date, y = q50),
+    col = 'darkblue'
+  ) +
+  # Observed data
+  geom_point(
+    data = dplyr::filter(sub_cases, cases < 500),
+    aes(x = date, y = cases), size = 0.2
+  ) +
+  facet_wrap(
+    ~factor(dep, levels = plot_order),
+    nrow = 2, labeller = dep_labeller
+  ) +
+  labs(y = 'Reported Cholera Cases') +
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m") +
+  theme(
+    axis.text.x = element_text(angle = 40, hjust = 1, vjust = 1, size = 7),
+    axis.title.x = element_blank()
+  )
+@
+\caption[Simulations from replicated Model 3]{\label{fig:mod3rep}
+Simulations from Model~3.
+Compare to Figure S18 in the supplement of \citet{lee20}.
+}
+\end{figure}
+
+<<lee3Cleanup, echo=FALSE, include=FALSE, message=FALSE>>=
+rm(lee3, lee3_sims_quants, sub_cases)
+gc()
+@
+
+\section{Calibrating Model~3 to observed cases}\label{sec:appendix_haiti_mod3Cal}
+
+<<CalibrateOrig3>>=
+unit_specific_names <- c("betaB", "foi_add")
+shared_param_names <- c(
+  "mu_B", "XthetaA", "thetaI", "lambdaR", "r", "std_W",
+  "epsilon", "k"
+)
+est_param_names <- c(
+  unit_specific_names, shared_param_names
+)
+
+# Add unit numbers to each parameter
+est_param_names_expanded <- paste0(rep(est_param_names, each = 10), 1:10)
+
+haiti3_sub_fit <- readRDS(paste0(root, 'data/h3_no_hurricane.rds'))
+@
+
+
+<<LoadOrig3>>=
+# Find model index with best log-likelihood
+best_m <- which.max(haiti3_sub_fit$search2$logLiks$logLik)
+
+# Find parameters using best_m index
+sub_params <- haiti3_sub_fit$search2$params[best_m, ]
+
+# Get unit log-likelihoods for the best model.
+all_liks <- as.data.frame(haiti3_sub_fit$search2$likMat)
+# all_liks$which <- rep(1:(SEARCH3$TOP_N * SEARCH3$NREPS), each = SEARCH3$NREPS_EVAL)
+all_liks$which <- rep(1:(12 * 6), each = 18)
+best_mod <- filter(all_liks, which == best_m)
+
+# Pivot longer to get estimate of log-likelihood for each unit.
+unitLikesM3 <- best_mod %>%
+  pivot_longer(
+    cols = -which,
+    names_to = "unit",
+    names_prefix = "V",
+    values_to = "logLik"
+  ) %>%
+  select(-which) %>%
+  group_by(unit) %>%
+  summarize(
+    ll_est = logmeanexp(logLik),
+    ll_se = logmeanexp(logLik, se = TRUE)[2]
+  ) %>%
+  ungroup() %>%
+  mutate(unit = as.numeric(unit)) %>%
+  arrange(unit)
+@
+
+<<M3_bench, echo=FALSE, message=FALSE, include=FALSE, cache=FALSE>>=
+h3 <- haiti3_spatPomp()
+deps <- h3@unit_names
+
+mod3_cases <- as.data.frame(t(h3@data))
+colnames(mod3_cases) <- deps
+m3_inits <- c(7362, 1914, 22, 8, 2818, 82, 2499, 6953, 44, 7)  # fit by hand
+names(m3_inits) <- deps
+
+bench_cond_lls <- list()
+for (dep in deps) {
+
+  # Get department cases
+  cases <- as.numeric(mod3_cases[, dep])
+  mod <- ar1_NegBinom(data = cases, init = m3_inits[dep])
+
+  bench_cond_lls[[dep]] <- haitipkg:::.ar1_NegBinom_cond_ll(
+    theta = mod$theta, init = m3_inits[dep], data = cases, transform = FALSE
+  )
+}
+
+bench_cond_lls <- as.data.frame(bench_cond_lls)
+
+bench_lls <- apply(bench_cond_lls, 2, sum)
+
+unitLikes_bench <- data.frame(
+  unit = 1:10,
+  # dep = names(bench_lls),
+  ll = bench_lls
+) %>%
+  as_tibble()
+
+bench_cond_lls$date <- lubridate::round_date(lubridate::date_decimal(h3@times), unit = 'day')
+@
+
+<<combine_bench_M3, echo=FALSE>>=
+# Combine tables with model 3 and benchmark likelihoods.
+bench_M3_joined <- dplyr::left_join(
+  x = unitLikesM3,
+  y = unitLikes_bench,
+  by = "unit"
+) %>%
+  select(-ll_se) %>%
+  mutate(unit = as.character(unit)) %>%
+  pivot_longer(
+    cols = -unit,
+    names_to = "type",
+    values_to = "ll"
+  ) %>%
+  mutate(unit = paste0(unit, ": ", deps[as.numeric(unit)]))
+@
+
+<<M3bpf, echo=FALSE, message=FALSE, include=FALSE>>=
+# Change model parameters to the best set of parameters from previous
+# search
+coef(h3)[names(sub_params)] <- sub_params
+
+# Perform block particle filter with fitted model, to get conditional
+# log-likelihoods.
+bpf_sub3_out <- readRDS(paste0(root, "data/noHur_cond_LL.rds"))
+@
+
+In this section, we provide more detail on the process that was used to estimate the coefficients of Model~3.
+In particular, we discuss why we decided to include additional model parameters---those that are associated with the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
+To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides22}.
+Due to the novelty of this algorithm, there exists only a few examples where the IBPF algorithm is used for data analysis \cite{li23,ionides22}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
+
+Lee et al. (2020)~\cite{lee20} only estimated model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
+Building on their results, we fit the fully coupled version of Model~3 to (nearly) all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the supplement for initialization models for more details).
+To maximize model likelihoods, we relied on parameter estimates obtained while calculating profile-likelihood confidence intervals, as this calculation requires many replicated IBPF searches.
+In our preliminary investigations that were done prior to conducting a profile likelihood search, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
+To do this, the first collection of searches is performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
+A subsequent refinement search used parameter values corresponding to the largest model likelihoods as starting parameter values.
+The need for multiple searches does not appear to be uncommon, as a similar approach was used in \cite{ionides22}.
+While computationally intensive, profile likelihoods proved to be an effective alternative to maximizing model likelihoods without the need to apply this multistage heuristic.
+
+We use the iterative fitting / pruning technique described above to fit the fully coupled version of Model~3 proposed in \cite{lee20}.
+The maximum likelihood we obtained after two rounds of searching was $\Sexpr{round(max(haiti3_sub_fit$search2$logLiks$logLik))}$, which is higher than the benchmark model ($\Sexpr{round(sum(unitLikes_bench$ll))}$).
+While beating a simple associative benchmark is promising, this does not immediately imply that the model is a good description of the system.
+Additional investigation of parameters estimates and their corresponding implications on model based conclusions should always be conducted.
+For meta-population models, it is worth considering how well the model fits the data to each spatial unit.
+% This can be done by looking at conditional log-likelihoods, which is part of the output of the \texttt{bpfilter} algorithm in the \texttt{spatPomp} package.
+The likelihoods for each department, compared to the corresponding benchmark model, are displayed in Fig.~\ref{fig:h3UnitLikes}.
+The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model at the aggregate level, Model~3 has lower likelihoods for some departments.
+
+\begin{figure}[!ht]
+<<h3UnitLikes, fig.height=3, fig.width=5.5, echo=FALSE>>=
+ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
+  geom_point(aes(col = type)) +
+  ylab("Unit") +
+  xlab("Log Likelihood") +
+  scale_color_manual(
+    labels = c("ll" = "Benchmark", "ll_est" = "Model 3"),
+    values = c("ll" = "#1b9e77", "ll_est" = "#d95f02")
+  ) +
+  theme(legend.title = element_blank(),
+        axis.title.y = element_blank()) + 
+  theme_bw()
+@
+\caption[Model~3 unit log-likelihoods.]{\label{fig:h3UnitLikes}Log-likelihoods of Model~3 for each department compared to the corresponding benchmark model prior to the inclusion of parameters that account for Hurricane Matthew.}
+\end{figure}
+
+In addition to considering the conditional log-likelihoods of each unit, one can consider conditional log-likelihoods of each observation.
+When compared to a benchmark, this level of detail can provide useful information about which observations are well described by the model and which are not.
+In Fig.~\ref{fig:condLL}, we plot the conditional log-likelihoods of Model~3 for each observation.
+Typically it is most useful to compare the conditional log-likelihoods of the model under consideration to a benchmark, as plotting only conditional log-likelihoods without a comparison may not be helpful.
+In this case, however, the same insight can be drawn using a figure without a benchmark comparison, so we do not include the benchmark in order to avoid the issue of over-plotting.
+
+\begin{figure}[!ht]
+<<CondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
+# Changing labels to human-readable labels.
+deps[grepl("_", deps)] <- gsub("_", "-", deps[grepl("_", deps)])
+deps[deps == "Grande-Anse"] <- "Grand\'Anse"
+names(deps) <- as.character(1:10)
+myLabeller <- as_labeller(deps)
+
+# Plot conditional log-likelihoods for each unit
+t(bpf_sub3_out$block.cond.loglik) %>%
+  as.data.frame() %>%
+  mutate(t = bpf_sub3_out$times) %>%
+  pivot_longer(
+    cols = -t,
+    values_to = 'likelihood',
+    names_prefix = "V",
+    names_to = 'Unit'
+  ) %>%
+  mutate(date = as.Date(lubridate::date_decimal(t))) %>%
+  ggplot(aes(x = date, y = likelihood)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~Unit, labeller = myLabeller, scales = 'free_y',
+             nrow = 2) +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = -45, hjust = 0)) +
+  ylab("Conditional log-likelihoods")
+@
+\caption[Conditional log-likelihoods without hurricane adjustment]{\label{fig:condLL}Conditional log-likelihoods of Model~3 prior to the inclusion of the Hurricane Matthew related parameters.}
+\end{figure}
+
+Fig.~\ref{fig:condLL} reveals that the fitted model poorly describes certain features of the data.
+For example, many departments (in particular Sud) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
+Further investigation of the model output reveals that the model is struggling to explain the sudden surge in cholera cases that occurred at this time, which coincides with the time that Hurricane Matthew struck Haiti.
+While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which had the greatest impact in the the Sud and Grand'Anse departments \cite{ferreirai16}.
+This result led us to include parameters $\Whur{u}$ and $\hHur{u}$ in Eq.~23 of the main text, which allows for an increase in the transmission rate between environmental cholera and humans for in Sud and Grand'Anse during and after the hurricane.
+The effect of the hurricane on cholera transmission is assumed to have an exponential decay, where the magnitude is determined by $\Whur{u}$ and the duration of the effect determined by $\hHur{u}$.
+
+<<loadFinalModel3, echo=FALSE, include=FALSE, message=FALSE>>=
+# This result was used in the manuscript, so it doesn't need to be recalculated.
+h3_final_mod_pars <- readRDS("../../chapters/haiti/data/model3/h3_MLE_eval.rds") %>%
+  slice_max(logLik, n = 1) %>%
+  select(-(job.id:logLik_se)) %>%
+  unlist()
+
+# Change model parameters to the best set of parameters from previous
+# search
+coef(h3)[names(h3_final_mod_pars)] <- h3_final_mod_pars
+
+registerDoRNG(731955)  # for modular, reproducible results
+
+# Perform block particle filter with fitted model, to get conditional
+# log-likelihoods.
+bpf_final3_out <- readRDS(paste0(root, "data/h3_cond_LL.rds"))
+unitLikesM3_final <- readRDS("../../chapters/haiti/data/model3/mod3_eval_res.rds")[['u_cond_ll']] %>%
+  t() %>%
+  as_tibble() %>%
+  rename(ll_est = est, ll_se = se) %>%
+  mutate(unit = 1:10) %>%
+  select(unit, ll_est, ll_se)
+
+# Combine model likelihood table to benchmarks
+bench_M3_joined_final <- dplyr::left_join(
+  x = unitLikesM3_final,
+  y = unitLikes_bench,
+  by = "unit"
+) %>%
+  select(-ll_se) %>%
+  mutate(unit = as.character(unit)) %>%
+  pivot_longer(
+    cols = -unit,
+    names_to = "type",
+    values_to = "ll"
+  ) %>%
+  mutate(unit = paste0(unit, ": ", deps[as.numeric(unit)]))
+
+bench_diffs_final <- dplyr::left_join(
+  x = unitLikesM3_final,
+  y = unitLikes_bench,
+  by = "unit"
+) %>%
+  rename(ll_mod3 = ll_est, ll_bench = ll) %>%
+  mutate(unit = unlist(myLabeller(unit)),
+         ll_diff = ll_mod3 - ll_bench) %>%
+  arrange(ll_diff)
+
+@
+
+We refit Model~3 after introducing these hurricane-related parameters.
+The resulting model has a log-likelihood value of $\Sexpr{round(readRDS("../../chapters/haiti/data/model3/mod3_eval_res.rds")[['ll']]['est'], 1)}$.
+The inclusion of these parameters resulted in an overall increase of $\Sexpr{round(readRDS("../../chapters/haiti/data/model3/mod3_eval_res.rds")[['ll']]['est'] - max(haiti3_sub_fit$search2$logLiks$logLik), 1)}$ log-likelihood units.
+Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, suggesting that the data highly favor the inclusion of the additional parameters.
+The addition of the Hurricane parameters also increases in conditional likelihoods for each observation, particularly around October 2016 (Fig.~\ref{fig:finalCondLL}).
+
+<<finalModel3BPF, echo=FALSE, message=FALSE, include=FALSE>>=
+# block particle filter to get conditional log-likelihoods.
+bpf_final3_out <- readRDS(paste0(root, "data/h3_final_bpf_cond_ll.rds"))
+@
+
+\begin{figure}[!ht]
+<<finalCondLLFig, echo=FALSE, message=FALSE, fig.height=3>>=
+t(bpf_final3_out$block.cond.loglik) %>%
+  as.data.frame() %>%
+  mutate(t = bpf_final3_out$times) %>%
+  pivot_longer(
+    cols = -t,
+    values_to = 'likelihood',
+    names_prefix = "V",
+    names_to = 'Unit'
+  ) %>%
+  mutate(date = as.Date(lubridate::date_decimal(t))) %>%
+  ggplot(aes(x = date, y = likelihood)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~Unit, labeller = myLabeller, scales = 'free_y',
+             nrow = 2) +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = -45, hjust = 0)) +
+  ylab("Conditional log-likelihoods")
+@
+\caption[Conditional log-likelihoods with hurricane adjustment]{\label{fig:finalCondLL}Conditional log-likelihoods of Model~3 after adding and estimating the parameters related to Hurricane Matthew.}
+\end{figure}
+
+Now that the model with additional parameters has been calibrated to the incidence data, we plot the conditional log-likelihood of each department compared to a benchmark model in Fig.~\ref{fig:finalUnitLL}.
+The difference in log-likelihoods between Model~3 and the benchmark model is smallest in the departments \Sexpr{bench_diffs_final$unit[1]}, \Sexpr{bench_diffs_final$unit[2]}, \Sexpr{bench_diffs_final$unit[3]} and \Sexpr{bench_diffs_final$unit[4]}.
+Each of these departments also exhibited the most sustained cholera transmission, defined by having the fewest number of weeks with no recorded cholera cases.
+Specifically, these four departments have zero cholera cases recorded in less than $4\%$ of the available data, and all remaining departments---except for Nord-Ouest, which has approximately $9.5\%$ of cases that are zeros and also exhibits the next smallest difference in log-likelihoods---have zero cases recorded in at least $14\%$ of the available weekly data.
+This result suggests that the quantitative advantage Model~3 has over its respective benchmark is primarily due to the model's ability to describe a resurgence of cases after a department records a week of zero cholera cases.
+This result may be unsurprising in the context of the models that we are comparing.
+Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our spatially-independent benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
+
+\begin{figure}[!ht]
+<<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
+ggplot(bench_M3_joined_final, aes(x = ll, y = reorder(unit, ll))) +
+  geom_point(aes(col = type)) +
+  ylab("Unit") +
+  xlab("Log Likelihood") +
+  scale_color_manual(
+    labels = c("ll" = "Benchmark", "ll_est" = "Model 3"),
+    values = c("ll" = "#1b9e77", "ll_est" = "#d95f02")
+  ) +
+  theme(legend.title = element_blank(),
+        axis.title.y = element_blank())
+@
+\caption{\label{fig:finalUnitLL}Log-likelihoods of Model~3 for each department compared to the corresponding benchmark model after adding and estimating parameters related to Hurricane Matthew.}
+\end{figure}
+
+The difference in log-likelihoods between Model~3 and its benchmark model for each individual units suggests that Model~3 has a relatively poor fit for the four units with the most sustained cholera transmission.
+The simple four parameter benchmark has a higher likelihood than Model~3 for the \Sexpr{bench_diffs_final$unit[1]} and \Sexpr{bench_diffs_final$unit[2]} departments, and also has log-likelihoods only a few units smaller than Model~3 for the departments \Sexpr{bench_diffs_final$unit[3]} and \Sexpr{bench_diffs_final$unit[4]}.
+This is particularly worrisome given that these four departments account for more than $\Sexpr{floor(100 * sum(mod3_cases[, c(bench_diffs_final$unit[1:4])], na.rm = TRUE) / sum(mod3_cases, na.rm = TRUE))}\%$ of the total number of reported cholera cases.
+
+\subsection{Examining the Hidden States of the Calibrated Model}
+
+For mechanistic models, beating a suitable statistical benchmark does not alone guarantee that the model provides an accurate description of a dynamic process.
+Indeed, a good statistical fit does not require the model to assert a causal explanation.
+For example, reconstructed latent variables should make sense in the context of alternative measurements of these variables \cite{grad12}.
+We demonstrate this principle by examining the latent state of the calibrated model.
+In particular, we examine the compartment of susceptible individuals under various scenarios.
+This analysis can also provide insight into why the calibrated model fails to outperform the benchmark model on the four departments with the most sustained cholera transmission.
+
+Recall that the filtering distribution for the calibrated version of Model~3 at time $t_k$ is defined as the distribution of the latent state at time $t_k$ given the data from times $t_{1}:t_{k}$, i.e. $f^{(3)}_{\bm{X}_k|\bm{Y}_{1:k}}(\bm{x}_{k} | \bm{y}^*_{1:k} ; \hat\theta)$.
+In general, one may expect simulations from the filtering distribution of a model with a good statistical fit to result in hidden states that are highly consistent with the observed data because the filtering distribution is conditioned on the observed data.
+Fig.~\ref{fig:h3Sus} shows the percentage of individuals that are in the susceptible compartment from various simulations of the model:
+simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
+This figure shows that simulations from initial conditions tends to result in a much more rapid depletion of susceptible individuals at the start of the epidemic than simulations from the filtering distribution, suggesting the calibrated model has a propensity to predict larger outbreaks than what is typically seen in the data.
+This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, providing a possible explanation as to why the model fails to beat the simple benchmark for each spatial unit.
+This results hints at the possibility of model mispecification, and warrants a degree of caution in interpreting the model's outputs.
+
+<<h3SusFigSetup, echo=FALSE, message=FALSE, include=FALSE>>=
+
+# This bake performs the following:
+#  (1) simulates the model from initial conditions
+#  (2) get the values of the hidden states at the end of each simulation, and
+#      saves these for later use.
+#  (3) Obtain quantiles for the Susceptible pool from the simulations.
+init_conditions_results <- readRDS(paste0(root, "data/InitSimsQuants.rds"))
+
+# Get the output of the "bake" call for plotting.
+h3Spat_quants <- init_conditions_results[["SQuants"]]
+
+# This bake call uses the ending hidden states from above to forecast cholera
+# cases in the future under the V0 vaccination scenario
+mod3_V0_initcond_res <- readRDS(paste0(root, "data/vacc_sim_from_init.rds"))
+
+# This result was already used in the manuscript; it doesn't need to
+# be recalculated.
+mod3_V0_res <- readRDS("../../chapters/haiti/data/model3/mod3_V0_res.rds")
+@
+
+\begin{figure}[!ht]
+<<h3SusFig, echo=FALSE, message=FALSE, fig.height=3>>=
+ggplot() +
+  # Sims from initial condition
+  geom_line(data = h3Spat_quants, aes(x = date, y = Q50), col = 'red') +
+  geom_ribbon(
+    data = h3Spat_quants,
+    aes(x = date, ymin = Q025, ymax = Q975),
+    fill = 'red', alpha = 0.5
+  ) +
+  # projections from initial condition, using filtered sims function
+  geom_line(data = mod3_V0_initcond_res$SQuants, aes(x = date, y = Q50), col = 'red') +
+  geom_ribbon(
+    data = mod3_V0_initcond_res$SQuants,
+    aes(x = date, ymin = Q025, ymax = Q975),
+    fill = 'red', alpha = 0.5
+  ) +
+  # Sims from filtered distribution
+  geom_line(
+    data = bpf_final3_out$Sus_df,
+    aes(x = as.Date(lubridate::date_decimal(time)), y = Q50),
+    col = 'blue'
+  ) +
+  geom_ribbon(
+    data = bpf_final3_out$Sus_df,
+    aes(x = as.Date(lubridate::date_decimal(time)), ymin = Q025, ymax = Q975),
+    fill = 'blue', alpha = 0.5
+  ) +
+  # Projections from filtered distribution
+  geom_line(data = mod3_V0_res$SQuants, aes(x = date, y = Q50), col = 'blue') +
+  geom_ribbon(
+    data = mod3_V0_res$SQuants,
+    aes(x = date, ymin = Q025, ymax = Q975),
+    fill = 'blue', alpha = 0.5
+  ) +
+  geom_vline(xintercept = max(h3Spat_quants$date), linetype = 'dashed') +
+  facet_wrap(~dep, scales = 'free_y', nrow = 2) +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = -45, hjust = 0)) +
+  ylab("Total Susceptible (%)")
+@
+\caption[Estimated susceptible population over time.]{\label{fig:h3Sus}Percentage of individuals that are in the susceptible compartment.
+Simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
+The dashed line represents the end of the observed data.}
+\end{figure}
+
+\section{Forecasting with parameter uncertainty}\label{sec:appendix_haiti_uncertain}
+
+Let $f_{Y_{1:N}}(y_{1:N} | \theta)$ denote the pdf of the model under consideration, were $\theta$ is a parameter vector that indexes the model.
+Furthermore, denote the observed data as $y_{1:N}^*$.
+Because the uncertainty in just a single parameter can lead to drastically different forecasts \cite{saltelli20},
+parameter uncertainty should be considered when obtaining model forecasts when the goal is to influencing policy.
+In a Bayesian modelling paradigm, the most natural way to account for parameter uncertainty in model forecasts is to suppose that $\theta$ comes from a distribution $f_{\Theta}$, and then to obtain $J$ forecasts from the model where each forecast is obtained using parameters drawn from the posterior distribution $\theta_{1:J} \mid Y_{1:N} = y_{1:N}^* \sim f_{\Theta}\big(\theta | Y_{1:N} = y_{1:N}^*\big)$.
+
+When frequentist methods are used, however, there does not exist a posterior distribution from which one could sample.
+A common approach could be to obtain a weighted average of the simulations from various models \cite{hoeting99}, but this can be problematic when forecasts from each model are very different from each other \cite{grueber11}.
+A similar approach that has been taken \cite{king15} is to obtain model forecasts using multiple sets of parameter values and then sample from the resulting forecasts using weights proportional to the corresponding likelihoods of the parameter values.
+This approach could be considered as empirical Bayes, as it is equivalent to using a discrete uniform prior where the set of values in the prior distribution is determined by a stochastic routine applied to the observed data, as discussed below.
+
+% Let $\Theta$ denote a random vector of model parameters.
+For each $k \in 1:K$, let $\theta_k$ be a unique set of model parameters.
+Letting $\Theta$ denote a random vector of model parameters, we endow $\Theta$ with a discrete uniform distribution on the set $\{\theta_1, \theta_2, \ldots, \theta_K\}$, such that $P\big(\Theta = \theta_k\big) = \frac{1}{K}$ for all values $k \in \seq{1}{K}$.
+Using this as a prior distribution, the posterior distribution of $\Theta | Y_{1:N} = y_{1:N}^*$ can be expressed as:
+$P\big(\Theta = \theta_k | Y_{1:N} = y_{1:N}^*\big) = \frac{f_{Y_{1:N}}(y_{1:N}^*| \theta_k)}{\sum_{l = 1}^K f_{Y_{1:N}}(y_{1:N}^*| \theta_l)}$.
+In a standard empirical Bayes analysis, the values $\theta_1, \ldots, \theta_k$ of the prior distribution would be chosen using the observed data, resulting in a posterior distribution that weighs the prior parameter vectors proportional to their corresponding likelihoods.
+We choose $\theta_k$ to be the output of a stochastic routine applied to the observed data by setting $\theta_k$ to be the output of an iterated filtering algorithm.
+In practice, because the likelihood maximization routines of iterated filtering methods are stochastic, it is common to run the iterated filtering method multiple times $(K)$ for each model in order to obtain a maximum likelihood estimate for model parameters.
+This results in a natural set of parameters near the MLE that could be used as the discrete prior distribution.
+Alternatively, the set $\{\theta_1, \theta_2, \ldots, \theta_K\}$ could be determined by first obtaining marginal confidence intervals for each element of the parameter vector $\Theta$, and then creating a hypercube using the combination of marginal confidence intervals.
+The set $\{\theta_1, \theta_2, \ldots, \theta_K\}$ is then obtained by sampling uniformly $K$ values from the resulting hypercube, as was done by \cite{king15}.
+
+
+%%%%%%%%%% END

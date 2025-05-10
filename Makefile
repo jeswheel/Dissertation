@@ -17,7 +17,7 @@ all: $(PDF_OUTPUT) dust
 	Rscript -e "knitr::knit('$<', output='$@')"
 
 # Rule to build PDF from main.tex, including all dependencies
-$(PDF_OUTPUT): $(MAIN_TEX) $(TEX_FILES) $(INPUT_FILES) $(APPENDIX_TEX)
+$(PDF_OUTPUT): $(MAIN_TEX) $(TEX_FILES) packages.tex $(APPENDIX_TEX) $(INFPUT_FILES)
 	latexmk -pdf $(MAIN_TEX)
 
 # Clean auxiliary files created by LaTeX

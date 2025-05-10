@@ -130,7 +130,7 @@ ggplot(df_combined, aes(x = Re, y = Im, col = Re^2 + Im^2 >= 1, shape = Re^2 + I
   scale_shape_manual(values = c(20, 4)) +
   theme(legend.position = 'none', axis.title = element_blank())
 @
-\caption{\label{fig:AR2}Inverted roots of 1000 samples of AR(2) and AR(3) coefficients sampled independently from a U$(-1, 1)$ distribution. The red ``x"s are points that lie outside the accepted region, which represents $\Sexpr{round(100*sum((real_parts_AR2^2 + imag_parts_AR2^2 >= 1)) / length(real_parts_AR2), 1)}\%$ of the AR(2) coefficients and $\Sexpr{round(100*sum((real_parts_AR3^2 + imag_parts_AR3^2 >= 1)) / length(real_parts_AR3), 1)}\%$ of the AR(3) coefficients. Increasing the width of the uniform sampling distribution results in a larger fraction outside the accepted region, and decreasing the width results in worse coverage of the range of acceptable parameter values.}
+\caption[Uniform resampling of model parameters.]{\label{fig:AR2}Inverted roots of 1000 samples of AR(2) and AR(3) coefficients sampled independently from a U$(-1, 1)$ distribution. The red ``x"s are points that lie outside the accepted region, which represents $\Sexpr{round(100*sum((real_parts_AR2^2 + imag_parts_AR2^2 >= 1)) / length(real_parts_AR2), 1)}\%$ of the AR(2) coefficients and $\Sexpr{round(100*sum((real_parts_AR3^2 + imag_parts_AR3^2 >= 1)) / length(real_parts_AR3), 1)}\%$ of the AR(3) coefficients. Increasing the width of the uniform sampling distribution results in a larger fraction outside the accepted region, and decreasing the width results in worse coverage of the range of acceptable parameter values.}
 \end{figure}
 
 %%%%%%%%%% END

@@ -29,6 +29,7 @@
 \usepackage{epstopdf}
 \usepackage{psfrag,epsf}
 \usepackage{url}
+\usepackage{xurl}
 \usepackage[ruled,noline,linesnumbered]{algorithm2e}
 \usepackage[table]{xcolor}
 % \usepackage{mathtools}
@@ -97,6 +98,7 @@
 \newcommand\NBintercept{\alpha}
 \newcommand\NBar{\beta}
 \newcommand\NBsize{\varphi}
+\newcommand\reportChange{\delta}
 
 \DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
 \DeclareMathSymbol{\varv}{\mathord}{matha}{118}
@@ -118,4 +120,25 @@
 
 \newcolumntype{t}{>{\tiny}c}
 
+\usepackage{pict2e}
+\usepackage{curve2e}
+
+%% basic POMP definitions
+\newcommand\Xspace{{\mathbb X}}
+\newcommand\Yspace{{\mathbb Y}}
+\newcommand\Thetaspace{\R^{\Thetadim}}
+\newcommand\Xunitspace{{\scriptsize{\mathcal X}}}
+\newcommand\Yunitspace{{\tiny{\mathcal Y}}}
+\newcommand\hatTheta{\widehat{\Theta}}
+\newcommand\Xdim{{\mathrm{dim}}(\Xspace)}
+\newcommand\Ydim{{\mathrm{dim}}(\Yspace)}
+\newcommand\Thetadim{P}
+\newcommand\thetadim{p}
+\newcommand\timeSet{{\mathbb T}}
+\newcommand\data[1]{#1^*}
+\newcommand\unitSpecific{\hspace{0.1mm}\mathrm{us}}
+\newcommand\shared{\hspace{0.15mm}\mathrm{sh}}
+\newcommand\given{{\,\vert\,}}
+\newcommand\prob{\mathbb{P}}
+\newcommand\E{\mathbb{E}}
 
