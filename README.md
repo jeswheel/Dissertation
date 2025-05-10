@@ -3,6 +3,7 @@
 ## TODO
 
 - [x] Create TODO list.
+- [ ] Write Acknowledgements.
 - [ ] Check Figure vs Fig in the entire document.
 - [ ] Check Tab vs Table in the entire document. 
 - [ ] Fill out README with instructions
@@ -10,7 +11,7 @@
 - [x] Add Haiti Appendices 
 - [ ] Add MPIF paper
 - [x] Choose better citations (name, year)
-   - [ ] Chicago seems good, but why am I getting underlines and not italics? Fix this. 
+   - [x] Chicago seems good, but why am I getting underlines and not italics? Fix this. 
 - [ ] Write Introduction 
 - [ ] Write conclusion
 - [ ] Proof read ARMA paper 
@@ -22,6 +23,6 @@
    - [x] Fix parameter table 
       - [x] Needs to change namerefs to referencing supplement, once created. 
    - [x] Short names for all tables
-- [ ] Check references (are first names always abbreviated? Capitalizations consistent? etc.)
+- [ ] Check references (are first names always abbreviated? Capitalizations consistent? Links / DOIs? etc.)
 - [ ] Check for any TODOs left in anywhere in the repository. 
 
