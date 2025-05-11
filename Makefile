@@ -7,7 +7,7 @@ RMW_FILES = $(foreach dir,$(CHAPTER_DIRS),$(wildcard $(dir)/*.Rnw))
 TEX_FILES = $(RMW_FILES:.Rnw=.tex)
 MAIN_TEX = main.tex
 PDF_OUTPUT = main.pdf
-INFPUT_FILES = packages.tex thesis-umich.cls references.bib
+INPUT_FILES = packages.tex thesis-umich.cls references.bib chapters/introduction/intro.tex
 
 # Default target
 all: $(PDF_OUTPUT) dust
@@ -17,7 +17,7 @@ all: $(PDF_OUTPUT) dust
 	Rscript -e "knitr::knit('$<', output='$@')"
 
 # Rule to build PDF from main.tex, including all dependencies
-$(PDF_OUTPUT): $(MAIN_TEX) $(TEX_FILES) packages.tex $(APPENDIX_TEX) $(INFPUT_FILES)
+$(PDF_OUTPUT): $(MAIN_TEX) $(TEX_FILES) $(APPENDIX_TEX) $(INPUT_FILES)
 	latexmk -pdf $(MAIN_TEX)
 
 # Clean auxiliary files created by LaTeX
