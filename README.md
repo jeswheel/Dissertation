@@ -5,24 +5,25 @@
 - [x] Create TODO list.
 - [ ] Write Acknowledgements.
 - [ ] Check Figure vs Fig in the entire document.
-- [ ] Check Tab vs Table in the entire document. 
+- [ ] Check Tab vs Table in the entire document.
+- [ ] Run spell-checker on all documents. 
 - [ ] Fill out README with instructions
 - [x] Add ARIMA appendices
 - [x] Add Haiti Appendices 
 - [ ] Add MPIF paper
 - [x] Choose better citations (name, year)
    - [x] Chicago seems good, but why am I getting underlines and not italics? Fix this. 
-- [ ] Write Introduction 
+- [x] Write Introduction
+   - [] ? Add discussion on PanelPOMP / SpatPOMP ?
 - [ ] Write conclusion
-- [ ] Proof read ARMA paper 
+- [x] Proof read ARMA paper 
    - [x] Short names for all figures and tables
-   - [ ] Match notation with introduction and other chapters. 
-   - [ ] Provide more details about the state-space expression of ARMA models. 
+   - [x] Match notation with introduction and other chapters. 
 - [ ] Proof read Haiti chapter
-   - [ ] Remove duplicate introduction of POMP intro. 
    - [x] Fix parameter table 
       - [x] Needs to change namerefs to referencing supplement, once created. 
    - [x] Short names for all tables
 - [ ] Check references (are first names always abbreviated? Capitalizations consistent? Links / DOIs? etc.)
+   - [ ] Right now there is a problem with papers with same first author and year, it's not distinguishing. e.g. richterman19 rictherman19inverse, or lee20 + lee20reply. I tried chigacoa, not working.
 - [ ] Check for any TODOs left in anywhere in the repository. 
 

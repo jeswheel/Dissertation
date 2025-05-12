@@ -260,9 +260,9 @@ Model~2 is deterministic with spatial structure, and includes transmission via c
 Model~3 is stochastic with spatial structure, and accounts for measured rainfall.
 Model~4 has an agent-based construction, featuring considerable mechanistic detail but limited ability to calibrate these details to data.
 These modeling strategies were selected by \citet{lee20} to represent the range of approaches used in the research community.
-We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \citep{tracy18} are outside the scope of this article.
+We focus on Models~1--3, as the strengths and weaknesses of the agent-based modeling approach \citep{tracy18} are outside the scope of this chapter.
 In addition, agent-based models were less widely used, the agent based model in \citet{lee20} being the only model of this class that was found in our literature review.
-The data that were used in \citet{lee20}, and that we reanalyze, are displayed in Fig.~\ref{fig:CholeraData}.
+The data that were used in \citet{lee20}, and that we reanalyze, are displayed in Figure~\ref{fig:CholeraData}.
 
 \begin{figure}[!h]
 <<Plot_Reported_Cases, echo=FALSE, fig.height=3.5>>=
@@ -527,13 +527,13 @@ mod3_lee_coupled_partial_aic <- 2 * lee3_results$n_params - 2 * lee3_results$sub
 
 Mechanistic models representing biological phenomena are valuable for epidemiology and consequently for public health policy \citep{lofgren14,mccabe21}. More broadly, they have useful roles throughout biology, especially when combined with statistical methods that properly account for stochasticity and nonlinearity \citep{may04}. In some situations, modern machine learning methods can outperform mechanistic models on epidemiological forecasting tasks \citep{lau22,baker18}. The predictive skill of non-mechanistic models can reveal limitations in mechanistic models, but cannot readily replace the scientific understanding obtained by describing the biological dynamics of the system in a mathematical model \citep{baker18,prosperi20}.
 
-In this article, we refer to models that focus on learning relationships between variables in a dataset as {\it associative}, whereas models that incorporate a known scientific property of the system we call {\it causal} or {\it mechanistic}.
+In this chapter, we refer to models that focus on learning relationships between variables in a dataset as {\it associative}, whereas models that incorporate a known scientific property of the system we call {\it causal} or {\it mechanistic}.
 The danger in using forecasting techniques which rely on associative models to predict the consequence of interventions is called the Lucas critique in an econometric context.
 \citet{lucas76} pointed out that it is naive to predict the effects of an intervention on a given system based entirely on historical associations.
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
 This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
 Despite their limited ability to project the effect of interventions on a system, associative models can be effectively used to make inference on an certain features of a system.
-In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \citep{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,richterman19,richterman19inverse,bengtsson15,li16adjusting}.
+In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \citep{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,richterman19,bengtsson15,richterman19inverse,li16adjusting}.
 
 The four mechanistic models of \citet{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
@@ -1103,7 +1103,7 @@ Calibrating model parameters to observed data does not guarantee that the result
 However, the congruency between the model and observed data serves as a proxy for the congruency between the model and the true underlying dynamic system.
 As such, it is desirable to obtain the best possible fit of the proposed mechanistic structure to the observed data.
 
-In this article we follow \citet{lee20} by calibrating the parameters of each of our models using maximum likelihood, as described in Eq.~\myeqref{eq:likedef}.
+In this chapter we follow \citet{lee20} by calibrating the parameters of each of our models using maximum likelihood, as described in Eq.~\myeqref{eq:likedef}.
 The likelihood for each of the fitted models---and the corresponding AIC values for model comparisons that include an adjustment for the number of calibrated parameters---is provided in Table~\ref{tab:likes}.
 In the following subsections we describe in detail our approach to calibrating the three proposed mechanistic models to observed cholera incidence data.
 The main alternative to maximum likelihood estimation is Bayesian inference via Markov chain Monte Carlo, used to analyze the Haiti cholera epidemic by \citet{andrews11,pasetto18,rinaldo12,lewnard16,trevisin22,sallah17,azman12,kuhn14,mari15,gatto12}.
@@ -1162,7 +1162,7 @@ Details of estimating the likelihood of the models used in \citet{lee20} are pro
 Model~1 is a highly nonlinear over-dispersed stochastic dynamic model, favoring a scientifically plausible description of cholera dynamics rather than one that is statistically convenient \citep{he10}.
 This results in the inability to obtain a closed form expression of the joint model density---described in Eq.~\myeqref{eq:jointLik}.
 Therefore in order to perform likelihood based inference on this model, we are restricted to use parameter estimation techniques that have the \emph{plug-and-play} property, which is that the fitting procedure only requires the ability to simulate the latent process rather than evaluating transition densities \citep{breto09,he10};
-in the context of the notation and definitions employed in this article, this means that we only require the ability to simulate from $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$ and $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ rather than needing to evaluate these densities.
+in the context of the notation and definitions employed in this chapter, this means that we only require the ability to simulate from $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$ and $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$ rather than needing to evaluate these densities.
 Plug-and-play algorithms include Bayesian approaches like ABC and PMCMC \citep{toni09,andrieu10}, but here we use algorithms that enable maximum likelihood estimation.
 To our knowledge, the only plug-and-play methods that have been effectively used to maximize the likelihood for arbitrary nonlinear POMP models are iterated filtering algorithms \citep{ionides15}, which modify the well-known \emph{particle filter} \citep{arulampalam02}.
 
@@ -1179,14 +1179,14 @@ We demonstrate this capability by proposing a log-linear trend $\transmissionTre
 \transmission(t) = \bar{\transmission} \exp\Big(\sum_{j=1}^6 \transmission_s s_j(t) + \transmissionTrend\bar{t}\Big),
 \end{equation}
 where $\bar{t} = \frac{t - (t_N + t_0) / 2}{t_N - (t_N + t_0) / 2}$, so that $\bar{t} \in [-1, 1]$.
-The proposal of a trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Fig.~\ref{fig:CholeraData}.
+The proposal of a trend in transmission is a result of observing an apparent decrease in reported cholera infections from 2012-2019 in Figure~\ref{fig:CholeraData}.
 While several factors may contribute to this decrease, one explanation is that case-area targeted interventions (CATIs), which included education sessions, increased monitoring, household decontamination, soap distribution, and water chlorination in infected areas \citep{rebaudet19CATI}, may have substantially reduced cholera transmission over time \citep{rebaudet21}.
 
 We perform a statistical test to determine whether or not the data indicate the presence of a trend in transmissibility.
 To do this, we perform a profile-likelihood search on the parameter $\transmissionTrend$ and obtain a $95\%$ confidence interval via a Monte Carlo Adjusted Profile (MCAP) \citep{ionides17}.
 \citet{lee20} implemented Model~1 by fitting two distinct phases: an epidemic phase from October 2010 through March 2015, and an endemic phase from March 2015 onward.
 We similarly allow the re-estimation of process and measurement overdispersion parameters ($\sigmaProc^2$ and $\obsOverdispersion$), and require that the latent Markov process $X(t)$ carry over from one phase into the next.
-The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(beta_t_mcap_results$ci[1], digits = 3)}, \Sexpr{myround(beta_t_mcap_results$ci[2], digits = 3)})$, with the full results displayed in Fig.~\ref{fig:betat}.
+The resulting 95\% confidence interval for $\transmissionTrend$ is $(\Sexpr{myround(beta_t_mcap_results$ci[1], digits = 3)}, \Sexpr{myround(beta_t_mcap_results$ci[2], digits = 3)})$, with the full results displayed in Figure~\ref{fig:betat}.
 These results are suggestive that the inclusion of a trend in the transmission rate improves the quantitative ability of Model~1 to describe the observed data.
 The maximum likelihood estimate for $\transmissionTrend$ corresponds to a \Sexpr{paste0(myround(100 - 100*exp(beta_t_mcap_results$mle * 430/215), 1), '\\%')} reduction to the transmission rate over the course of the outbreak, with a $95\%$ confidence interval of (\Sexpr{paste0(rev(myround(100 - 100*exp(beta_t_mcap_results$ci * 430/215), 1)), collapse = ', ', sep = '\\%')}) for the overall reduction in transmission.
 The reported results for Model~1 in the remainder of this article were obtained with the inclusion of the parameter $\transmissionTrend$.
@@ -1233,7 +1233,7 @@ Many Monte Carlo replications are then required to quantify and further reduce t
 The large increase in the log-likelihood for Model~1 (Table~\ref{tab:likes}) can primarily be attributed to increasing the computational effort used to calibrate the model.
 This result highlights the importance of carefully determining the necessary computational effort needed to maximize model likelihoods and acting accordingly.
 In this case study, this was done by performing standard diagnostics for the IF2 and particle filter algorithms \citep{king16,li23,pons-salort18,laneri10}. Given the considerable computational costs of simulation-based algorithms, we find it useful to perform an initial assessment using hyperparameter values---such as the number of particles, filtering iterations, and replicates based on different parameter initializations---that enable relatively quick calculations. The insights obtained from this preliminary analysis help in accurately determining the amount of computation that is required to achieve reliable outcomes.
-Simulations from the initial conditions of our fitted model are plotted against the observed incidence data in Fig.~\ref{fig:mod1fit}.
+Simulations from the initial conditions of our fitted model are plotted against the observed incidence data in Figure~\ref{fig:mod1fit}.
 
 \begin{figure}[!h]
 \centering
@@ -1320,7 +1320,7 @@ Here we chose to fit the model to transformed case counts rather than adding ove
 
 We implemented this model using the \code{spatPomp} \code{R} package \citep{asfaw24}.
 The model was then fit using the subplex algorithm \citep{king2020Subplex}.
-A comparison of the trajectory of the fitted model to the data is given in Fig.~\ref{fig:mod2Traj}.
+A comparison of the trajectory of the fitted model to the data is given in Figure~\ref{fig:mod2Traj}.
 
 <<Model 2 Trajectory, echo=FALSE>>=
 
@@ -1419,7 +1419,7 @@ For our analysis, we calibrate the parameters of the spatially coupled version o
 This algorithm extends the work of Ning and Ionides \citep{ning23}, who provided theoretic justification for the version of the algorithm that only estimates unit-specific parameters.
 The IBPF algorithm enables us to directly estimate the parameters of models describing high-dimensional partially-observed nonlinear dynamic systems via likelihood maximization.
 The ability to directly estimate parameters of Model~3 is responsible for the large increase in model likelihoods reported in Table~\ref{tab:likes}.
-Simulations from the fitted model are displayed in Fig.~\ref{fig:h3spatsims}.
+Simulations from the fitted model are displayed in Figure~\ref{fig:h3spatsims}.
 
 <<Model 3 SpatPOMP Sims, echo=FALSE>>=
 
@@ -1542,7 +1542,7 @@ On the other hand, comparisons may generate unexpected results that have the pot
 In the context of our case study, we demonstrate how the fit of Model~1 corroborates other evidence concerning the role of rainfall in cholera epidemics.
 Specifically, we examine the results of fitting the flexible cubic spline term in Model~1 (Eqs.~\myeqref{model1:lambda}--\myeqref{model1:beta}).
 The cubic splines permit flexible estimation of seasonality in the force of infection, $\transmission(t)$.
-Fig.~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
+Figure~\ref{fig:h1SeasRain} shows that the estimated seasonal transmission rate $\transmission$ mimics the rainfall dynamics in Haiti, despite Model~1 not having access to rainfall data.
 This is consistent with previous studies that incorporated rainfall as an important part of their mechanistic model or otherwise argue that rainfall is an important driver of cholera dynamics in Haiti \citep{hulland19,kirpich17,lee20,moise20,pasetto18,kirpich16,eisenberg13,rinaldo12,mavian20}.
 The estimated seasonality also features an increased transmission rate during the fall, which was noticed at an earlier stage of the epidemic \citep{rinaldo12}. The high transmission rate in the fall may be a result of the increase transmission that occurred in the fall of 2016, when hurricane Matthew struck Haiti \citep{ferreirai16}.
 
@@ -1754,17 +1754,17 @@ ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) 
 @
 \caption[Probability of cholera elimination under Models~1 and 3.]{\label{fig:elimProbs}
 Probability of cholera elimination, defined as having zero cholera infectious for at least 52 consecutive weeks, based on 10 year simulations from calibrated versions of Models~1 and 3.
-Compare to Fig.~3A of \citet{lee20}.}
+Compare to Figure~3A of \citet{lee20}.}
 \end{figure}
 
 Probability of elimination estimates of this form are not meaningful for deterministic models, as the trajectory of these models only represent the mean behavior of the system rather than individual potential outcomes.
-We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Fig.~\ref{fig:mod2Traj}).
+We therefore do not provide probability of elimination estimates under Model~2, but show trajectories under the various vaccination scenarios using this model (Figure~\ref{fig:mod2Traj}).
 
 \section{Discussion}\label{sec:discussion}
 
 The ongoing global COVID-19 pandemic has demonstrated how government policy may be affected by the inferences drawn from mathematical modeling \citep{saltelli20}.
 However, the development of credible models---which are supported by data and can provide quantitative insights into a dynamic system---remains a challenging task.
-In this article, we demonstrated opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.
+In this chapter, we demonstrated opportunities available for raising the current standards of statistical inference for mathematical models of biological systems.
 
 We presented methodology consistent with existing guidelines \citep{behrend20} but going beyond standard practice.
 In particular, we showed the value of comparing the likelihood of fitted mechanistic models versus non-mechanistic benchmarks, a practice that has been previously advocated for \citep{he10} but was not done by any of the studies in our literature review.
@@ -1779,7 +1779,7 @@ In our case study, the re-calibrated version of Model~1 outperformed its benchma
 When fitting a mechanistic model to a dynamic system, the complexity of the model warrants consideration. Mathematical models provide simplified representations of complex systems, with the simplicity serving both to facilitate scientific understanding and to enable statistical inference on unknown parameters.
 In our case study, employing deterministic dynamics in Model~2 was found to be an over-simplification by comparing model fit with benchmarks.
 % Including stochastic metapopulation dynamics permitted investigation of spatiotemporal data, the main cost being additional complexity of numerical computations.
-Model~3 is distinct in that it is both stochastic and has a meta-population structure, making it challenging to draw likelihood-based inferences. In this paper, we demonstrated how this model class can be calibrated to incidence data using the innovative IBPF algorithm. One of only a few examples of fitting a nonlinear non-Gaussian meta-population model via maximum likelihood \citep{li23,ionides22}, this case study exemplifies the algorithm's potential benefits and provides an example for future researchers on a possible approach to fitting a high-dimensional non-linear model.
+Model~3 is distinct in that it is both stochastic and has a meta-population structure, making it challenging to draw likelihood-based inferences. In this chapter, we demonstrated how this model class can be calibrated to incidence data using the innovative IBPF algorithm. One of only a few examples of fitting a nonlinear non-Gaussian meta-population model via maximum likelihood \citep{li23,ionides22}, this case study exemplifies the algorithm's potential benefits and provides an example for future researchers on a possible approach to fitting a high-dimensional non-linear model.
 
 Likelihood-based methods aid in determining an appropriate level of model complexity. Models fit to the same data can be compared using a criteria such as AIC. Nested model variations are particularly useful as they enable formal statistical testing of the nested features via likelihood ratio tests. Our case study demonstrated the examination of nested model features for all three models. Model~1 investigated a time-varying transmission rate; Model~2 assessed a phase-shift parameter in seasonal cholera peaks; Model~3 incorporated hurricane-related parameters.
 
@@ -1815,6 +1815,6 @@ Scientific results are only trustworthy so far as they can be critically questio
 
 We provide a strong form of reproducibility, as well as extendability, by developing our analysis in the context of a software package, \code{haitipkg}, written in the R language \citep{r}.
 Using a software package mechanism supports documentation, standardization and portability that promote extendability.
-In the terminology of \citet{gentleman07}, the source code for this article is a {\it dynamic document} combining code chunks with text.
-In addition to reproducing the article, the code can be extended to examine alternative analysis to that presented.
+In the terminology of \citet{gentleman07}, the source code for this chapter is a {\it dynamic document} combining code chunks with text.
+In addition to reproducing the content of this chapter, the code can be extended to examine alternative analysis to that presented.
 The dynamic document, together with the R packages, form a {\it compendium}, defined by \citet{gentleman07} as a distributable and executable unit which combines data, text and auxiliary software (the latter meaning code written to run in a general-purpose, portable programming environment, which in this case is R).
