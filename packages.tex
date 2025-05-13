@@ -137,8 +137,65 @@
 \newcommand\timeSet{{\mathbb T}}
 \newcommand\data[1]{#1^*}
 \newcommand\unitSpecific{\hspace{0.1mm}\mathrm{us}}
-\newcommand\shared{\hspace{0.15mm}\mathrm{sh}}
 \newcommand\given{{\,\vert\,}}
 \newcommand\prob{\mathbb{P}}
 \newcommand\E{\mathbb{E}}
+
+%%%%% MPIF %%%%%% 
+\usepackage{placeins}
+\usepackage{etoolbox}
+
+\newcommand\panelPomp{\texttt{panelPomp}\xspace}
+\newcommand\pomp{\texttt{pomp}\xspace}
+\newcommand\nimble{\texttt{nimble}\xspace}
+\newcommand\mcstate{\texttt{mcstate}\xspace}
+\newcommand\spatPomp{\texttt{spatPomp}\xspace}
+\newcommand\PanelPOMP{PanelPOMP}
+\newcommand\example[1]{ \item #1}
+
+% PSUEDO-CODE HELPERS
+\newcommand\mycolon{{\hspace{0.6mm}:\hspace{0.6mm}}}
+\newcommand\np{j}
+\newcommand\Np{J}   % Number of particles
+\newcommand\nrep{i} % Replicate index (in likelihood evaluations)
+\newcommand\Nrep{I} % Number of replicates (in likelihood evaluations)
+\newcommand\unit{u} % Unit index
+\newcommand\Unit{U} % Number of panel units
+\renewcommand\time{n}
+\newcommand\Time{N}
+\newcommand\Nmif{M} % Number of iterated filtering steps
+\newcommand\nmif{m} % Mif index
+\newcommand\Shared{\Phi}
+\newcommand\Specific{\Psi}
+\newcommand\shared{\phi}
+\newcommand\specific{\psi}
+\newcommand\Nshared{A}
+\newcommand\nshared{a}
+\newcommand\Nspecific{B}
+\newcommand\nspecific{b}
+\newcommand\dimSpecific{{\mathrm{dim}(\Psi)}}
+\newcommand\dimShared{{\mathrm{dim}(\Phi)}}
+\newcommand\argequals{{\,=\,}}
+\newcommand\mystretch{\rule[-2mm]{0mm}{5mm} }
+\newcommand\myBigStretch{\rule[-3mm]{0mm}{5mm} }
+\newcommand\asp{\hspace{6mm}}
+
+% MATH HELPERS
+%\newcommand\Thetadim{{{\mathrm{dim}}(\Theta)}}
+\newcommand\contactsRate{\Lambda}
+\newcommand\giventh{{\,;\,}}
+\newcommand\eulerstep{\Delta}
+
+
+\newcommand\lemmaBound{c}
+%\newcommand\normal{\mathrm{Normal}}
+\newcommand\normal{{\mathcal N}}
+\newcommand\pop{\mathrm{pop}}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{define}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
 

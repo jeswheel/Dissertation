@@ -3,14 +3,19 @@
 ## TODO
 
 - [x] Create TODO list.
-- [ ] Write Acknowledgements.
+- [ ] Finish Acknowledgements.
 - [ ] Check Figure vs Fig in the entire document.
 - [ ] Check Tab vs Table in the entire document.
 - [ ] Run spell-checker on all documents. 
 - [ ] Fill out README with instructions
 - [x] Add ARIMA appendices
 - [x] Add Haiti Appendices 
-- [ ] Add MPIF paper
+- [x] Add MPIF paper
+- [ ] Add MPIF paper appendices.
+- [ ] Proof reed MPIF chapter
+- [ ] Add brief comments about PanelPOMP and SpatPOMP in Introduction. 
+- [ ] Remove POMP introduction from MPIF
+- [ ] Remove POMP introduction from HAITI. 
 - [x] Choose better citations (name, year)
    - [x] Chicago seems good, but why am I getting underlines and not italics? Fix this. 
 - [x] Write Introduction
