@@ -1637,8 +1637,8 @@ bpf_sub3_out <- readRDS(paste0(root, "data/noHur_cond_LL.rds"))
 
 In this section, we provide more detail on the process that was used to estimate the coefficients of Model~3.
 In particular, we discuss why we decided to include additional model parameters---those that are associated with the behavior of the system during Hurricane Matthew---that were not considered by \cite{lee20}.
-To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides22}.
-Due to the novelty of this algorithm, there exists only a few examples where the IBPF algorithm is used for data analysis \cite{li23,ionides22}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
+To calibrate this model, we used the iterated block particle filter (IBPF) method of \cite{ionides24}.
+Due to the novelty of this algorithm, there exists only a few examples where the IBPF algorithm is used for data analysis \cite{li23,ionides24}, which is one motivation of the inclusion additional details related to fitting and diagnosing the model fit provided here.
 
 Lee et al. (2020)~\cite{lee20} only estimated model parameters to a simplified version of Model~3 on a subset of the available data, as no method existed at the time of their publication to fit a fully coupled meta-population model to disease incidence data.
 Building on their results, we fit the fully coupled version of Model~3 to (nearly) all available data, reserving only a few observations to use to calibrate the initial conditions of the model (see the supplement for initialization models for more details).
@@ -1646,7 +1646,7 @@ To maximize model likelihoods, we relied on parameter estimates obtained while c
 In our preliminary investigations that were done prior to conducting a profile likelihood search, we found that it was necessary to use multiple searches for the MLE, periodically pruning away less successful searches.
 To do this, the first collection of searches is performed by obtaining initial values for the parameters by uniformly sampling values from a predefined hypercube.
 A subsequent refinement search used parameter values corresponding to the largest model likelihoods as starting parameter values.
-The need for multiple searches does not appear to be uncommon, as a similar approach was used in \cite{ionides22}.
+The need for multiple searches does not appear to be uncommon, as a similar approach was used in \cite{ionides24}.
 While computationally intensive, profile likelihoods proved to be an effective alternative to maximizing model likelihoods without the need to apply this multistage heuristic.
 
 We use the iterative fitting / pruning technique described above to fit the fully coupled version of Model~3 proposed in \cite{lee20}.

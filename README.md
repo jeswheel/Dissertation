@@ -11,7 +11,9 @@
 - [x] Add ARIMA appendices
 - [x] Add Haiti Appendices 
 - [x] Add MPIF paper
-- [ ] Add MPIF paper appendices.
+- [x] Add MPIF paper appendices.
+- [ ] Short titles for MPIF figures. 
+- [ ] Create "List of Algorithms", instead of programs. 
 - [ ] Proof reed MPIF chapter
 - [ ] Add brief comments about PanelPOMP and SpatPOMP in Introduction. 
 - [ ] Remove POMP introduction from MPIF
@@ -19,7 +21,7 @@
 - [x] Choose better citations (name, year)
    - [x] Chicago seems good, but why am I getting underlines and not italics? Fix this. 
 - [x] Write Introduction
-   - [] ? Add discussion on PanelPOMP / SpatPOMP ?
+   - [ ] ? Add discussion on PanelPOMP / SpatPOMP ?
 - [ ] Write conclusion
 - [x] Proof read ARMA paper 
    - [x] Short names for all figures and tables

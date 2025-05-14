@@ -2,7 +2,8 @@
 CHAPTER_DIRS = $(wildcard chapters/*)
 APPENDIX_DIRS = $(wildcard appendices/*)
 APPENDIX_FILES = $(foreach dir,$(APPENDIX_DIRS),$(wildcard $(dir)/*.Rnw))
-APPENDIX_TEX = $(APPENDIX_FILES:.Rnw=.tex)
+APPENDIX_TEX = $(foreach dir,$(APPENDIX_DIRS),$(wildcard $(dir)/*.tex))
+# APPENDIX_TEX = $(APPENDIX_FILES:.Rnw=.tex)
 RMW_FILES = $(foreach dir,$(CHAPTER_DIRS),$(wildcard $(dir)/*.Rnw))
 TEX_FILES = $(RMW_FILES:.Rnw=.tex)
 MAIN_TEX = main.tex
