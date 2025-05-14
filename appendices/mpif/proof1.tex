@@ -1,0 +1,104 @@
+ \section{Proof and discussion of Theorem~1}\label{sec:panelTheory}
+ 
+  Theorem~\ref{theorem:pif} is a straightforward extension of Theorem~4 of \citet{chen24} to PanelPOMP models. 
+  Our approach is to express an arbitrary PanelPOMP model as a POMP model by ``stacking" the model into a long format.
+  Then, Algorithm~\ref{alg:mpif} is equivalent to applying Algorithm~4 of \citet{chen24} to this stacked POMP model.
+  After ensuring the necessary conditions are met, their Theorem~4 provides guarantees for this to converge to the MLE, proving the conclusions of Theorem~\ref{theorem:pif}. 
+  
+  This stacking argument follows the approach of \citet{breto20}, who previously introduced the PIF algorithm and extended an existing theory for low-dimensional POMP models \citep{ionides15} to derive theoretical properties of PIF. 
+  However, the recent work of \citet{chen24} provides convergence results for iterated filtering algorithms under weaker assumptions than \citet{ionides15}.
+  Most notably, \citet{chen24} prove convergence of iterated filtering algorithms as the random walk standard deviation for parameter perturbations decreases over time rather than being fixed at a small constant.
+  Thus, this approach allows us to provide stronger theoretical results for panel iterated filtering than obtained by \citet{breto20}.
+  
+  \begin{proof} Let $\Theta_j^{(M)}$ denote the output of $M$ iterations of Algorithm~\ref{alg:mpif} without marginalization, and recall the basic definition of the joint density of a PanelPOMP model: 
+  \begin{align}
+&f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}_{1:N}; \theta) =
+\nonumber
+\\
+& \hspace{20mm} \prod_{u = 1}^Uf_{X_{u, 0}}(x_{u, 0};\theta) 
+\prod_{n = 1}^{N_u}f_{Y_{u, n}|X_{u, n}}(y_{u, n} | x_{u, n} ;\theta)f_{X_{u, n} | X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta). \label{eq:ppompSI}
+\end{align}
+  We would like to ``stack" the unit specific processes into a single process. 
+  For convenience, we refactor the model to initialize at time $t_{u, 1}$ rather than $t_{u, 0}$ for each unit $u$ by considering the density of $X_{u, 1}$ after integrating out $X_{u, 0}$. 
+  That is, we use the identity 
+  $$
+  f_{X_{u,1}}(x_{u, 1};\theta) = \int_{\mathcal{X}} f_{X_{u, 1}|X_{u, 0}}(x_1|x_0;\theta)f_{X_{u, 0}}(x_0;\theta)dx_0
+  $$
+  and use this to write Eq.~\ref{eq:ppompSI} as
+  \begin{align}
+  f_{\mathbf{X}_{1:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{1:N}, \mathbf{y}_{1:N}; \theta) = \prod_{u = 1}^U \prod_{n = 1}^{N_u}f_{Y_{u, n}|X_{u, n}}(y_{u, n} | x_{u, n} ;\theta)f_{X_{u, n} | X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta), \label{eq:ppompSI1}
+  \end{align}
+  using the convention that for $n = 1$, $f_{X_{u, n} | X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta) = f_{X_{u,1}}(x_{u, 1};\theta)$.
+  
+  Now let $T_u = \sum_{k = 1}^u (t_{k, N_k} - t_{k, 1})$, with $T_0 = 0$, and $S_u = \sum_{k = 1}^u N_k$ for $u \in 1:U$ and $S_0 = 0$. 
+  We then define new latent processes $\tilde{X}$ and $\tilde{Y}$. First,
+  \begin{align}
+    \tilde{X}(t) &= X_u(t_{u, 1} + (t - T_u)), \, \text{for} \,\, T_{u-1} \leq t \leq T_u.
+  \end{align}
+  Letting $t'_n = t_{u, n-S_u}$ for $S_{u - 1} < n \leq S_u$, the latent and observable processes are equivalent to
+  \begin{align*}
+  \begin{split}
+    \tilde{X}_n = \tilde{X}(t'_n) = X_{u, n - S_{u - 1}} \\
+    \tilde{Y}_n = Y_{u, n - S_{u-1}}. 
+  \end{split}
+  \end{align*}
+  With this new definition of $\tilde{X}$ and $\tilde{Y}$, we have a new POMP model which has joint density
+  \begin{align}
+&f_{\tilde{X}_{1:S_U}, \tilde{Y}_{1:S_U}}(x_{1:S_U}, y_{1:S_U}; \theta) =  \nonumber
+\\
+& \hspace{20mm}
+f_{\tilde{X}_1}(x_1;\theta)f_{\tilde{Y}_1|\tilde{X}_1}(y_1 | x_1; \theta)\prod_{n = 2}^{S_{U}}f_{\tilde{Y}_n|\tilde{X}_n}(y_n | x_n; \theta)f_{\tilde{X}_{n}|\tilde{X}_{n - 1}}(x_n | x_{n - 1}; \theta). \label{eq:lowPOMP}
+  \end{align}
+
+  As defined, Eqs.~\ref{eq:lowPOMP} and \ref{eq:ppompSI} describe the same model. 
+  We refer to Eq~\ref{eq:lowPOMP} as the \emph{long} format, which is indicative that the model has been expressed as a low-dimensional POMP model with observation times ranging from $1$ to $\sum_{u = 1}^U N_u$, rather than a collection (or product) of POMP models, each with observation times $N_u$ for $u \in \seq{1}{U}$. 
+  This representation allows us to naturally extend the theoretical framework of \citet{chen24} to the PanelPOMP model.
+  Specifically, it is easily verified that Assumptions~\ref{assumption:1}--\ref{assumption:2} outlined in Appendix~\ref{sec:assumptions} ensure that the density in Eq.~\ref{eq:lowPOMP} corresponds to a state-space model that satisfies the MLE conditions of \citet{chen24}. 
+  In a similar fashion, Assumption~\ref{assumption:kernel} ensures that an iterated filtering algorithm with perturbation kernel that satisfies these conditions implies the conclusion of Theorem~\ref{theorem:pif}, as it is a direct application of Theorem~4 of \citet{chen24} to this model. 
+  
+    \end{proof}
+
+  \noindent Formally, Theorem~\ref{theorem:pif} provides guarantees for several variants of iterated filtering algorithms applied to panel models, where each variant is a change to the perturbation kernel. 
+  However, not all variants are useful in practice. 
+    For instance, directly applying IF2 to panel models generally leads to worse results than the PIF algorithm applied to the same model \citep{breto20}.
+  
+  As pointed out in Section~\ref{sec:discussion}, the effect of the perturbation kernel is twofold. 
+    First, it helps revive particle representations of the intermediate parameter distributions by adding random noise. 
+    Second, the random noise results in a loss of information by masking the signal from the observed data. 
+    However, these competing interests are not addressed in theorems involving iterated filtering algorithms.
+    In this case, heuristics are useful for determining suitable perturbation densities. 
+    
+    For instance, it can be shown following Proposition~S2 of \citet{chen24} that choosing the perturbation density $h_{u, n}(\theta|\varphi; \sigma_{u, m})$ in lines~\ref{line:startu} and \ref{line:perturbations} of Algorithm~\ref{alg:mpif} to be a multivariate normal density satisfies Assumption~\ref{assumption:kernel}, where $\varphi$ is the mean of the distribution and, for some full rank positive definite matrix $\Sigma_0$ and sequence $\sigma_{u, m} = o(m^{-1})$, $\sigma^2_{u, m}\Sigma_0$ is the covariance.
+    
+    If $\Sigma_0$ is full rank, however, then the perturbations will be applied to all parameters at each time step, including unit specific parameters for units $v \in \{1, \ldots, U\} / \{u\}$. 
+    This results in an unnecessary amount of loss of information at each step.
+    This motivates the default behavior of the PIF algorithm, which is that each unit gets an initial covariance $\Sigma_{u, 0}$, and only the columns corresponding to the shared and unit-specific parameters of interest are full rank. 
+    Explicitly, if we write $\Sigma_{u, 0}^{(\phi, \psi_u)}$ as the full-rank submatrix corresponding the relevant shared and unit specific parameters, then the perturbation in line~\ref{line:perturbations} in Algorithm~\ref{alg:mpif} is equivalent to 
+\begin{equation*}
+  % \spacingset{1.5}
+  \begin{cases}
+    \big(\Phi_{n}, \Psi_{u, n} \big) \sim N\Big[\big(\Phi_{n-1}, \Psi_{u, n-1} \big), \, 
+        \sigma^2_{u, m}\Sigma_{u, 0}^{(\phi, \psi_u)}\Big]
+    \\
+    \Psi_{v, n} = \Psi_{v, n-1} \text{ for all} \, v \in \seq{1}{U}, \, v \neq u.
+  \end{cases}  
+\end{equation*}
+ This strategy is effective in reducing the loss of information that results from perturbing parameters when the data provides limited information. 
+ However, it also results in the particle depletion issue in higher dimensions that is discussed in detail in Section~\ref{sec:depletion}. 
+ \citet{chen24} propose alternative perturbation strategies that are intended to balance these competing interests in low dimensional models. 
+ In the PanelPOMP models we are interested in this study, the proposed alternatives would still require a large number of perturbations of parameters that are not of direct interest, resulting in a large loss of information. 
+ For this reason, the marginalization procedure is useful in practice as it directly addresses both issues simultaneously in PanelPOMP models. 
+ Combining the novel perturbations strategies of \citet{chen24} with a marginalization step could also result in an improved algorithm in some cases, but that is outside of the scope of this article. 
+    
+A common scenario is that the entire collection of model parameters contain a subset that are only relevant to the model dynamics at certain time steps. 
+The most common instance of this is initial value parameters, which only impact how the latent dynamic process is initialized, and as such the data points that are generally most relevant for inference are at the start of the time series. 
+A standard strategy for these parameters in low-dimensional settings is to only apply perturbations at observation times at the beginning of the observed time series, following the logic above for unit-specific parameters from units $v \neq u$. 
+  
+One reason that Theorem~\ref{theorem:pif} cannot be used directly to infer the practicality of panel iterated filtering algorithms is because the behavior of $C_M$ as $M \rightarrow \infty$ is unknown.
+Previous works on high-dimensional particle filtering---without adding perturbations or performing data cloning---suggest that the sequence $C_M$ might scale exponentially with the number of units \citep{snyder08,bengtsson08}.
+While this problem has partially been avoided by writing the PanelPOMP in a long format, reducing the size of both the latent and observed spaces at each time point, the parameter space for $\Theta$ is still large.
+Specifically, the total dimension of $\Theta$ is $d_\phi + Ud_u$, where $d_\phi$ and $d_u$ are the number of shared and unit-specific parameters, respectively.
+
+Both perturbation kernels proposed above (IF2 and PIF) therefore require high-dimensional filtering, which is known to not perform well in practice \citep{rebeschini15}.
+This provides another motivation for the MPIF algorithm, as it dramatically shrinks the size of the latent sates that are being filtered at each steps. 
+Thus, the MPIF algorithm has many similarities to other iterated block particle filtering algorithms that have been effective for moderately sized dynamic systems with spatial coupling \citep{ning23,ionides24}.

@@ -1,0 +1,411 @@
+\section{Proof of Theorem~2}\label{appendix:Gaus}
+
+As a reminder, we assume that there are $U\geq 2$ units, labeled $\seq{1}{U}$, with the data for unit $u$ being denoted as $\mathbf{y}^*_u$. 
+We write $\theta = (\phi, \psi_1, \ldots, \psi_U)$, and recall that the unit likelihood $L_{u}(\theta;\mathbf{y}^*_u)$ for unit $u \in 1:U$ depends only on the shared parameter $\phi$ and the unit-specific parameter $\psi_u$.
+The panel assumption implies that, conditioned on the parameter vector, the units are dynamically independent.
+Therefore, we can decompose the likelihood function for the entire collection of data $L(\theta; \mathbf{y}^*)$ as:
+\begin{align*}
+    L(\theta; \mathbf{y}^*) = \prod_{u = 1}^U L_u(\theta;\mathbf{y}_u^*) = \prod_{u = 1}^U L_u(\phi, \psi_u;\mathbf{y}_u^*).
+\end{align*}
+
+Each iteration of the Eqs.~\ref{eq:margBayes} and \ref{eq:MPIFupdate} corresponds to a Bayes update followed by a marginalization. 
+Under the statement of Theorem~\ref{theorem:GG}, the prior and likelihood are assumed to be Gaussian.
+In this setting, it is well known that the resulting Bayes posterior also corresponds to a Gaussian distribution. 
+Similarly, the marginalization of a multivariate Gaussian distribution also results in multivariate Gaussian distributions. 
+Thus, each iteration of Eqs.~\ref{eq:margBayes} and \ref{eq:MPIFupdate} results in a density that corresponds to a Gaussian distribution. 
+
+We now show that the mean of the resulting Gaussian distribution converges to the MLE, while the covariance matrix converges to the zero matrix, resulting in a density with all mass centered at the MLE. 
+To aid this calculation, we introduce the following lemma.
+\begin{lemma}\label{lemma:bound}
+\label{lemma:matrix}
+  Let $d$ be a positive integer, and let $B_k \in \R^{2\times 2}$ for $k \in \seq{1}{d}$ be a collection of real-valued matrices.
+  We construct a sequence of matrices $A_{k} \in \R^{d+1\times d+1}$ such that:
+  \begin{equation*}
+    % \spacingset{1.5}
+    [A_k]_{i, j} = \begin{cases}
+        [B_k]_{1,1}, & i = j = 1 \\ 
+        [B_k]_{1,2}, & i = 1, j = k+1 \\
+        [B_k]_{2, 1}, & i = k+1, j=1 \\
+        [B_k]_{2,2}, & i = j = k+1 \\
+        1, & i = j, \, i \notin \{1, k+1\} \\
+        0, & \text{otherwise}
+	\end{cases}
+  \end{equation*}
+ That is, $A_k$ is a perturbation of the identity matrix, where the first and $(k+1)$th row and column have been modified on the diagonal and on their off-diagonal intersection to match the matrix $B_k$.
+If for all $k \in \seq{1}{d}$, $\|B_k\|_2 \leq c$ for some constant $0 < \lemmaBound \leq 1$, then
+\begin{equation}\label{eq:lemma:bound}
+\bigg\| \prod_{k = 1}^d A_k \bigg\|_2 \leq \lemmaBound.
+\end{equation}
+\end{lemma}
+\begin{proof}[Proof of Lemma~\ref{lemma:bound}]
+  For $i, j \in \seq{1}{(d+1)}$, denote $\mu_{(i, j)} \in \mathbb{R}^2$ as the sub-vector of $\mu \in \mathbb{R}^{d+1}$ that contains only the $i$ and $j$th elements, and write $\mu_{-(i, j)} \in \mathbb{R}^{d-1}$ to be the sub-vector of $\mu$ after removing these elements.
+  By design, the matrix $A_k$ operates only on the sub-vector $\mu_{(1, k+1)}$.
+That is, if $B_k \, \mu_{(1, k+1)} = (\tilde{\mu}_{(1)}, \tilde{\mu}_{(k+1)})^T$, then $A_k\mu = (\tilde{\mu}_{(1)}, \mu_{(2)}, \ldots, \tilde{\mu}_{(k + 1)}, \ldots, \mu_{(d+1)})$.
+  From this, we see that for positive integer $m \leq d$,
+  the first $m$ factors of the product $\prod_{k = 1}^d A_k$ modify only the first $m + 1$ dimensions of a vector $\mu \in \R^{d+1}$.
+  
+We proceed by mathematical induction on the dimension size.
+Let $\big\{A^{(d)}_k, k\in \seq{1}{d-1}\big\}$ be a collection of matrices satisfying the condition of Lemma~\ref{lemma:bound} for each $d$.
+Setting $P_d=\big\|\prod_{k = 1}^{d-1} A^{(d)}_k \big\|_2$, we first observe that Eq.~(\ref{eq:lemma:bound}) holds for $d=2$ as a direct consequence of the condition $\|B_k\|_2 \leq c$.
+Suppose inductively that the lemma holds for $d$, so that $P_d\leq\lemmaBound$.
+We wish to bound $P_{d+1}$.
+We can choose $A^{(d)}_k$ to be the $(d+1)\times (d+1)$ sub-matrix of $A^{(d+1)}_k$ omitting row and column $(d+2)$.
+Thus, for $k\in\seq{1}{d}$,
+\begin{equation*}
+A^{(d+1)}_k =
+  \begin{pmatrix}
+    A^{(d)}_k & 0 \\
+    0 & 1
+  \end{pmatrix}.
+\end{equation*}
+Consider a vector $\mu \in \R^{d+1}$, such that $\|\mu\|_2 \leq 1$.
+Let $\tilde{\mu} \in \R^{d}$ be defined by 
+\begin{equation}
+\tilde{\mu} = \bigg[\bigg(\prod_{k = 1}^{d-1} A^{(d+1)}_k\bigg)\mu\bigg]_{(1:d)}
+\end{equation}
+and notice that we have
+\begin{equation}\label{eq:lemma:d}
+\tilde{\mu} = \bigg(\prod_{k = 1}^{d-1} A^{(d)}_k\bigg)\mu_{(1:d)}.
+\end{equation}
+By construction, we have 
+\begin{align*}
+    \bigg|\Big(\prod_{k = 1}^d A^{(d+1)}_k\Big)\mu \bigg|^2_2 &= \bigg|\Big(A^{(d+1)}_d\prod_{k = 1}^{d-1} A^{(d+1)}_k\Big)\mu \bigg|^2_2\\
+    &= \big|A^{(d+1)}_d(\tilde{\mu}_{(1:d)}, \mu_{(d+1)})^T\big|^2_2 \\
+    &= \big|B^{(d+1)}_d (\tilde{\mu}_1, \mu_{(d+1)})^T\big|^2_2 + \big|\tilde{\mu}_{(1:d)}\big|^2_2 - \tilde{\mu}^2_1.
+\end{align*}
+Because $\|B^{(d+1)}_d\|_2 \leq \lemmaBound$, $|B^{(d+1)}_d (\tilde{\mu}_1, \mu_{(d+1)})^T|^2_2 \leq \lemmaBound^2|(\tilde{\mu}_1, \mu_{(d+1)})^T|^2_2$.
+Furthermore, our inductive hypothesis applied to Eq.~(\ref{eq:lemma:d}) implies that
+$|{\tilde{\mu}}_{(1:d)}|^2_2 \leq \lemmaBound^2|\mu_{(1:d)}|^2_2 \leq \lemmaBound^2|\mu|^2_2$.
+Therefore,
+\begin{align}
+    \bigg|\Big(\prod_{k = 1}^d A_k\Big)\mu\bigg|^2_2 &\leq \lemmaBound^2({\tilde{\mu}}^2_1 + \mu_{(d+1)}^2) + \lemmaBound^2(|\mu_{(1:d)}|^2_2) - {\tilde{\mu}}^2_1 \\
+    &= (\lemmaBound^2-1){\tilde{\mu}}^2_1 + \lemmaBound^2 |\mu|^2_2
+    \\
+    \label{eq:lemma:conclusion}
+    &\leq \lemmaBound^2 \|\mu\|^2_2,
+\end{align}
+with Eq.~(\ref{eq:lemma:conclusion}) implied by $\lemmaBound \leq 1$, and hence $(\lemmaBound^2-1) < 0$.
+It follows immediately from Eq.~(\ref{eq:lemma:conclusion}) that $P_{d+1}\le c$, completing the proof.
+\end{proof}
+
+We now return to the main argument.
+%continue the proof of Theorem~\ref{theorem:GG}. 
+
+\begin{proof}[Proof of Theorem~\ref{theorem:GG}]
+Using the transformation invariance of the MLE, we can suppose without loss of generality that the maximum of the marginal likelihood for unit $u$ is at $\phi, \psi_u = 0$.
+To help ease notation, we write the covariance matrix as
+$$
+\Lambda^*_u = \begin{pmatrix}
+    \Lambda^{(u)}_{\phi} & \Lambda_{\phi, u} \\
+    \Lambda_{\phi, u} & \Lambda_{u}
+\end{pmatrix}.
+$$
+Let the prior density $\pi_0(\theta)$ correspond to a Gaussian distribution with mean $\mu_0 \in R^{U+1}$ and precision $\Gamma_0 = \Sigma^{-1}_0 \in \R^{U+1\times U+1}$,
+\begin{align*}
+    \mu_0 = \begin{pmatrix}
+        \mu_0^{(\phi)} \\ 
+        \mu_0^{(1)} \\ 
+        \vdots \\
+        \mu_0^{(U)}
+    \end{pmatrix}, \, \, \hspace{2mm} \Gamma_0 = \begin{pmatrix}
+        \tau^{(\phi)}_0 & 0 & \ldots & 0 \\
+        0 & \tau^{(1)}_0 & & \vdots \\ 
+        \vdots & & \ddots & 0\\
+        0 & \ldots & 0 & \tau^{(U)}_0
+    \end{pmatrix}.
+\end{align*}
+
+Eqs.~\ref{eq:margBayes} and \ref{eq:MPIFupdate} contain two indices $(\nmif, \unit)$ for the intermediate density function $\pi_{\nmif, \unit}(\theta)$.
+The first index ($\nmif \in \mathbb{N}$) counts the number of times data from all units has been used in the Bayes update (Eq.~\ref{eq:margBayes}), and this corresponds to the number of complete iterations of the $\nmif$ loop in Algorithm~\ref{alg:mpif}. 
+The second index ($\unit \in \seq{1}{U}$) denotes the data from which unit is currently being used to update the density, and we refer to this as a sub-iteration. 
+In what follows, we assume that $\pi_{\nmif, \unit - 1}(\theta) = \pi_{\nmif - 1, \Unit}(\theta)$ if $\unit = 1$, and use a similar convention for the corresponding mean and covariance that correspond to this intermediate density. 
+
+The density after each sub-iteration of Eqs.~\ref{eq:margBayes} and \ref{eq:MPIFupdate} is Gaussian, and the marginalization step ensures that the precision matrix from previous sub-iterations is diagonal. 
+Using $\mu_{\nmif, \unit-1}$ and $\Gamma_{\nmif, \unit-1}$ to denote the mean and precision after $\nmif$ complete iterations and the $(\unit-1)$th unit-iteration, we write: 
+\begin{align*}
+    \mu_{\nmif, \unit - 1} = \begin{pmatrix}
+        \mu_{\nmif, \unit-1}^{(\phi)} \\ 
+        \mu_{\nmif, \unit-1}^{(1)} \\ 
+        \vdots \\
+        \mu_{\nmif, \unit-1}^{(\Unit)}
+    \end{pmatrix}, \, \, \hspace{2mm} \Gamma_{\nmif, \unit-1} = \begin{pmatrix}
+        \tau^{(\phi)}_{\nmif, \unit-1} & 0 & \ldots & 0 \\
+        0 & \tau^{(1)}_{\nmif, \unit-1} & & \vdots \\ 
+        \vdots & & \ddots & 0\\
+        0 & \ldots & 0 & \tau^{(\Unit)}_{\nmif, \unit-1}
+    \end{pmatrix}.
+\end{align*}
+By design, each sub-iteration $u$ only modifies the elements of the mean and precision that correspond to the shared parameter $\phi$ and the unit specific parameter $\psi_u$. Thus, we use the superscript notation $\mu_{\nmif, \unit}^{(1, k)}$ and $\Gamma_{\nmif, \unit}^{(1, k)}$ to denote the components of the vector $\mu_{\nmif, \unit}$ corresponding to parameters $\phi$ and $\psi_k$, and the $2\times 2$ submatrix of $\Gamma_{\nmif, \unit}$ with the elements corresponding to parameters $\phi$ and $\psi_k$. 
+
+Performing the Bayes update to this distribution (Eq.~\ref{eq:margBayes}) results in an unmarginalized precision matrix, which we denote as $\tilde{\Gamma}_{\nmif, \unit}$, where the only modified components are
+$$
+\tilde{\Gamma}^{(\nmif, \unit)}_{\nmif, \unit} = \Gamma^{(\nmif, \unit)}_{\nmif, \unit-1} + \Lambda_\unit^* = \begin{pmatrix}
+  \tau^{(\phi)}_{\nmif, \unit-1} + \Lambda^{(\unit)}_{\phi} & \Lambda_{\phi, \unit} \\ 
+  \Lambda_{\phi, \unit} & \tau^{(\unit)}_{\nmif, \unit-1} + \Lambda_{\unit}
+\end{pmatrix}. 
+$$
+The corresponding mean $\tilde{\mu}_{(\nmif, \unit)} = \mu_{(\nmif, \unit)}$, noting that the marginalization procedure (Eq.~\ref{eq:MPIFupdate}) does not affect the mean, remains the same as the previous iteration except for the components
+\begin{align}
+\begin{split}
+    \tilde{\mu}^{(\phi, \unit)}_{\nmif, \unit} &= \big(\tilde{\Gamma}^{(\nmif, \unit)}_{\nmif, \unit}\big)^{-1}\big(\Gamma^{(\nmif, \unit)}_{\nmif, \unit-1} \mu_{\nmif, \unit-1}^{(\phi, u)} + \Lambda_u^* (0, 0)^T\big) \\
+   \mu^{(\phi, u)}_{\nmif, \unit} &= \big(\tilde{\Gamma}^{(\phi, u)}_{\nmif, \unit}\big)^{-1}\Gamma^{(\phi, u)}_{\nmif, \unit-1} \mu_{\nmif, \unit-1}^{(\phi, u)} \\
+   &= B_{\nmif, \unit} \mu_{\nmif, \unit-1}^{(\phi, u)}, 
+\end{split}\label{eq:submatB}
+\end{align}
+where $B_{\nmif, \unit} = \big(\tilde{\Gamma}^{(\phi, 1)}_{\nmif, \unit}\big)^{-1}\Gamma^{(\phi, u)}_{\nmif, \unit-1}$ is a $2\times 2$ matrix that provides the update to the first and $(\unit+1)$th components of a vector $\mu \in \mathbb{R}^{\Unit+1}$.
+Now by defining matrix $A_{\nmif, \unit}$ to be a perturbation of the $\Unit+1$ identity matrix, such that
+\begin{equation*}
+% \spacingset{1.5}
+\big[A_{\nmif, \unit}\big]_{i, j} = \begin{cases}
+  [B_{\nmif, \unit}]_{1, 1} & i = j = 1 \\
+  [B_{\nmif, \unit}]_{2, 2} & i = j = u+1 \\
+  [B_{\nmif, \unit}]_{1, 2} & i = 1, j = k+1 \\
+  [B_{\nmif, \unit}]_{2, 1} & i = k+1, j = 1 \\
+  1 & i = j, i \notin \{1, k+1\} \\
+  0 & \text{otherwise}
+\end{cases},
+\end{equation*}
+We see that for a given precision matrix $\Gamma_{\nmif, \unit-1}$, the a single sub-iteration of Eqs.~\ref{eq:margBayes} and \ref{eq:MPIFupdate} corresponds to a linear update of the mean vector $\mu_{\nmif, \unit-1}$, defined by
+\begin{align*}
+  \mu_{\nmif, \unit} = A_{\nmif, \unit} \, \mu_{\nmif, \unit-1}.
+\end{align*}
+Thus, the mean after $M$ complete iterations, denoted by $\mu_{M}$ is calculated by the product of these linear transformations
+\begin{align*}
+  \mu_M = \bigg(\prod_{\nmif = 1}^M\prod_{u = 1}^U A_{\nmif, \unit}\bigg)\mu_0. 
+\end{align*}
+Thus, the long-term value of $\mu_M$ depends on the long-term behavior of the product of matrices $A_{\nmif, \unit}$. 
+
+We now consider the limiting behavior of the precision matrices, which determines the behavior of the matrices $A_{\nmif, \unit}$. 
+First, we recall that the unmarginalized precision matrix is of the form:
+\begin{align*}
+  {\tilde{\Gamma}}^{(\nmif, \unit)}_{\nmif, \unit} = \begin{pmatrix}
+  \tau^{(\phi)}_{\nmif, \unit-1} + \Lambda^{(u)}_{\phi} & \Lambda_{\phi, u} \\ 
+  \Lambda_{\phi, u} & \tau^{(u)}_{\nmif, \unit-1} + \Lambda_{u}\end{pmatrix} = \begin{pmatrix} 
+  a & b \\ b & d
+\end{pmatrix}. 
+\end{align*}
+The marginalization step (Eq.~\ref{eq:MPIFupdate}) for Gaussian densities is represented by setting the off-diagonal elements of the covariance matrix to be zero. 
+Thus, 
+\begin{align*}
+    {\tilde{\Gamma}}^{(\nmif, \unit)}_{\nmif, \unit} &= \begin{pmatrix}a & b \\ b & d \end{pmatrix} \\
+    \left({\tilde{\Gamma}}^{(\nmif, \unit)}_{\nmif, \unit}\right)^{-1} &= \frac{1}{ad - b^2}\begin{pmatrix}d & -b \\ -b & a\end{pmatrix} \\
+    \left(\Gamma^{(\nmif, \unit)}_{\nmif, \unit}\right)^{-1} &= \frac{1}{ad - b^2}\begin{pmatrix}d & 0 \\ 0 & a\end{pmatrix}\\
+    &= \begin{pmatrix} \frac{d}{ad-b^2} & 0 \\ 0 & \frac{a}{ad-b^2}\end{pmatrix}\\
+   \Gamma^{(\nmif, \unit)}_{\nmif, \unit} &= \begin{pmatrix} a - \frac{b^2}{d} & 0 \\ 0 & d-\frac{b^2}{a}\end{pmatrix}, 
+\end{align*}
+and therefore the precision matrix after the marginalization step is 
+\begin{align}
+\begin{split}
+ \Gamma^{(\phi, u)}_{\nmif, \unit} &= \begin{pmatrix}
+    \tau_{\nmif, \unit-1}^{(\phi)} + \Lambda_{\phi}^{(u)} - \frac{\Lambda_{\phi, u}^2}{\tau_{\nmif, \unit-1}^{(u)} + \Lambda_u} & 0 \\
+    0 & \tau_{\nmif, \unit-1}^{(u)} + \Lambda_u - \frac{\Lambda_{\phi, u}^2}{\tau_{\nmif, \unit-1}^{(\phi)} + \Lambda^{(u)}_{\phi}}
+   \end{pmatrix} \\
+   &= \begin{pmatrix}
+    \tau_{\nmif, \unit-1}^{(\phi)} + \Lambda_{\phi}^{(u)} - \alpha_{\nmif, \unit} & 0 \\
+    0 & \tau_{\nmif, \unit-1}^{(u)} + \Lambda_u - \beta_{\nmif, \unit}
+   \end{pmatrix},
+   \end{split}\label{eq:margPrecision}
+\end{align}
+with $\alpha_{\nmif, \unit} = \frac{\Lambda_{\phi, u}^2}{\tau_{\nmif, \unit-1}^{(u)} + \Lambda_u}$ and $\beta_{\nmif, \unit} = \frac{\Lambda_{\phi, u}^2}{\tau_{\nmif, \unit-1}^{(\phi)} + \Lambda^{(u)}_{\phi}}$. Because $\Lambda^*_u$ is a positive definite matrix, for all real numbers $c > 0$, 
+
+\begin{align*}
+    \Lambda_{\phi}^{(u)} > \frac{\Lambda^2_{\phi, u}}{\Lambda_{u}} > \frac{\Lambda^2_{\phi, u}}{c + \Lambda_{u}} 
+  \end{align*}
+And therefore by letting $\alpha = \min_u \big(\Lambda_u - \frac{\Lambda^2_{\phi, u}}{\Lambda^{(u)}_{\phi}}\big) > 0$, we have $\tau_{\nmif, \unit}^{(\phi)} > \tau_{\nmif, \unit-1} + \alpha$ for all $\nmif \in \mathbb{N}$ and $\unit \in \seq{1}{\Unit}$. 
+By iterating this inequality, we have $\tau_{\nmif, \unit}^{(\phi)} > \tau^{(\phi)}_0 + \nmif\alpha$, and thus we see that $\tau_{\nmif, \unit}^{(\phi)} = O(\nmif)$. 
+% \eic{should $n$ be $nU$?} 
+% \jwc{No, U is constant, so it's the same asymptotic order.}
+Therefore as $\nmif \rightarrow \infty$, $\tau_{\nmif, \unit}^{(\phi)} \rightarrow \infty$. 
+A similar calculation shows that $\tau_{\nmif, k}^{(\unit)} = O(\nmif)$ for all $k, \unit \in \seq{1}{\Unit}$. 
+Thus, considering the covariance matrix after $\nmif$ complete iterations, 
+$$
+\big\|\Sigma_{\nmif}\big\|_2 = \big\|\Gamma^{-1}_\nmif\big\|_2 = O(1/\nmif),
+$$
+% \eic{NOTE: $x_n=y_n=)(1/\nmif)$ IS PROBLEMATIC BECAUSE IT REVEALS THE ABUSE OF $=$ COMMON IN $o/O$ NOTATION. REALLY, $O(1/\nmif)$ IS AN EQUIVALENCE CLASS, AND WE SHOULD SAY $\in O(1/\nmif)$. LET'S DISCUSS}
+% jwc{Thanks for the recommendation. I was following the definitions / notation used by Keener's textbook, in which case the equality is okay (though maybe abused).}
+proving the statement in Theorem~\ref{theorem:GG} that $\|\Sigma_\nmif\|_2 \rightarrow 0$. 
+To finish the proof, we need to show that $|\mu_\nmif|_2 \rightarrow 0$. 
+To do this, we need more precise descriptions for the rates at which the precision grows. 
+
+Our previous calculations establish that both $\tau^{(\phi)}_{\nmif, k}$ and $\tau^{(\unit)}_{\nmif, k}$ are strictly increasing sequences in both $\nmif$ and $k$, and are unbounded. 
+Thus, the correction terms $\alpha_{\nmif, \unit}$ and $\beta_{\nmif, \unit}$ converge to zero, as the only moving parts are the precision terms that are in the denominator of each of these sequences. 
+Furthermore, the sequence $\{\alpha_i\}$, defined as
+\begin{align*}
+  \alpha_i = \sum_{u = 1}^U \alpha_{i, u} 
+\end{align*}
+satisfies $\alpha_i \rightarrow 0$. 
+Thus, by iterating Eq.~\ref{eq:margPrecision}, we can express the precision matrix after $n$ complete iterations as
+\begin{align*}
+  \Gamma^{(\phi, u)}_{\nmif} = \Gamma^{(\phi, \unit)}_{\nmif-1, \Unit} = \begin{pmatrix}
+    \tau^{(\phi)}_{0} + \nmif\sum_{k = 1}^{\Unit}\Lambda^{(k)}_{\phi} - \sum_{i = 1}^\nmif\alpha_{i} & 0 \\
+    0 & \tau^{(\unit)}_{0} + \nmif\Lambda_{k} - \sum_{i = 1}^\nmif \beta_{i, \unit}
+  \end{pmatrix}.
+\end{align*}
+Using the fact that the Ces\`aro mean of a convergent sequence converges to the same limit as the sequence, we have $\frac{1}{\nmif}\sum_{i = 1}^\nmif \alpha_{i} \rightarrow 0$, and therefore 
+\begin{align}
+  \Gamma^{(\phi, k)}_{\nmif, \unit} &= \begin{pmatrix} 
+    \nmif\sum_{k = 1}^\Unit \Lambda_{\phi}^{(k)} + o(\nmif) & 0 \\
+    0 & \nmif\Lambda_k + o(\nmif)
+  \end{pmatrix}. \label{eq:nGamma}
+\end{align}
+
+Using the rates established in Eq.~\ref{eq:nGamma}, we now investigate the long-term behavior of the mean vector $\mu_\nmif$ by considering the spectral norm of the matrices $B_{\nmif, \unit}$ that define the linear updates to the sub-vector $\mu^{(\phi, \unit)}_{\nmif}$.
+Recall from Eq.~\ref{eq:submatB} that $B_{\nmif, \unit} = \big(\Gamma^{(\phi, u)}_{\nmif, \unit-1} + \Lambda^*_{u}\big)^{-1}\Gamma^{(\phi, u)}_{\nmif, \unit-1}$. 
+We can take advantage of the fact that $\Gamma^{(\phi, u)}_{\nmif, \unit-1}$ is a diagonal matrix to write
+\begin{align*}
+  B_{\nmif, \unit} &= \big(\Gamma^{(\phi, u)}_{\nmif, \unit-1} + \Lambda^*_{u}\big)^{-1}\Gamma^{(\phi, u)}_{\nmif, \unit-1} \\
+  &= \Big(I + (\Gamma^{(\phi, u)}_{\nmif, \unit-1})^{-1}\Lambda^*_{u}\Big)^{-1} \\
+  &= \begin{pmatrix} 1 + \frac{\Lambda^{(u)}_{\phi}}{\nmif\sum_{k = 1}^U\Lambda^{(k)}_{\phi} + o(\nmif)} & \frac{\Lambda_{\phi, u}}{\nmif\sum_{k = 1}^U\Lambda^{(k)}_{\phi} + o(\nmif)} \\ 
+  \frac{\Lambda_{\phi, u}}{\nmif\Lambda_u + o(\nmif)} & 1 + \frac{\Lambda_{u}}{\nmif\Lambda_u + o(\nmif)} \end{pmatrix}^{-1} \\
+  &= \begin{pmatrix} 1 + \frac{\Lambda^{(u)}_{\phi}}{\nmif\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + o(1/\nmif) & \frac{\Lambda_{\phi, u}}{\nmif\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + o(1/\nmif)\\ 
+  \frac{\Lambda_{\phi, u}}{\nmif\Lambda_u} + o(1/\nmif) & 1 + \frac{1}{\nmif} + o(1/\nmif) \end{pmatrix}^{-1}.
+\end{align*}
+Next we would like to calculate the spectral norm of $B_{\nmif, \unit}$. 
+Recall that for an invertible matrix $A$, $\|A^{-1}\|_2 = \sigma_{\max}(A^{-1}) = 1 / \sigma_{\min}(A)$, where $\sigma_{\max}$ and $\sigma_{\min}$ correspond to the maximum and minimum singular values of $A$.
+Therefore in order to calculate $\|B_{\nmif, \unit}\|_2$, we need to find the minimum singular value of $B^{-1}_{\nmif, \unit}$, which is equal to the minimum eigenvalue of the matrix $B^{-T}_{\nmif, \unit}B^{-1}_{\nmif, \unit}$:
+\begin{align*}
+  B^{-T}_{\nmif, \unit}B^{-1}_{\nmif, \unit} &= \begin{pmatrix} 1 + \frac{2\Lambda^{(u)}_{\phi}}{\nmif\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + o(1/\nmif) & \frac{\Lambda_{\phi, u}}{\nmif} \big(\frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}\big) + o(1/\nmif)\\ 
+  \frac{\Lambda_{\phi, u}}{\nmif} \big(\frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}\big) + o(1/\nmif) & 1 + \frac{2}{\nmif} + o(1/\nmif) \end{pmatrix} \\
+  &= I + \frac{1}{\nmif}\begin{pmatrix} \frac{2\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + o(1) & \Lambda_{\phi, u} \big(\frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}\big) + o(1)\\ 
+  \Lambda_{\phi, u} \big(\frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}\big) + o(1) & 2 + o(1) \end{pmatrix} \\
+  &= I + \frac{1}{\nmif}C_{\nmif, \unit}.
+\end{align*}
+Using this expression, the eigenvalues of $B^{-T}_{\nmif, \unit}B^{-1}_{\nmif, \unit}$ are equal to one plus the eigenvalues of $\frac{1}{\nmif}C_{\nmif, \unit}$. 
+Thus, we consider the characteristic polynomial defined by $\det (C_{\nmif, \unit} - \lambda I)$ to calculate the eigenvalues of $C_{\nmif, \unit}$. The resulting polynomial is
+\begin{align*}
+f_{\nmif, \unit}(\lambda) &=
+  \bigg(
+    \frac{2\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} - \lambda\bigg)
+  \big(2 - \lambda\big) -
+  \Lambda_{\phi, u}^2
+  \bigg(
+    \frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}
+  \bigg)^2 + o(1)
+  \\
+  &= \lambda^2 -
+  2\bigg(
+    1 + \frac{\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}}
+  \bigg)
+  \lambda +
+  \bigg\{
+    \frac{4\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}}
+    - \Lambda_{\phi, u}^2
+    \bigg(
+      \frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}
+    \bigg)^2
+  \bigg\} + o(1).
+\end{align*}
+We now proceed by showing that, under the condition specified in Assumption~\ref{eq:GausAssumption}, all roots of the polynomial $f_{\nmif, \unit}(\lambda)$ are strictly positive. 
+That is, for some $0 < \lambda^{(1)}_{\nmif, \unit} < \lambda^{(2)}_{\nmif, \unit}$, we have the eigenvalues of $C_{\nmif, \unit}$ are $\lambda^{(1)}_{\nmif, \unit} + o(1)$ and $\lambda^{(2)}_{\nmif, \unit} + o(1)$. 
+
+For this to hold, we need first that the discriminant of the resulting quadratic equation to be strictly positive. 
+This condition holds without any assumptions, as we can write the condition as
+\begin{align*}
+\bigg(2\bigg[ 1 + \frac{\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}}\bigg]\bigg)^2 - &4\bigg(\frac{4\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} - \Lambda_{\phi, u}^2\bigg[\frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}\bigg]^2\bigg) > 0 \iff \\
+\Lambda^{2}_{\phi, u}\bigg(&\frac{1}{\sum_{k = 1}^U \Lambda_{\phi}^{(k)}} + \frac{1}{\Lambda_u}\bigg)^2 > -\frac{\big(\sum_{k = 1}^U \Lambda_{\phi}^{(k)} - \Lambda_\phi^{(u)}\big)^2}{\big(\sum_{k = 1}^U \Lambda_{\phi}^{(k)}\big)}.
+\end{align*}
+This condition always holds as the left-hand side of the inequality is strictly positive, and the right-hand side of the inequality is strictly negative. 
+Thus, the polynomial $f_{\nmif, \unit}(\lambda)$ has two unique real roots. 
+
+Next, by taking the derivative and setting equal to zero, we note that $\argmin_\lambda f_{\nmif, \unit}(\lambda) = \lambda^* > 0$, as the coefficient on the linear term of the polynomial is always negative.
+This combined with the previous condition ensures that $\lambda^{(2)}_{\nmif, \unit} > 0$. 
+
+Finally, if $f_{\nmif, \unit}(0) > 0$, then the intermediate value theorem implies that because $f_{\nmif, \unit}(\lambda^*) < 0$, then there exists some $\lambda^{(1)}_{\nmif, \unit} \in (0, \lambda^{*})$ such that $f_{\nmif, \unit}(\lambda^{(1)}_{\nmif, \unit}) = 0$, implying that $\lambda^{(1)}_{\nmif, \unit}$ is a positive root.
+Therefore we need 
+$$
+\frac{4\Lambda^{(u)}_{\phi}}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} - \Lambda_{\phi, u}^2\bigg(\frac{1}{\sum_{k = 1}^U\Lambda^{(k)}_{\phi}} + \frac{1}{\Lambda_u}\bigg)^2 > 0,
+$$
+which is equivalent to the condition
+\begin{align*}
+  \Lambda_{\phi, u}^2 < \frac{4\Lambda^{(u)}_\phi\Lambda^2_{u}\sum_{k = 1}^U \Lambda_{\phi}^{(k)}}{\big(\Lambda_u + \sum_{k = 1}^{U}\Lambda^{(k)}_{\phi}\big)^2}.
+\end{align*}
+This condition is guaranteed by Assumption~\ref{eq:GausAssumption}, ensuring that the eigenvalues of $C_{\nmif, \unit}$ are $\lambda^{(1)}_{\nmif, \unit} + o(1)$ and $\lambda^{(1)}_{\nmif, \unit} + o(1)$ for two positive numbers $\lambda^{(1)}_{\nmif, \unit}$ and $\lambda^{(1)}_{\nmif, \unit}$.
+As a result of this computation, The minimum eigenvalue of $B^{-T}_{\nmif, \unit}B^{-1}_{\nmif, \unit}$ is equal to $1 + \frac{\lambda^{(1)}_{\nmif, \unit}}{\nmif} + o(1/\nmif)$, implying that 
+\begin{align*}
+  \big\| B_{\nmif, \unit}\big\|_2 &= 1 / \sigma_{min}\big(B^{-1} \big) \\
+  &= \frac{1}{1 + 1 + \frac{\lambda^{(1)}_{\nmif, \unit}}{\nmif} + o(1/\nmif)} \\
+  &= 1 - \frac{\lambda^{(1)}_{\nmif, \unit}}{\nmif} + o(1/\nmif). 
+\end{align*}
+By Lemma~\ref{lemma:matrix}, we have for all $\nmif \in \mathbb{N}$, $\|\prod_{u = 1}^U A_{\nmif, \unit}\|_2 \leq 1 - \frac{\max_u \lambda^{(1)}_{\nmif, \unit}}{\nmif} + o(1/\nmif)$, and therefore by the sub-multiplicative property of the spectral norm,
+\begin{align*}
+  \Big\| \prod_{m = 1}^M \prod_{u = 1}^U A_{m, u}\Big\|_2 & \leq \prod_{m = 1}^M \Big\|\prod_{u = 1}^U A_{m, u}\Big\|_2 \\
+  &< \prod_{m = 1}^M \Big(1 - \frac{\max_u \lambda^{(1)}_{\nmif, \unit}}{\nmif} + o(1/\nmif)\Big) \rightarrow 0.
+\end{align*}
+Therefore for any arbitrary initial conditions $\mu_0$ and $\Gamma_0$, we have
+$$|\mu_M|_2 = \bigg|\bigg(\prod_{\nmif = 1}^M\prod_{u = 1}^U A_{\nmif, \unit}\bigg)\mu_0\bigg|_2 \rightarrow 0$$
+as $M\rightarrow \infty$, completing the proof.
+
+\end{proof}
+
+  \subsection{Proof of Corollary~1}\label{appendix:perturbed} 
+ 
+  For this corollary, we use the same setup as Appendix~\ref{appendix:Gaus}. 
+  At each step, we add independent random perturbations to the current parameter distribution via a convolution operation before updating using Bayes rule. 
+  Because Gaussian density convolved with another Gaussian density is still Gaussian, we again only record the mean and precision corresponding to the resulting Gaussian distribution at each step, which we denote $\mu'_{\nmif} \in \R^{U+1}$ and $\Gamma'_{\nmif} \in \R^{U+1\times U+1}$. 
+
+\begin{proof}
+Let $\mu_{\nmif, \unit} \in \R^{U+1}$ and
+$\Gamma_{\nmif, \unit} = \text{diag}
+  \big(
+    \tau_{\nmif, \unit}^{(\phi)}, \tau_{(\nmif, \unit)}^{(1)}, \ldots, \tau_{(\nmif, \unit)}^{(U)}
+  \big)
+  \in \R^{U+1\times U+1}$
+denote the mean and precision matrices of the multivariate Gaussian after the $(\nmif, \unit)$th iteration. 
+Consider the $(\nmif, \unit)$th update of Eqs.~\ref{eq:margBayesPerturb}--\ref{eq:MPIFupdatePerturb}. 
+Using well-known results on the convolution of Gaussian densities and the conjugate prior identities, the umarginalized precision is evaluated as
+\begin{align*}
+\tilde{\Gamma}'_{\nmif, \unit+1} &= \begin{pmatrix} \frac{\tau_{\nmif, \unit}^{(\phi)}\tau_{\nmif, \unit}^{(\sigma)}}{\tau_{\nmif, \unit}^{(\phi)} + \tau_{\nmif, \unit}^{(\sigma)}} + \Lambda^{(u)}_\phi & \Lambda_{\phi, u} \\ \Lambda_{\phi, u} & \frac{\tau_{\nmif, \unit}^{(u)}\tau_{\nmif, \unit}^{(\sigma)}}{\tau_{\nmif, \unit}^{(u)} + \tau_{\nmif, \unit}^{(\sigma)}} + \Lambda_u\end{pmatrix}.
+   \end{align*}
+   Following the formula from Appendix~\ref{appendix:Gaus} for finding the marginalized precision matrices, the marginalized precision $\Gamma'_{\nmif, \unit}$ can be expressed as
+     \begin{align*}
+   \Gamma'_{\nmif, \unit+1} &= \begin{pmatrix} \frac{\tau^{(\phi)}_\nmif\tau^{(\sigma)}_\nmif}{\tau^{(\phi)}_\nmif + \tau^{(\sigma)}_\nmif} + \Lambda^{(\unit)}_{\phi} - \frac{\Lambda^2_{\phi, u}(\tau^{(\sigma)}_\nmif + \tau^{(u)}_\nmif)}{\tau^{(\sigma)}_\nmif\tau^{(\unit)}_\nmif + \Lambda_u(\tau^{(\sigma)}_\nmif + \tau^{(u)}_\nmif)} & 0 \\ 0 & \frac{\tau^{(u)}_\nmif\tau^{(\sigma)}_\nmif}{\tau^{(u)}_\nmif + \tau^{(\sigma)}_\nmif} + \Lambda_{u} - \frac{\Lambda^2_{\phi, u}(\tau^{(\sigma)}_\nmif + \tau^{(\phi)}_\nmif)}{\tau^{(\sigma)}_\nmif\tau^{(\phi)}_\nmif + \Lambda^{(u)}_\phi(\tau^{(\sigma)}_\nmif + \tau^{(\phi)}_\nmif)}\end{pmatrix}.
+   \end{align*}
+  Because $\Lambda^*_u$ is positive definite, the same argument in the unperturbed case (Appendix~\ref{appendix:Gaus}) gives the existence of positive constants $\{\beta_u, \alpha_u\}_{u = 1}^U$ such that
+  \begin{align*}
+    \tau^{(\phi)}_{\nmif, \unit+1} &> \frac{\tau^{(\phi)}_\nmif\tau^{(\sigma)}_\nmif}{\tau^{(\phi)}_\nmif + \tau^{(\sigma)}_\nmif} + \alpha_u \\
+    \tau^{(u)}_{\nmif, \unit+1} &> \frac{\tau^{(u)}_\nmif\tau^{(\sigma)}_\nmif}{\tau^{(u)}_\nmif + \tau^{(\sigma)}_\nmif} + \beta_u.
+  \end{align*}
+  Furthermore, the sequence defined by iterating the right hand side of these inequalities is unbounded, which is easily demonstrated by assuming it is bounded, and noting that this leads to a contradiction because $1/\tau^{(\sigma)}_\nmif = o(1/\nmif)$, and therefore each update grows by an amount arbitrarily close to the constants $\alpha_u$ and $\beta_u$.
+  
+  Immediately, this result implies that $\tau_{\nmif, \unit}^{(\phi)}, \tau_{\nmif, \unit}^{(u)} \rightarrow \infty$ as $n \rightarrow \infty$. 
+  That is, the covariance matrix convergence to the zero matrix, even in the presence of parameter perturbations. 
+  In particular, we can write the correction term
+  $$
+  \epsilon_{\nmif, \unit} = \frac{\Lambda^2_{\phi, u}(\tau^{(\sigma)}_\nmif + \tau^{(u)}_\nmif)}{\tau^{(\sigma)}_\nmif\tau^{(u)}_\nmif + \Lambda_u(\tau^{(\sigma)}_\nmif + \tau^{(u)}_\nmif)} = o(1),
+  $$
+  and, using the fact that the sequence $\tau^{(\sigma)}_\nmif$ is defined independently of $\tau^{\phi}_{\nmif, \unit}$, we can write 
+  \begin{align*}
+  \frac{\tau^{(\phi)}_{\nmif, \unit}\tau^{(\sigma)}_\nmif}{\tau^{(\phi)}_{\nmif, \unit} + \tau^{(\sigma)}_\nmif} &= \frac{\tau^{(\phi)}_{\nmif, \unit}}{\frac{1}{\tau^{(\sigma)}_{\nmif}}\big(\tau^{(\phi)}_{\nmif, \unit} + \tau^{(\sigma)}_{\nmif}\big)} \\
+  &= \tau_{\nmif, \unit}^{(\phi)}\frac{1}{1+o(1/\nmif)} \\
+  &= \tau^{(\phi)}_{\nmif, \unit} + o(1/\nmif).
+  \end{align*}
+  Thus, we the updated precision after a full iteration can be approximated as
+  $$
+  \tau_{\nmif + 1}^{(\phi)} = \tau^{\phi}_{\nmif} + n\sum_{u = 1}^U \Lambda_{\phi}^{(u)} - \sum_{u = 1}^U\epsilon_{\nmif, \unit} + o(1/\nmif),
+  $$
+  and therefore 
+  $$
+  \tau_{\nmif + 1}^{(\phi)} = o(\nmif) + n\sum_{u = 1}^U \Lambda_{\phi}^{(u)}, 
+  $$
+  and the same basic calculation shows that for all $u$, 
+  $$
+  \tau^{(u)}_{\nmif+1} = o(\nmif) + \nmif\Lambda_{u}.
+  $$
+  
+Similar to the unperturbed case, the update to the mean can be expressed as $\mu_{\nmif+1} = \big(\prod_{u = 1}^UA'_{\nmif, \unit}\big)\mu_\nmif$, where the matrix $A'_{\nmif, \unit}$ is defined in the same way as $A_{\nmif, \unit}$ from Appendix~\ref{appendix:Gaus}, after replacing the covariance matrices with the perturbed versions: 
+$$
+A'_{\nmif, \unit} = \big(\Gamma'_{\nmif, \unit - 1} + \Lambda^*_u\big)^{-1}\Gamma'_{\nmif, \unit - 1}.
+$$
+We have shown above that $A'_{\nmif, \unit}$ and $A_{\nmif, \unit}$ are asymptotically equivalent. 
+Therefore the same argument in the proof of Theorem~\ref{theorem:GG} immediately implies
+$$
+\big| \mu'_{\nmif} \big|_2 =
+  \bigg|
+    \bigg(
+      \prod_{m = 1}^n\prod_{u = 1}^U A'_{m, u}
+    \bigg)
+    \mu_0
+  \bigg|_2 \rightarrow 0.
+$$
+
+   \end{proof}
