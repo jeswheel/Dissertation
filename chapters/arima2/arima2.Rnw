@@ -140,7 +140,7 @@ However, the CSS initialization is less useful with limited data, or when there 
 The CSS estimate may also lie outside the valid parameter region, and in such cases, parameters are reinitialized at the origin.
 Both software implementations also allow for manual selection of initial parameter values, but finding suitable initializations manually can be challenging due to complex parameter inter-dependencies.
 
-The log-likelihood function of ARMA models is often multimodal \citep{ripley2002}, and therefore this single initialization approach can result in parameter estimates corresponding to local maxima (see Fig~\ref{fig:multiMode}).
+The log-likelihood function of ARMA models is often multimodal \citep{ripley2002}, and therefore this single initialization approach can result in parameter estimates corresponding to local maxima (see Figure~\ref{fig:multiMode}).
 This is true even for a carefully chosen initialization, such as the CSS estimate.
 A common strategy to optimize multimodal loss functions is to perform multiple optimizations using different initial parameters.
 However, we have found no instances of practitioners using a multiple initialization strategy for estimating ARMA model parameters.
@@ -506,7 +506,7 @@ Even in this extremely simplified scenario, existing software failed to properly
 Though this improvement may appear modest, an improvement in $\Sexpr{round(100 * tot_pct, 1)}\%$ of the large number of published ARMA models would affect many papers---a number measured in thousands of papers since 2024 following our estimate in the introduction.
 Furthermore, time series analysis courses and textbooks often recommend fitting multiple ARMA models to a dataset, and here we only fit one for each algorithm. 
 Consequently, the probability that at least one candidate model is not properly optimized increases significantly in practice.
-The rate of improvement obtained using our algorithm increases with model complexity and decreases with more observations (Fig.~\ref{fig:simProps}).
+The rate of improvement obtained using our algorithm increases with model complexity and decreases with more observations (Figure~\ref{fig:simProps}).
 For example, likelihoods improved in $\Sexpr{round(100 * arma33_n50_pct, 1)}\%$ of the simulations when $p = q = 3$ and $n = 50$; models of this size and number of observations are not uncommon in published research studies.
 
 <<getTiming>>=
@@ -556,7 +556,7 @@ These standard errors result from the numeric optimizer's estimate of the gradie
 These standard errors, though not inherently of interest, are sometimes used justify the inclusion of a parameter in a model \cite[Chatper~9]{brockwell1991}.
 We extend our simulation study to examine this approach and how our algorithm impacts the estimates.
 For each of the 36,000 generative models from the previous study, we generate 100 additional datasets, estimating the MLE and Bonferroni-adjusted $95\%$ confidence intervals using both estimated standard errors and profile likelihood confidence intervals (PLCIs) from Wilks' theorem.
-Fig~\ref{fig:pctCovered} shows PLCIs had better or equivalent nominal coverage than Fisher-based confidence intervals across all combinations of $p$, $q$, and $n$. We found that the interval estimation method mattered more for confidence interval performance than the specific parameter estimation algorithm.
+Figure~\ref{fig:pctCovered} shows PLCIs had better or equivalent nominal coverage than Fisher-based confidence intervals across all combinations of $p$, $q$, and $n$. We found that the interval estimation method mattered more for confidence interval performance than the specific parameter estimation algorithm.
 The relevance of this result is explored further in Section~\ref{sec:HuronCI}.
 
 \begin{figure}[!ht]
@@ -641,8 +641,8 @@ For each dataset, AIC tables were created for model sizes $(p, q) \in \{0, 1, 2,
 
 The single parameter initialization approach resulted in AIC table inconsistencies in $\Sexpr{round(100*arma_inc, 1)}\%$ of the simulated datasets.
 Although our proposed algorithm significantly mitigates this issue, it does not guarantee that all model likelihoods are fully maximized.
-This is illustrated in Fig~\ref{fig:AICtabRes}, where a non-zero percentage of AIC tables remain inconsistent, even as the algorithm's stopping criterion grows.
-The ARMA$(1, 1)$ panel in Fig~\ref{fig:AICtabRes} illustrates the increasing difficulty of parameter estimation when dealing with parameter redundancies.
+This is illustrated in Figure~\ref{fig:AICtabRes}, where a non-zero percentage of AIC tables remain inconsistent, even as the algorithm's stopping criterion grows.
+The ARMA$(1, 1)$ panel in Figure~\ref{fig:AICtabRes} illustrates the increasing difficulty of parameter estimation when dealing with parameter redundancies.
 In such cases, it is often necessary to adjust additional parameters in the numeric optimization routine.
 For example, our R implementation of the algorithm relies on the generic BFGS optimizer in the \code{stats::optim} function.
 Modifying the optimization method or the default hyperparameters can lead to improved fits or faster convergence rates.
@@ -698,7 +698,7 @@ Further, the increasing preference of using automated software to pick the model
 
 \noindent In this example, we illustrate how improperly maximized likelihoods can lead to inconsistencies and uncertainty in a real data analysis scenario.
 Additionally, we show how the common practice of using the estimated standard error for calibrated parameters can misleadingly support the inclusion of model parameters.
-We consider a dataset containing annual observations on the average depth of Lake Michigan-Huron, recorded the first day of each year from 1860-2014 (Fig~\ref{fig:huron}) \citep{NOAA16}.
+We consider a dataset containing annual observations on the average depth of Lake Michigan-Huron, recorded the first day of each year from 1860-2014 (Figure~\ref{fig:huron}) \citep{NOAA16}.
 We wish to develop an ARMA model for these data, which is a standard task in time series analysis \citep{shumway2017}.
 
 \begin{figure}[!ht]
@@ -714,7 +714,7 @@ Average depth of Lake Michigan-Huron from 1860-2014.
 }
 \end{figure}
 
-Diagnostic tests, such as sample autocorrelation and normal quantile plots for residuals, suggest that it is reasonable to model the data in Fig~\ref{fig:huron} as a weakly stationary Gaussian $\text{ARMA}(p, q)$ process for some non-negative integers $p$ and $q$.
+Diagnostic tests, such as sample autocorrelation and normal quantile plots for residuals, suggest that it is reasonable to model the data in Figure~\ref{fig:huron} as a weakly stationary Gaussian $\text{ARMA}(p, q)$ process for some non-negative integers $p$ and $q$.
 While an ARIMA model may also be reasonable for these data, we first consider fitting an ARMA model because we would like to avoid the possibility of over-differencing the data.
 The next step is to determine appropriate values of $p$ and $q$;
 after some initial investigation, multiple combinations of $p$ and $q$ seem plausible, and therefore we decide to choose the values of $p$ and $q$ that minimize the AIC.
@@ -864,9 +864,9 @@ coefs_tab %>%
 @
 
 However, our simulation studies have suggested that these confidence intervals can be misleading, and that PLCIs are more reliable alternatives.
-The $95\%$ PLCI for the parameter (Fig~\ref{fig:huronMAevid}A) is much larger than the confidence interval created using these standard errors.
+The $95\%$ PLCI for the parameter (Figure~\ref{fig:huronMAevid}A) is much larger than the confidence interval created using these standard errors.
 The steep curve in the immediate vicinity of $\hat{\theta}_1$ may explain the small standard error estimates for this parameter and the corresponding tight confidence intervals created using Fisher's identity matrix.
-Alternative evidence indicates the potential for nearly canceling roots (Fig~\ref{fig:huronRoots}), in which case the MA(1) term may not be needed in the model.
+Alternative evidence indicates the potential for nearly canceling roots (Figure~\ref{fig:huronRoots}), in which case the MA(1) term may not be needed in the model.
 
 <<ma1PCI>>=
 prof <- profile(huron_21, which = 3, lower = -0.99, upper = 1.1, npts = 1000L) %>%
@@ -1056,11 +1056,11 @@ ggplot(all_roots, aes(x = real, y = im, col = mod, pch = mod)) +
 Both types of confidence intervals considered in this example rely on asymptotic justifications, but we can further investigate the finite sample properties using a simulation study.
 We fit both $\text{ARMA}(2, 1)$ and $\text{AR}(1)$ models to the data, and conduct a boot-strap simulation study by simulating $1000$ datasets from each of the fitted models.
 We then re-estimate an $\text{ARMA}(2, 1)$ model to each of these datasets and record the estimated coefficients.
-A histogram containing the estimated values of $\hat{\theta}_1$ when the data are generated from the $\text{ARMA}(2, 1)$ and $\text{AR}(1)$ models fit to the Lake Huron-Michigan data are shown in Fig~\ref{fig:huronMAevid}B and Fig~\ref{fig:huronMAevid}C, respectively.
+A histogram containing the estimated values of $\hat{\theta}_1$ when the data are generated from the $\text{ARMA}(2, 1)$ and $\text{AR}(1)$ models fit to the Lake Huron-Michigan data are shown in Figure~\ref{fig:huronMAevid}B and Figure~\ref{fig:huronMAevid}C, respectively.
 
-The shape of this histogram in Fig~\ref{fig:huronMAevid}B mimics that of the profile log-likelihood surface in Fig~\ref{fig:huronMAevid}A, confirming that a large confidence interval is needed in order to obtain a $95\%$ confidence interval.
-In Fig~\ref{fig:huronMAevid}C, a large number of $\hat{\theta}_1$ coefficients are estimated near $1$ when the generating model is $\text{AR}(1)$.
-Combining this result with the nearly canceling roots of the $\text{ARMA}(2, 1)$ model (Fig~\ref{fig:huronRoots}), we cannot reject the hypothesis that the data were generated from a $\text{AR(1)}$ model, even though the Fisher information standard errors suggest that the data should be modeled with a nonzero $\theta_1$ coefficient.
+The shape of this histogram in Figure~\ref{fig:huronMAevid}B mimics that of the profile log-likelihood surface in Figure~\ref{fig:huronMAevid}A, confirming that a large confidence interval is needed in order to obtain a $95\%$ confidence interval.
+In Figure~\ref{fig:huronMAevid}C, a large number of $\hat{\theta}_1$ coefficients are estimated near $1$ when the generating model is $\text{AR}(1)$.
+Combining this result with the nearly canceling roots of the $\text{ARMA}(2, 1)$ model (Figure~\ref{fig:huronRoots}), we cannot reject the hypothesis that the data were generated from a $\text{AR(1)}$ model, even though the Fisher information standard errors suggest that the data should be modeled with a nonzero $\theta_1$ coefficient.
 
 \section{Discussion}
 

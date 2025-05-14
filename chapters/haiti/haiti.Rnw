@@ -805,38 +805,44 @@ Translations back into the notation of \citet{lee20} are given in Table~\ref{tab
   \caption[Parameter translations to original model definitions]{\label{tab:translate}Translations between our common notation and notation used by Lee et al (2020).}
 \end{table}
 
-Each model describes the cholera dynamics as a partially observed Markov process (POMP) with a latent state vector $\bm{X}(t)$ for each continuous time point $t$.
-$N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
-The observation at time $t_n$ is modeled by the random vector $\bm{Y}_n$.
-While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
-We therefore write $\bm{X}_n = \bm{X}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}_{1:N}$ is the collection of latent state values for all observed time points.
-The observable random variables $\bm{Y}_{1:N}$ are assumed to be conditionally independent given $\bm{X}_{0:N}$.
-Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model defines a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
-The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
-
-Because of the probabilistic nature of both the unobserved latent state and the observable random variables, it is possible to consider various marginal and conditional densities of these two jointly random vectors.
-An important example is the marginal density of the observed random vector $\bm{Y}_{1:N}$, evaluated at the observed data $\bm{y}_{1:N}^*$, as shown in Eq.~\myeqref{eq:likedef}:
-
-\begin{eqnarray}
-\label{eq:likedef}
-f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N}^*;\paramVec\big) d\bm{x}_{0:N}.
-\end{eqnarray}
-
-\noindent When treated as a function of the parameter vector $\paramVec$, this marginal density is called the \emph{likelihood function}, which is the basis of likelihood based statistical inference.
-
-Using the conditional independence of $\bm{Y}_{1:N}$ given $\bm{X}_{0:N}$ and the Markov property of $\bm{X}_{0:N}$, the joint density can be re-factored into the useful form given in Eq.~\myeqref{eq:jointLik}:
-
-\begin{eqnarray}
-\label{eq:jointLik}
-f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big).
-\end{eqnarray}
-
-\noindent This factorization is useful because it demonstrates that POMP models may be completely described using three parts: the \emph{initialization model} for the latent states $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$; the \emph{one-step transition density}, or \emph{the process model} $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$; and the \emph{measurement model} $f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$.
-In the following subsections, we describe Models 1--3 in terms of these three components.
-The latent state vector $\bm{X}(t)$ for each model consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
+Each model describes the cholera dynamics as a partially observed Markov process (POMP).
+Here, we use the same notation and definitions for POMP models provided in Chapter~\ref{chpt:intro}.
+The latent state state $\bm{X}(t)$ for each model is modeled as a continuous time process, and consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
 The observable random vector $\bm{Y}_{1:N}$ represents the random vector of cholera incidence data for each model;
 Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$, in which case we denote the observed data for each unit using $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$.
 Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
+% with a latent state vector $\bm{X}(t)$ for each continuous time point $t$.
+% $N$ observations on the system are collected at time points $t_1,\dots,t_N$, written as $t_{1:N}$.
+% The observation at time $t_n$ is modeled by the random vector $\bm{Y}_n$.
+% While the latent process exists between observation times, the value of the latent state at observations times is of particular interest.
+% We therefore write $\bm{X}_n = \bm{X}(t_n)$ to denote the value of the latent process at the $n$th observation time, and $\bm{X}_{1:N}$ is the collection of latent state values for all observed time points.
+% The observable random variables $\bm{Y}_{1:N}$ are assumed to be conditionally independent given $\bm{X}_{0:N}$.
+% Together, with the density for the initial value of the latent state $\bm{X}_{0} = \bm{X}(t_0)$, each model defines a joint density $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big)$, where $\paramVec$ is a parameter vector that indexes the model.
+% The observed data $\bm{y}_{1:N}^*$, along with the unobserved true value of the latent state, are modeled as a realization of this joint distribution.
+
+% Because of the probabilistic nature of both the unobserved latent state and the observable random variables, it is possible to consider various marginal and conditional densities of these two jointly random vectors.
+% An important example is the marginal density of the observed random vector $\bm{Y}_{1:N}$, evaluated at the observed data $\bm{y}_{1:N}^*$, as shown in Eq.~\myeqref{eq:likedef}:
+% 
+% \begin{eqnarray}
+% \label{eq:likedef}
+% f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N}^*;\paramVec\big) d\bm{x}_{0:N}.
+% \end{eqnarray}
+
+% \noindent When treated as a function of the parameter vector $\paramVec$, this marginal density is called the \emph{likelihood function}, which is the basis of likelihood based statistical inference.
+
+% Using the conditional independence of $\bm{Y}_{1:N}$ given $\bm{X}_{0:N}$ and the Markov property of $\bm{X}_{0:N}$, the joint density can be re-factored into the useful form given in Eq.~\myeqref{eq:jointLik}:
+
+% \begin{eqnarray}
+% \label{eq:jointLik}
+% f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big).
+% \end{eqnarray}
+
+% \noindent This factorization is useful because it demonstrates that POMP models may be completely described using three parts: the \emph{initialization model} for the latent states $f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)$; the \emph{one-step transition density}, or \emph{the process model} $f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)$; and the \emph{measurement model} $f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big)$.
+% In the following subsections, we describe Models 1--3 in terms of these three components.
+% The latent state vector $\bm{X}(t)$ for each model is modeled as a continuous time process, and consists of individuals labeled as susceptible (S), infected (I), asymptomatically infected (A), vaccinated (V), and recovered (R), with various sub-divisions sometimes considered.
+% The observable random vector $\bm{Y}_{1:N}$ represents the random vector of cholera incidence data for each model;
+% Models~2 and~3 have metapopulation structure, meaning that each individual is a member of a spatial unit, denoted by a subscript $u\in \seq{1}{U}$, in which case we denote the observed data for each unit using $\bm{y}_{1:N}^* = y_{1:N,1:U}^*$.
+% Here, the spatial units are the $U=10$ Haitian administrative d\'{e}partements (henceforth anglicized as departments).
 
 While the complete model description is scientifically critical, as well as necessary for transparency and reproducibility, the model details are not essential to our methodological discussions of how to diagnose and address model misspecification with the purpose of informing policy.
 A first-time reader may choose to skim through the rest of this section, and return later.
@@ -1095,7 +1101,7 @@ To avoid this extreme possibility, we do not allow a change in reporting rate wh
 
 \subsection{Model Fitting}\label{sec:model_fitting}
 
-Each of the three models considered in this study describes cholera dynamics as a partially observed Markov process (POMP) \citep{king16}, with the understanding that the deterministic Model~2 is a special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.
+Each of the three models considered in this study describes cholera dynamics using a POMP model, with the understanding that the deterministic Model~2 is a special case of a Markov processes solving a stochastic differential equation in the limit as the noise parameter goes to zero.
 Each model is indexed by a parameter vector, $\paramVec$, and different values of $\paramVec$ can result in qualitative differences in the predicted behavior of the system.
 Therefore, the choice of $\paramVec$ used to make inference about the system can greatly affect model-based conclusions \citep{saltelli20}.
 Elements of $\paramVec$ can be fixed at a constant value based on scientific understanding of the system, but parameters can also be calibrated to data by maximizing a measure of congruency between the observed data and the model's mechanistic structure.
@@ -1624,7 +1630,7 @@ This makes direct interpretation of estimated parameters delicate.
 
 Our case study provides an example of this in the parameter estimate for the duration of natural immunity due to cholera infection, $\muRS^{-1}$.
 Under the framework of Model~2, the best estimate for this parameter is $\Sexpr{signif(1/h2_fit$h2_params["sigma"],3)}$ yr, suggesting that individuals have permanent immunity to cholera once infected.
-Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligible part of the dynamics. % TODO: fix typo
+Rather than interpreting this as scientific evidence that individuals have permanent immunity from cholera, this result suggests that Model~2 favors a regime where reinfection events are a negligible part of the dynamics.
 The depletion of susceptible individuals may be attributed to confounding mechanisms---such as localized vaccination programs and non-pharmaceutical interventions that reduce cholera transmission \citep{trevisin22, rebaudet21}---that were not accounted for in the model.
 Perhaps the best interpretation of the estimated parameter, then, is that under the modeling framework that was used, the model most adequately describes the observed data by having a steady decrease in the number of susceptible individuals.
 The weak statistical fit of Model~2 compared to a log-linear benchmark (see Table~\ref{tab:likes}) cautions us against drawing quantitative conclusions from this model.

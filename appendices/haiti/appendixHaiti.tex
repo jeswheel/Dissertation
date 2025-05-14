@@ -436,7 +436,7 @@ In this case, we chose to use measurement model that considers only symptomatic 
 Model~3 was developed by a team of researchers at the Laboratory of the Swiss Federal Institute of Technology in Lausanne, hereafter referred to as the Model~3 authors.
 The code that was originally used to implement Model~3 is archived with the DOI: \url{10.5281/zenodo.3360723}, and also available in the public GitHub repository: \code{jcblemai/haiti-mass-ocv-campaign}.
 Because the code was made publicly available, and final model parameters were reported in the supplementary material of \citet{lee20}, we were able to reproduce Model~3 by directly using the source code.
-In Fig.~\ref{fig:mod3rep}, we plot simulations from this model.
+In Figure~\ref{fig:mod3rep}, we plot simulations from this model.
 This figure can be compared to Figure S18 of \citet{lee20}.
 We note that slight differences may be accounted for due to variance in the model simulations and the difference in programming language used to produce the figure.
 Overall, the high standard of reproducibility that was achieved by the Model~3 authors facilitated the ability to readily replicate their model and results.
@@ -489,7 +489,7 @@ While beating a simple associative benchmark is promising, this does not immedia
 Additional investigation of parameters estimates and their corresponding implications on model based conclusions should always be conducted.
 For meta-population models, it is worth considering how well the model fits the data to each spatial unit.
 % This can be done by looking at conditional log-likelihoods, which is part of the output of the \texttt{bpfilter} algorithm in the \texttt{spatPomp} package.
-The likelihoods for each department, compared to the corresponding benchmark model, are displayed in Fig.~\ref{fig:h3UnitLikes}.
+The likelihoods for each department, compared to the corresponding benchmark model, are displayed in Figure~\ref{fig:h3UnitLikes}.
 The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model at the aggregate level, Model~3 has lower likelihoods for some departments.
 
 \begin{figure}[!ht]
@@ -502,7 +502,7 @@ The figure demonstrates that while the log-likelihood of the fitted model outper
 
 In addition to considering the conditional log-likelihoods of each unit, one can consider conditional log-likelihoods of each observation.
 When compared to a benchmark, this level of detail can provide useful information about which observations are well described by the model and which are not.
-In Fig.~\ref{fig:condLL}, we plot the conditional log-likelihoods of Model~3 for each observation.
+In Figure~\ref{fig:condLL}, we plot the conditional log-likelihoods of Model~3 for each observation.
 Typically it is most useful to compare the conditional log-likelihoods of the model under consideration to a benchmark, as plotting only conditional log-likelihoods without a comparison may not be helpful.
 In this case, however, the same insight can be drawn using a figure without a benchmark comparison, so we do not include the benchmark in order to avoid the issue of over-plotting.
 
@@ -514,7 +514,7 @@ In this case, however, the same insight can be drawn using a figure without a be
 \caption[Conditional log-likelihoods without hurricane adjustment]{\label{fig:condLL}Conditional log-likelihoods of Model~3 prior to the inclusion of the Hurricane Matthew related parameters.}
 \end{figure}
 
-Fig.~\ref{fig:condLL} reveals that the fitted model poorly describes certain features of the data.
+Figure~\ref{fig:condLL} reveals that the fitted model poorly describes certain features of the data.
 For example, many departments (in particular Sud) have observations with lower conditional log-likelihoods near October 2016 than at other time points.
 Further investigation of the model output reveals that the model is struggling to explain the sudden surge in cholera cases that occurred at this time, which coincides with the time that Hurricane Matthew struck Haiti.
 While the model does include a mechanism to account for increased cholera transmission due to large rainfall events, the mechanism does not appear to be sufficient to capture the damaging effects of the hurricane, which had the greatest impact in the the Sud and Grand'Anse departments \cite{ferreirai16}.
@@ -527,7 +527,7 @@ We refit Model~3 after introducing these hurricane-related parameters.
 The resulting model has a log-likelihood value of $\ensuremath{-1.73329\times 10^{4}}$.
 The inclusion of these parameters resulted in an overall increase of $216.4$ log-likelihood units.
 Such a large difference in log-likelihoods is well beyond the threshold of statistical uncertainty determined by Wilks' theorem, suggesting that the data highly favor the inclusion of the additional parameters.
-The addition of the Hurricane parameters also increases in conditional likelihoods for each observation, particularly around October 2016 (Fig.~\ref{fig:finalCondLL}).
+The addition of the Hurricane parameters also increases in conditional likelihoods for each observation, particularly around October 2016 (Figure~\ref{fig:finalCondLL}).
 
 
 
@@ -539,7 +539,7 @@ The addition of the Hurricane parameters also increases in conditional likelihoo
 \caption[Conditional log-likelihoods with hurricane adjustment]{\label{fig:finalCondLL}Conditional log-likelihoods of Model~3 after adding and estimating the parameters related to Hurricane Matthew.}
 \end{figure}
 
-Now that the model with additional parameters has been calibrated to the incidence data, we plot the conditional log-likelihood of each department compared to a benchmark model in Fig.~\ref{fig:finalUnitLL}.
+Now that the model with additional parameters has been calibrated to the incidence data, we plot the conditional log-likelihood of each department compared to a benchmark model in Figure~\ref{fig:finalUnitLL}.
 The difference in log-likelihoods between Model~3 and the benchmark model is smallest in the departments Artibonite, Nord, Ouest and Centre.
 Each of these departments also exhibited the most sustained cholera transmission, defined by having the fewest number of weeks with no recorded cholera cases.
 Specifically, these four departments have zero cholera cases recorded in less than $4\%$ of the available data, and all remaining departments---except for Nord-Ouest, which has approximately $9.5\%$ of cases that are zeros and also exhibits the next smallest difference in log-likelihoods---have zero cases recorded in at least $14\%$ of the available weekly data.
@@ -570,7 +570,7 @@ This analysis can also provide insight into why the calibrated model fails to ou
 
 Recall that the filtering distribution for the calibrated version of Model~3 at time $t_k$ is defined as the distribution of the latent state at time $t_k$ given the data from times $t_{1}:t_{k}$, i.e. $f^{(3)}_{\bm{X}_k|\bm{Y}_{1:k}}(\bm{x}_{k} | \bm{y}^*_{1:k} ; \hat\theta)$.
 In general, one may expect simulations from the filtering distribution of a model with a good statistical fit to result in hidden states that are highly consistent with the observed data because the filtering distribution is conditioned on the observed data.
-Fig.~\ref{fig:h3Sus} shows the percentage of individuals that are in the susceptible compartment from various simulations of the model:
+Figure~\ref{fig:h3Sus} shows the percentage of individuals that are in the susceptible compartment from various simulations of the model:
 simulations from Model~3 under initial conditions are displayed in red; simulations from the filtering distribution of model are displayed in blue.
 This figure shows that simulations from initial conditions tends to result in a much more rapid depletion of susceptible individuals at the start of the epidemic than simulations from the filtering distribution, suggesting the calibrated model has a propensity to predict larger outbreaks than what is typically seen in the data.
 This result demonstrates that the calibrated model favors a more rapid growth in cholera cases than what is typically seen in the observed data, providing a possible explanation as to why the model fails to beat the simple benchmark for each spatial unit.

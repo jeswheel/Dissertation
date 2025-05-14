@@ -222,7 +222,7 @@ Modeling the data collectively, rather than individually for each unit, allows f
 
 A common approach to modeling nonlinear dynamic systems is through the use of mechanistic models \citep{auger21}.
 These models involve the proposal of a system of equations that describe how the dynamic system state evolves stochastically over time.
-When combined with a model relating the state to observable quantities, we obtain a partially observed Markov process (POMP) model, also known as a state space model or a hidden Markov model.
+When combined with a model relating the state to observable quantities, we obtain a POMP model, described in Chapter~\ref{chpt:intro}.
 Once calibrated to data, such models provide a quantitative description of the observations while simultaneously adhering to a given scientific hypothesis about how the data are generated.
 Despite the growing ability of deep learning and other advanced machine learning techniques to extract useful information from complex data sets, mechanistic models continue to be important in modern science since mechanistic models are superior to machine learning models for interpretability of parameters \citep{baker18,hogg24}.
 The ability of mechanistic models to describe scientifically important yet unobservable system states \citep{andrade22} also facilitates predictions of the impact of interventions on the system, such as masking or vaccination efforts during a disease outbreak \citep{wheeler24}.  
@@ -235,7 +235,6 @@ Our work addresses this possibility by proposing a new algorithm that is effecti
 Various previously proposed algorithms, both frequentist and Bayesian, are capable in principle of fitting mechanistic models to panel data.
 Some algorithms scale well as the model's dimension grows, but they rely on unrealistic Gaussian approximations \citep{evensen09}, or they avoid the difficulties related to evaluating the model's likelihood function by optimizing alternative measures of goodness-of-fit \citep{toni09,wood10}.
 Other algorithms can be applied in less restrictive cases, but they scale poorly as the model's dimension increases \citep{andrieu10,ionides15}.
-
 
 An extensively used approach in ecology, known as \emph{data cloning} \citep{lele07,lele10}, involves iteratively using Bayes' rule, by recursively mapping a prior distribution to a posterior distribution using the same likelihood function, until the iterated posterior distribution converges to a point mass at the maximum likelihood estimate (MLE).
 Data cloning is equivalent to performing a Bayesian update on multiple copies of the data when the data are independent and identically distributed.
@@ -263,16 +262,16 @@ We then conduct a data analysis of a high-dimensional dataset of pre-vaccination
 
 \section{Iterated filtering for panel models}
 
-To set up mathematical notation for PanelPOMP models, we first give a formal definition of a POMP.
-A POMP model comprises an unobserved Markov process $\mathbf{X}(t)$, where $t \in \mathcal{T}\subset \mathbb{R}$ and $\mathbf{X}(t)$ takes values in $\mathcal{X} \subset \mathbb{R}^{d_x}$.
-The process is initialized at time $t_0 \in \mathcal{T}$, such that $t_0\leq t'$ for all $t' \in \mathcal{T}$.
-Observations are drawn from the dynamic system at time points $t_1, \ldots, t_N \in \mathcal{T}$, and we denote the observation measured at time $t_n$ as $\mathbf{y}^*_n \in \mathcal{Y} \subset \mathbb{R}^{d_y}$.
-We assume that the observation $\mathbf{y}^*_n$ is a single realization of a random variable $\mathbf{Y}_n$.
-
-While $\mathbf{X}(t)$ may be a continuous or discrete time process, the value of $\mathbf{X}(t)$ at observation times $t_{1:N}$ is often of particular interest, and so we write $\mathbf{X}_n = \mathbf{X}(t_n)$.
-This gives rise to a joint probability density or probability mass function $f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}_{1:N}; \theta)$ at the observation times $t_{0:N}$.
-For the remainder of this article, we use the term {\it density} to refer to both probability densities and probability mass functions, the latter being formally treated as densities with respect to a counting measure on a finite or countable set.
-To complete the POMP specification, we assume that the observed random variables $\mathbf{Y}_{1:N}$ are conditionally independent given the values of the latent process $\mathbf{X}_{1:N}$.
+% To set up mathematical notation for PanelPOMP models, we first give a formal definition of a POMP.
+% A POMP model comprises an unobserved Markov process $\mathbf{X}(t)$, where $t \in \mathcal{T}\subset \mathbb{R}$ and $\mathbf{X}(t)$ takes values in $\mathcal{X} \subset \mathbb{R}^{d_x}$.
+% The process is initialized at time $t_0 \in \mathcal{T}$, such that $t_0\leq t'$ for all $t' \in \mathcal{T}$.
+% Observations are drawn from the dynamic system at time points $t_1, \ldots, t_N \in \mathcal{T}$, and we denote the observation measured at time $t_n$ as $\mathbf{y}^*_n \in \mathcal{Y} \subset \mathbb{R}^{d_y}$.
+% We assume that the observation $\mathbf{y}^*_n$ is a single realization of a random variable $\mathbf{Y}_n$.
+% 
+% While $\mathbf{X}(t)$ may be a continuous or discrete time process, the value of $\mathbf{X}(t)$ at observation times $t_{1:N}$ is often of particular interest, and so we write $\mathbf{X}_n = \mathbf{X}(t_n)$.
+% This gives rise to a joint probability density or probability mass function $f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}_{1:N}; \theta)$ at the observation times $t_{0:N}$.
+% For the remainder of this article, we use the term {\it density} to refer to both probability densities and probability mass functions, the latter being formally treated as densities with respect to a counting measure on a finite or countable set.
+% To complete the POMP specification, we assume that the observed random variables $\mathbf{Y}_{1:N}$ are conditionally independent given the values of the latent process $\mathbf{X}_{1:N}$.
 
 In a panel data analysis scenario, data are collected for each unit in the panel.
 Because the data generating process of each unit are assumed to be dynamically independent, we may model the panel data as a collection of related POMP models, which we call a PanelPOMP.
@@ -285,10 +284,10 @@ f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}_{1:N}; \thet
 \end{align}
 where Eq.~\ref{eq:ppomp} arises from the assumption of dynamically independent units, and Eq.~\ref{eq:ppomp2} is a result of the Markov property of $X_{u}(t)$ and the conditional independence assumption on $Y_{u, n}$.
 
-Our goal is to make inferences about the parameter $\theta$ by maximizing the likelihood function
-\begin{align}
-L(\theta;\mathbf{y}^*) &= \int f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}^*_{1:N}; \theta)\, d\mathbf{x}_{0:N}. \label{eq:likelihood}
-\end{align}
+Our goal is to make inferences about the parameter $\theta$ by maximizing the likelihood function (Eq.~\ref{eq:likedef}).
+% \begin{align}
+% \math(\theta;\mathbf{y}^*) &= \int f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}^*_{1:N}; \theta)\, d\mathbf{x}_{0:N}. \label{eq:likelihood}
+% \end{align}
 Although the unit densities in Eq.~\ref{eq:ppomp} can be factored as a result of the dynamic independence between measurement units, a defining feature of a panel model is that the parameter vector $\theta$ remains relevant across all the dynamic systems.
 Therefore, inference methodology used to obtain estimates of $\theta$ should use data from each unit in the PanelPOMP.
 A special case of particular interest arises when $\theta = (\phi, \psi_{1:U})$, where $\phi \in \Theta_\phi \subset \mathbb{R}^{d_\phi}$ is a vector of parameters that are shared across each unit, and $\psi_{u} \in \Theta_\psi \subset \mathbb{R}^{d_u}$ are parameters that are specific to unit $u$, formally,
@@ -348,11 +347,11 @@ This idea is key to deriving the proof of Theorem~\ref{theorem:pif}, which provi
 
 \begin{theorem}\label{theorem:pif}
   Consider a PanelPOMP model defined by Eq.~\ref{eq:ppomp}.
-  Assume conditions \ref{assumption:1}--\ref{assumption:kernel} of Appendix~\ref{sec:assumptions} are satisfied, and write $\hat{\theta} = \argmax_{\theta} L(\theta;\mathbf{y}^*)$ from Eq.~\ref{eq:likelihood}.
+  Assume conditions \ref{assumption:1}--\ref{assumption:kernel} of Appendix~\ref{sec:assumptions} are satisfied, and write $\hat{\theta} = \argmax_{\theta} L(\theta;\mathbf{y}^*)$ from Eq.~\ref{eq:likedef}.
   Denote the output of Algorithm~\ref{alg:mpif} without marginalization as $\Theta_{1:J}^{(M)}$.
   Then there exists some positive sequences $\{C_M\}_{M \geq 1}$ and $\{\epsilon_M\}_{M \geq 1}$ where $\lim_{M \rightarrow \infty}\epsilon_M = 0$ such that for all $(J, M) \in \mathbb{N}^2$,
   $$
-  E\bigg[\Big|\frac{1}{J}\sum_{i=1}^J \Theta_j^{(M)} - \hat{\theta}\Big|_2\bigg] \leq \frac{C_M}{\sqrt{J}} + \epsilon_M
+  E\bigg[\Big\vert\frac{1}{J}\sum_{i=1}^J \Theta_j^{(M)} - \hat{\theta}\Big\vert_2\bigg] \leq \frac{C_M}{\sqrt{J}} + \epsilon_M
   $$
 \end{theorem}
 \begin{proof}[Proof outline]
@@ -375,7 +374,7 @@ If we denote $\pi_i(\theta)$ as the posterior distribution of the parameter vect
 &\vdots \\
 \pi_m(\theta) &\propto f^m(\mathbf{y}^* ;\theta)\pi_0(\theta).
 \end{align*}
-In this representation, $f(\mathbf{y}^*; \theta)$ is the likelihood function (Eq.~\ref{eq:likelihood}), and $\pi_0(\theta)$ is the original prior distribution for $\theta$.
+In this representation, $f(\mathbf{y}^*; \theta)$ is the likelihood function (Eq.~\ref{eq:likedef}), and $\pi_0(\theta)$ is the original prior distribution for $\theta$.
 If we let $m\rightarrow \infty$, the effect of the initial prior distribution diminishes, and the $m$th posterior has all of its mass centered at the MLE.
 This can be shown by taking the limit of $\pi_m(\theta) / \pi_m(\hat{\theta})$ as $m$ goes to infinity: if $\theta = \hat{\theta}$, then the limit is one, and zero otherwise \citep{lele07}.
 
@@ -495,7 +494,7 @@ We assume that $h_{u, m}(\theta)$ is some perturbation density, and we modify th
 Corollary~\ref{corollary:perturbed} shows that, under similar conditions as Theorem~\ref{theorem:GG}, marginalized data cloning with perturbations also converges to a point mass at the MLE if the likelihood is Gaussian.
 
 \begin{corollary}\label{corollary:perturbed}
-  Consider the setup of Theorem~\ref{theorem:GG}. If the parameter perturbations are Gaussian with covariance matrix $\sigma^2_m \Sigma_0$ for some initial covariance matrix $\Sigma_0 \in \R^{(U+1) \times (U+1)}$ and sequence $\sigma^2_m = o(1/m)$, then the $m$th iteration of Eqs.~\ref{eq:margBayesPerturb} and \ref{eq:MPIFupdatePerturb} corresponds to a Gaussian distribution with mean $\mu'_m \in \R^{U+1}$ and covariance $\Sigma'_m \in \R^{U+1\times U+1}$. If $\theta^* = (\phi^*, \psi^*_1, \ldots, \psi^*_{U})$ denotes the MLE, then $\|\mu'_m - \theta^*\|_2 \rightarrow 0$ and $\|\Sigma'_m\|_2 \rightarrow 0$.
+  Consider the setup of Theorem~\ref{theorem:GG}. If the parameter perturbations are Gaussian with covariance matrix $\sigma^2_m \Sigma_0$ for some initial covariance matrix $\Sigma_0 \in \R^{(U+1) \times (U+1)}$ and sequence $\sigma^2_m = o(1/m)$, then the $m$th iteration of Eqs.~\ref{eq:margBayesPerturb} and \ref{eq:MPIFupdatePerturb} corresponds to a Gaussian distribution with mean $\mu'_m \in \R^{U+1}$ and covariance $\Sigma'_m \in \R^{U+1\times U+1}$. If $\theta^* = (\phi^*, \psi^*_1, \ldots, \psi^*_{U})$ denotes the MLE, then $\vert\mu'_m - \theta^*\vert_2 \rightarrow 0$ and $\|\Sigma'_m\|_2 \rightarrow 0$.
 \end{corollary}
 
 The convergence of the Eqs.~\ref{eq:margBayesPerturb}-\ref{eq:MPIFupdatePerturb} can be partially explained using a well known heuristic in Bayesian analysis: a more dispersed prior typically results in a posterior distribution that more closely resembles the likelihood function. 
@@ -647,7 +646,7 @@ ggplot(df_all_mu) +
   facet_wrap(~group, labeller = labeller(group = method_names)) + 
   theme(plot.margin = unit(c(0, 0, 0, 0), 'cm'))
 @
-\caption{\label{fig:DC}Data Cloning and Marginalized Data Cloning for two parameter model with Gaussian likelihoods and priors. The ellipses show the region of the parameter distribution that contains $95\%$ of the probability mass of the distribution. The black dashed line shows this region for the likelihood surface, and the red ``x" marks the MLE.}
+\caption[Data cloning compared to marginalized data cloning for Gaussian densities.]{\label{fig:DC}Data cloning and Marginalized data cloning for two parameter model with Gaussian likelihoods and priors. The ellipses show the region of the parameter distribution that contains $95\%$ of the probability mass of the distribution. The black dashed line shows this region for the likelihood surface, and the red ``x" marks the MLE.}
 \end{figure}
 
 \section{Simulation Studies}
@@ -829,7 +828,7 @@ depletion_2 <- ggplot() +
 
 cowplot::plot_grid(depletion_1, depletion_2, nrow = 2, labels = "AUTO", rel_heights = c(0.425, 0.575))
 @
-\caption{\label{fig:depletion}Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}. (A) The total number of unique particles representing each parameter. The dashed horizontal line shows that MPIF maintains the number of particles for $\Psi_2$ over time. (B) Parameter particle swarm of a single update with and without marginalization compared to the true posterior distribution.}
+\caption[Single unit iteration of MPIF on toy model.]{\label{fig:depletion}Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}. (A) The total number of unique particles representing each parameter. The dashed horizontal line shows that MPIF maintains the number of particles for $\Psi_2$ over time. (B) Parameter particle swarm of a single update with and without marginalization compared to the true posterior distribution.}
 \end{figure}
 
 \subsection{Stochastic Gompertz Population Model}\label{sec:gompertz}
@@ -843,7 +842,7 @@ For each unit $u$, the latent state has a one-step transition density that satis
 X_{u,n+1} = K_u^{1-e^{r_u}} \, X_{u, n}^{e^{-r_u}}\, \epsilon_{u, n},
 \end{equation*}
 
-\noindent where $K_u$ is the carrying capacity for the population in unit $u$, $r_u$ is a positive parameter that corresponds to the growth rate, and $\epsilon_{u, n}$ are iid. lognormal random variables such that $\log \epsilon_{u, n} \sim \normal[0, \sigma_u^2]$.
+\noindent where $K_u$ is the carrying capacity for the population in unit $u$, $r_u$ is a positive parameter that corresponds to the growth rate, and $\epsilon_{u, n}$ are iid. log-normal random variables such that $\log \epsilon_{u, n} \sim \normal[0, \sigma_u^2]$.
 Measurements of the population are obtained via the density
 
 \begin{equation*}
@@ -1013,13 +1012,13 @@ gg_bigU <- IF_long_ntruth %>%
 
 cowplot::plot_grid(gg_smallU, gg_bigU, nrow = 2, rel_heights = c(0.4, 0.6))
 @
-\caption{\label{fig:gomp}Comparison of the MPIF and PIF algorithms for fitting the stochastic Gompertz population model. 
+\caption[MPIF compared to PIF on Gompertz population model.]{\label{fig:gomp}Comparison of the MPIF and PIF algorithms for fitting the stochastic Gompertz population model. 
 The solid horizontal line shows the true maximum likelihood, determined via the Kalman filter and a numeric optimizer, an intractable approach for high-dimensional parameter spaces $(U > 100)$, so in these cases the dashed line indicates the likelihood at the data-generating parameters. 
 Each algorithm used 50 unique starting points.
 Vertical bars span the tenth percentile to the maximum likelihood values; lowest values were excluded due to poor likelihoods from the PIF algorithm.}
 \end{figure}
 
-\section{Example: Measles in the United Kingdom} 
+\section{Example: Measles in the United Kingdom}\label{sec:UKmeas}
 
 We show how MPIF and PIF compare in an epidemiological model for weekly reported measles cases for 20 different UK cities from 1950 to 1964 \citep{korevaar20}.
 Pre-vaccination UK measles data has been used extensively to motivate innovative methods for inference on stochastic processes since \citet{bartlett60}, yet, fitting nonlinear Markov process models simultaneously to multiple cities with shared and unit-specific parameters remains a challenge, leading practitioners to consider linearizations that have uncertain consequences \citep{korevaar20}.
@@ -1196,7 +1195,7 @@ gg <- results_in |>
 
 print(gg)
 @
-\caption{\label{fig:measles1} Log-likelihoods yielded by the PIF and MPIF algorithms for the mechanistic measles model to the UK data. 
+\caption[MPIF comparison using mechanistic model for UK measles incidence data.]{\label{fig:measles1} Log-likelihoods yielded by the PIF and MPIF algorithms for the mechanistic measles model to the UK data. 
 Rows correspond to a different number of particles $J$ used in Algorithm~\ref{alg:mpif}. 
 The log-likelihood is evaluated at iterations 20, 56, 92, 128, 164, and 200, marked by vertical grey lines.}
 \end{figure}

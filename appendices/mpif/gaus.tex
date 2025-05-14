@@ -58,7 +58,7 @@ A^{(d+1)}_k =
     0 & 1
   \end{pmatrix}.
 \end{equation*}
-Consider a vector $\mu \in \R^{d+1}$, such that $\|\mu\|_2 \leq 1$.
+Consider a vector $\mu \in \R^{d+1}$, such that $\vert\mu\vert_2 \leq 1$.
 Let $\tilde{\mu} \in \R^{d}$ be defined by 
 \begin{equation}
 \tilde{\mu} = \bigg[\bigg(\prod_{k = 1}^{d-1} A^{(d+1)}_k\bigg)\mu\bigg]_{(1:d)}
@@ -69,27 +69,27 @@ and notice that we have
 \end{equation}
 By construction, we have 
 \begin{align*}
-    \bigg|\Big(\prod_{k = 1}^d A^{(d+1)}_k\Big)\mu \bigg|^2_2 &= \bigg|\Big(A^{(d+1)}_d\prod_{k = 1}^{d-1} A^{(d+1)}_k\Big)\mu \bigg|^2_2\\
-    &= \big|A^{(d+1)}_d(\tilde{\mu}_{(1:d)}, \mu_{(d+1)})^T\big|^2_2 \\
-    &= \big|B^{(d+1)}_d (\tilde{\mu}_1, \mu_{(d+1)})^T\big|^2_2 + \big|\tilde{\mu}_{(1:d)}\big|^2_2 - \tilde{\mu}^2_1.
+    \bigg\vert\Big(\prod_{k = 1}^d A^{(d+1)}_k\Big)\mu \bigg\vert^2_2 &= \bigg\vert\Big(A^{(d+1)}_d\prod_{k = 1}^{d-1} A^{(d+1)}_k\Big)\mu \bigg\vert^2_2\\
+    &= \big\vert A^{(d+1)}_d(\tilde{\mu}_{(1:d)}, \mu_{(d+1)})^T\big\vert^2_2 \\
+    &= \big\vert B^{(d+1)}_d (\tilde{\mu}_1, \mu_{(d+1)})^T\big\vert^2_2 + \big\vert\tilde{\mu}_{(1:d)}\big\vert^2_2 - \tilde{\mu}^2_1.
 \end{align*}
-Because $\|B^{(d+1)}_d\|_2 \leq \lemmaBound$, $|B^{(d+1)}_d (\tilde{\mu}_1, \mu_{(d+1)})^T|^2_2 \leq \lemmaBound^2|(\tilde{\mu}_1, \mu_{(d+1)})^T|^2_2$.
+Because $\|B^{(d+1)}_d\|_2 \leq \lemmaBound$, $\vert B^{(d+1)}_d (\tilde{\mu}_1, \mu_{(d+1)})^T\vert^2_2 \leq \lemmaBound^2\vert(\tilde{\mu}_1, \mu_{(d+1)})^T\vert^2_2$.
 Furthermore, our inductive hypothesis applied to Eq.~(\ref{eq:lemma:d}) implies that
-$|{\tilde{\mu}}_{(1:d)}|^2_2 \leq \lemmaBound^2|\mu_{(1:d)}|^2_2 \leq \lemmaBound^2|\mu|^2_2$.
+$\vert{\tilde{\mu}}_{(1:d)}\vert^2_2 \leq \lemmaBound^2\vert\mu_{(1:d)}\vert^2_2 \leq \lemmaBound^2\vert\mu\vert^2_2$.
 Therefore,
 \begin{align}
-    \bigg|\Big(\prod_{k = 1}^d A_k\Big)\mu\bigg|^2_2 &\leq \lemmaBound^2({\tilde{\mu}}^2_1 + \mu_{(d+1)}^2) + \lemmaBound^2(|\mu_{(1:d)}|^2_2) - {\tilde{\mu}}^2_1 \\
-    &= (\lemmaBound^2-1){\tilde{\mu}}^2_1 + \lemmaBound^2 |\mu|^2_2
+    \bigg\vert\Big(\prod_{k = 1}^d A_k\Big)\mu\bigg\vert^2_2 &\leq \lemmaBound^2({\tilde{\mu}}^2_1 + \mu_{(d+1)}^2) + \lemmaBound^2(\vert\mu_{(1:d)}\vert^2_2) - {\tilde{\mu}}^2_1 \\
+    &= (\lemmaBound^2-1){\tilde{\mu}}^2_1 + \lemmaBound^2 \vert\mu\vert^2_2
     \\
     \label{eq:lemma:conclusion}
-    &\leq \lemmaBound^2 \|\mu\|^2_2,
+    &\leq \lemmaBound^2 \vert\mu\vert^2_2,
 \end{align}
 with Eq.~(\ref{eq:lemma:conclusion}) implied by $\lemmaBound \leq 1$, and hence $(\lemmaBound^2-1) < 0$.
 It follows immediately from Eq.~(\ref{eq:lemma:conclusion}) that $P_{d+1}\le c$, completing the proof.
 \end{proof}
 
 We now return to the main argument.
-%continue the proof of Theorem~\ref{theorem:GG}. 
+%continue the proof of Theorem~\ref{theorem:GG}.
 
 \begin{proof}[Proof of Theorem~\ref{theorem:GG}]
 Using the transformation invariance of the MLE, we can suppose without loss of generality that the maximum of the marginal likelihood for unit $u$ is at $\phi, \psi_u = 0$.
@@ -332,7 +332,7 @@ By Lemma~\ref{lemma:matrix}, we have for all $\nmif \in \mathbb{N}$, $\|\prod_{u
   &< \prod_{m = 1}^M \Big(1 - \frac{\max_u \lambda^{(1)}_{\nmif, \unit}}{\nmif} + o(1/\nmif)\Big) \rightarrow 0.
 \end{align*}
 Therefore for any arbitrary initial conditions $\mu_0$ and $\Gamma_0$, we have
-$$|\mu_M|_2 = \bigg|\bigg(\prod_{\nmif = 1}^M\prod_{u = 1}^U A_{\nmif, \unit}\bigg)\mu_0\bigg|_2 \rightarrow 0$$
+$$\vert\mu_M\vert_2 = \bigg\vert\bigg(\prod_{\nmif = 1}^M\prod_{u = 1}^U A_{\nmif, \unit}\bigg)\mu_0\bigg\vert_2 \rightarrow 0$$
 as $M\rightarrow \infty$, completing the proof.
 
 \end{proof}
@@ -399,13 +399,13 @@ $$
 We have shown above that $A'_{\nmif, \unit}$ and $A_{\nmif, \unit}$ are asymptotically equivalent. 
 Therefore the same argument in the proof of Theorem~\ref{theorem:GG} immediately implies
 $$
-\big| \mu'_{\nmif} \big|_2 =
-  \bigg|
+\big\vert \mu'_{\nmif} \big\vert_2 =
+  \bigg\vert
     \bigg(
       \prod_{m = 1}^n\prod_{u = 1}^U A'_{m, u}
     \bigg)
     \mu_0
-  \bigg|_2 \rightarrow 0.
+  \bigg\vert_2 \rightarrow 0.
 $$
 
    \end{proof}

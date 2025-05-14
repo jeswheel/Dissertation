@@ -63,7 +63,7 @@ An initialization with parameters $(\phi_1, \phi_2) = (1.1, 0.1)$ is not a valid
 Our algorithm accounts for the complex relationship between model parameters when obtaining random initializations.
 
 To visualize why an independent sampling scheme is not used, consider sampling parameters from a Uniform$(-1, 1)$ distribution.
-In Fig~\ref{fig:AR2}, we plot inverted roots that are a result of sampling from this distribution for AR(2) and AR(3) models.
+In Figure~\ref{fig:AR2}, we plot inverted roots that are a result of sampling from this distribution for AR(2) and AR(3) models.
 The figure illustrates that a significant percentage of uniformly sampled parameter initializations lie outside the accepted region, and, critically, the entire region of possible initializations is not well covered by uniform sampling.
 Picking a uniform distribution with different bounds---or any other independent sampling distribution---results in similar problems.
 In order to uniformly sample from the possibly regions, it is necessary to account for the geometry of parameter space, a problem solved by Algorithm~\ref{alg:mle}.
