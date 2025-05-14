@@ -1,0 +1,182 @@
+\chapter{Introduction}
+\label{chpt:intro}
+
+The importance of time series analysis has continued to grow with the demand for both the collection and analysis of data.
+Time series data are abundant, as data are often generated over time in a way that introduces dependence between observations. 
+However, the analysis of time series presents a unique challenge for both statisticians and practitioners, as the temporal dependence between observations requires careful treatment.
+A unifying approach in time series analysis, known as state space modeling, assumes that observations from the system under investigation depend on an unobservable process.
+Constructing a state space model involves proposing equations that describe the evolution of this unobservable process over time and how observations are made.
+Common goals of state space modeling include making inferences about critical yet unobserved variables, incorporating real-world mechanisms into statistical models, and enabling likelihood based inference for models who that lack closed-form expressions of the likelihood function.
+
+The term state space model (SSM) has a number of synonyms including mechanistic model, partially observed Markov process (POMP) model, and hidden Markov model (HMM) \citep{king15}.
+In some literature, these terms have alternatively been used to refer to particular instances of the more general model class \citep[e.g.,][]{glennie23}, resulting in some confusion.
+% To avoid ambiguity, unifying notation and terminology is presented in this section.
+Throughout the dissertation, I follow the seminal work of \citet{durbin12} and use the term SSM to refer to the most general case.
+That is, the observed time series is assumed to be reliant on an unobservable collection of variables at each observation time, without any restrictions on relationships between variables.
+The term \emph{mechanistic} is reserved for models where the evolution of latent variables is dictated by equations intended to replicate real-world mechanisms, such as the transmission of infectious diseases among susceptible populations \citep{wheeler24}.
+In most instances in this thesis and existing literature, the latent variables are treated as a Markov process, in which case the term POMP can be used.
+Finally, existing literature often uses the term HMM to refer to POMP models where the latent variables take values in a discrete and finite space \citep{eddy04,doucet01,glennie23,newman23}; this same definition is used here. 
+
+\section{Defining State Space Models and Notation}\label{sec:intro-POMP}
+
+In this section, some general terminology and notation that is common across chapters is introduced, and refined in subsequent chapters as needed. 
+This thesis presents methodologies for modeling real-valued time series data, collected at observation times $t_1, t_2, \ldots, t_N \in \mathcal{T} \subset \R$.
+Observation times do not need to be equally spaced.
+Notably, this treatment includes time series where measurements are equally spaced but occasionally missing.
+
+The observation at time $t_n$, $n \in \{1, \ldots, N\}$ can be vector valued, and is denoted $\bm{y}^*_{n} \in \R^{d_y}$.
+The collection of observations $\{\bm{y}^*_{n},\, n\in 1, \ldots, N\}$ is modeled as a single realization of a collection of random variables $\{\bm{Y}_n, \, n\in 1, \ldots, N\}$, called the observable or measurement process.
+The state space formulation introduces a collection of unobservable random variables $\{\bm{X}_n, \, n\in 1, \ldots, N\}$ that exist at the same time points as the observable process, and we generally assume that this unobservable (or latent) process takes values in a subset of $\R^{d_x}$.
+Most often, models of interest include a description of how the latent process is initialized at some time $t_0 < t_1$, and the collection of latent variables is extended to include $\bm{X}_0$.
+The latent process can be modeled either as a discrete or continuous time process.
+
+For convenience, we adopt the notation that for any integers $a < b$, $\seq{a}{b}$ is the vector $(a, a+1, \ldots, b-1, b)$.
+Similarly, we write the entire collection of observations as $\bm{y}^*_{1:N} = (\bm{y}^*_1, \ldots, \bm{y}^*_N)$, and use the same basic notation for $Y_{1:N}$ and $X_{0:N}$.  
+The joint probability density or (mass function) of the observable and unobservable processes is assumed to exist, and can be written as $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}(\bm{x}_{0:N}, \bm{y}_{1:N}; \theta)$, where $\theta$ is a parameter vector $\theta \in \R^{d_\theta}$.
+The likelihood is a function of $\theta$, defined by the density of $\bm{Y}_{1:N}$ evaluated at the observed data $\bm{y}^*_{1:N}$, given by
+\begin{eqnarray}
+\label{eq:likedef}
+\mathcal{L}(\theta) = f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N}^*;\paramVec\big) d\bm{x}_{0:N}.
+\end{eqnarray}
+In all but the simplest models, a closed-form expression of the likelihood function is not readily available due to the high-dimensional integral involving the latent variables.
+
+The SSMs described in Chapters~\ref{chpt:arima}--\ref{chpt:mpif} can all be classified as POMP models.
+This model class makes some additional, nonrestrictive assumptions that can be used to enable likelihood based inference.
+The latent process is assumed to be Markovian and independent of the measurement process.
+Additionally, the measurements are assumed to be conditionally independent given the current value of the latent process.
+In terms of joint and conditional density functions of variables at observation times, these assumptions imply that for all $n \in \seq{1}{N}$,
+$$
+f_{\bm{X}_{n} | \bm{X}_{1:n-1}}(\bm{x}_{n} | \bm{x}_{1:n-1}; \theta) = f_{\bm{X}_{n} | \bm{X}_{n-1}}(\bm{x}_{n} | \bm{x}_{n-1}; \theta),
+$$
+and
+$$
+f_{\bm{Y}_{n} | \bm{X}_{1:N}, \bm{Y}_{-n}}(\bm{y}_{n} | \bm{x}_{0:N}, \bm{y}_{-n}; \theta) = f_{\bm{Y}_{n} | \bm{X}_{n}}(\bm{y}_{n} | \bm{x}_{n}; \theta),
+$$
+Using the notation that $\bm{Y}_{-n}$ is the collection of random variables $\bm{Y}_{1:N}$ without $\bm{Y}_{n}$.
+A schematic diagram representing a general POMP model is given in Figure~\ref{fig:pompDiagram}
+The additional assumptions of a POMP model can be used to refactor the joint density of latent and observable random variables as
+\begin{eqnarray}
+\label{eq:jointLik}
+f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big).
+\end{eqnarray}
+This representation is useful as the entire model can be expressed in terms of three simple components, namely the \emph{initializer} $f_{\bm{X}_0}(\bm{x}_0; \theta)$, the \emph{process} or \emph{transition} model $f_{\bm{X}_{n} | \bm{X}_{n - 1}}(\bm{x}_n | \bm{x}_{n - 1}; \theta)$, and the \emph{measurement} model $f_{\bm{Y}_{n} | \bm{X}_n}(\bm{y}_n | \bm{x}_n ; \theta)$.
+Each of these pieces can depend arbitrarily on observation time and the individual components of the parameter vector $\theta$.
+
+\begin{figure}[!ht]
+<<pompDiagram, echo=FALSE, fig.height=3, fig.width=6>>=
+library(grid)
+library(latex2exp)
+vp <- viewport(x=unit(0.5,"npc"),y=unit(0.54,"npc"),
+               width=unit(0.96,"npc"),height=unit(0.96,"npc"))
+pushViewport(vp)
+
+X_offset <- 0.04
+
+fs <- 12
+x1 <- 0.5+X_offset; y1 <- 0.88; offset <- 0.225;
+gp <- gpar(lty=2,col=grey(0.6),fontsize=12)
+grid.text(x=x1,y=y1,label="measurement model",just="centre",gp=gpar(lty=2,col=grey(0.6),fontsize=11))
+grid.text(x=x1+offset,y=y1-0.005,TeX("$f_{Y_n|X_n}(y_n|x_n;\\,\\theta)$", italic = TRUE),gp=gpar(fontsize=11,col=grey(0.5)))
+x1 <- (2* x1 + offset/2)/2+X_offset
+grid.lines(x=unit(c(x1,7/24+X_offset),"npc")+unit(c(0,2),"points"),y=unit(c(y1,1/2),"npc")+unit(c(-fs/2,0),"points"),gp=gp)
+grid.lines(x=unit(c(x1,11.8/24+X_offset),"npc")+unit(c(0,2),"points"),y=unit(c(y1,1/2),"npc")+unit(c(-fs/2,0),"points"),gp=gp)
+grid.lines(x=unit(c(x1,18/24+X_offset),"npc")+unit(c(0,-2),"points"),y=unit(c(y1,1/2),"npc")+unit(c(-fs/2,0),"points"),gp=gp)
+
+x1 <- 0.25+X_offset; y1 <- 0.14; offset <- 0.2075
+grid.text(x=x1,y=y1,label="process model",just="centre",gp=gpar(lty=2,col=grey(0.6),fontsize=11))
+grid.text(x=x1+offset,y=y1-0.005,TeX("$f_{X_n|X_{n-1}}(x_n|x_{n-1};\\,\\theta)$", italic = TRUE),gp=gpar(fontsize=11,col=grey(0.5)))
+x1 <- (2 * x1 + offset) / 2
+grid.lines(x=unit(c(x1,4/24+X_offset),"npc"),y=unit(c(y1,1/3),"npc")+unit(c((fs+1)/2,-fs/4),"points"),gp=gp)
+grid.lines(x=unit(c(x1,9.5/24+X_offset),"npc"),y=unit(c(y1,1/3),"npc")+unit(c((fs+1)/2,-fs/4),"points"),gp=gp)
+grid.lines(x=unit(c(x1,13.5/24+X_offset),"npc"),y=unit(c(y1,1/3),"npc")+unit(c((fs+1)/2,-fs/4),"points"),gp=gp)
+grid.lines(x=unit(c(x1,19.6/24+X_offset),"npc"),y=unit(c(y1,1/3),"npc")+unit(c(fs/2,-fs/4),"points"),gp=gp)
+grid.lines(x=unit(c(x1,16/24+X_offset),"npc"),y=unit(c(y1,1/3),"npc")+unit(c((fs+1)/2,-fs/4),"points"),gp=gp)
+
+grid.text(x=1/72,y=c(1/3,2/3),label=c("latent states","observations"),just="centre",rot=90,gp=gpar(lty=2,col=grey(0.6),fontsize=11))
+
+x1 <- unit(c(2, 7, 12, 18, 7, 12, 18)/24+X_offset, "npc")
+y1 <- unit(c(rep(1,4),rep(2,3))/3,"npc")
+w <- unit(1/12,"npc")
+h <- unit(1/6,"npc")
+
+grid.lines(x=c(1/48,47/48+X_offset/2),y=1/12,arrow=arrow(length=unit(0.02,"npc")))
+grid.text(x=x1[1:4],y=1/24,label=c(expression(italic(t[0])),expression(italic(t[1])),expression(italic(t[2])),expression(t[n])))
+
+grid.text(x=unit(15/24+X_offset, 'npc'), y=1/24,label=quote(phantom(0)~cdots~phantom(0)))
+grid.text(x=unit(21/24+X_offset, 'npc'), y=1/24,label=quote(phantom(0)~cdots~phantom(0)))
+
+grid.rect(x=x1,y=y1,width=w,height=h,just=c(0.5,0.5),gp=gpar(fill="white",lwd=2))
+grid.text(x=x1,y=y1,label=c(
+  expression(italic(X[0])),expression(italic(X[1])),
+  expression(italic(X[2])),expression(italic(X[n])),
+  expression(italic(Y[1])),
+  expression(italic(Y[2])),expression(italic(Y[n]))),
+  gp=gpar(fontface=3))
+grid.text(x=c(15, 21)/24+X_offset,y=unit(1/3-(1/250),"npc")+unit(2,"point"),label=quote(phantom(0)~cdots~phantom(0)),gp=gpar(fontsize=15))
+grid.lines(x=c(2,7)/24+c(1.2,-1.2)/24+X_offset,y=1/3,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+grid.lines(x=c(7,12)/24+c(1.2,-1.2)/24+X_offset,y=1/3,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+grid.lines(x=c(12,15)/24+c(1.2,-0.7)/24+X_offset,y=1/3,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+grid.lines(x=c(15,18)/24+c(0.7,-1.2)/24+X_offset,y=1/3,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+grid.lines(x=c(18,21)/24+c(1.2,-0.6)/24+X_offset,y=1/3,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+
+grid.lines(x=7/24+X_offset,y=c(1,2)/3+c(1,-1)/12,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+grid.lines(x=12/24+X_offset,y=c(1,2)/3+c(1,-1)/12,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+grid.lines(x=18/24+X_offset,y=c(1,2)/3+c(1,-1)/12,arrow=arrow(length=unit(0.02,"npc")),gp=gpar(lwd=2))
+
+popViewport()
+@
+\caption[Schematic of POMP model]{\label{fig:pompDiagram}A flow diagram representing an arbitrary POMP model.}
+\end{figure}
+
+Though these additional assumptions do not generally give rise to a closed-form expression of the likelihood function, they do enable likelihood based inference in many scenarios.
+For instance, if the evolution of the latent variables and measurements are dictated by linear Gaussian equations, then the Kalman filter \citep{kalman60} can be used to evaluate the likelihood function exactly.
+These types of models are generally referred to as linear Gaussian SSMs rather than linear Gaussian POMP models, and I use this terminology as well in this thesis when referring to this model class.
+Despite the ability to evaluate the likelihood function exactly, linear Gaussian SSMs can still result in challenges for inference \citep{auger16}.
+This is demonstrated in Chapter~\ref{chpt:arima}, where I demonstrate that frequently used algorithms for maximizing the likelihood of a specific class of linear Gaussian SSMs often result in sub optimal parameter estimates, and propose a novel algorithm (Algorithm~\ref{alg:mle}) that addresses these shortcomings.
+
+Likelihood-based inference for POMP models has often been successful in more general cases, particularly when the observed variables are univariate ($d_y = 1$) or when the dimensionality is low ($d_y < 5$).
+Although the likelihood function cannot be evaluated exactly, various algorithms can approximate it using Monte Carlo techniques.
+For example, in mechanistic models of infectious disease dynamics, the particle filter \citep{arulampalam02} is commonly used to evaluate model likelihoods. 
+Additionally, iterated filtering, an extension of the particle filter, is used to maximize the likelihood \citep{ionides15}.
+An application of this approach is demonstrated using Model~1 of Chapter~\ref{chpt:haiti}. 
+However, the the applicability of these Monte Carlo approaches diminishes quickly as the dimensionality of the model grows.
+
+A common instance that has challenged existing Monte Carlo procedures arises when a collection of similar but independent POMP models is used to analyze a set of time series, known as panel data or longitudinal data.
+This assembly of POMP models is referred to as a PanelPOMP model.
+Inference methodologies for this class of models is the primary focus of Chapter~\ref{chpt:mpif}.
+The independence of the models allows the particle filter to be applied independently to each model for likelihood evaluation.
+However, when parameters are shared across models, coupling is introduced, which can lead to scaling issues typical of Monte Carlo algorithms in high-dimensional settings.
+The MPIF algorithm, introduced in Chapter~\ref{chpt:mpif}, mitigates these issues and significantly enhances the ability to fit PanelPOMPs to panel data compared to existing approaches.
+
+High-dimensional models can also emerge when time series data are collected from multiple sites or individuals and the latent processes shares dynamics across measurement locations.
+This situation commonly arises when there is spatial dependence between measurement locations, giving rise to the name SpatPOMP for this class of models.
+Although the primary focus of this thesis is not on methods for SpatPOMP models, Chapter~\ref{chpt:haiti} explores an application of a SpatPOMP model for cholera infections in the 2010-2019 outbreak in Haiti.
+The model accounts for spatial dependence between infections recorded at distinct Haitian administrative d\'{e}partements.
+
+\section{Overview of remaining chapters}\label{intro:overview}
+
+Chapter~\ref{chpt:arima} describes an algorithm for performing maximum likelihood estimation for parameters of arbitrary autoregressive moving average (ARMA) models.
+Existing methodologies for this task express the ARMA model as a linear Gaussian SSM, and then use the Kalman filter \citep{kalman60} to evaluate the likelihood function;
+the likelihood is then maximized using numeric optimization algorithms.
+In this chapter, I demonstrate that this approach often results in sub optimal parameter estimates, as numeric optimizers frequently converge to local maxima of the likelihood surface.
+To overcome these optimization deficiencies, I propose a random parameter initialization algorithm that enables sampling of ARMA parameter coefficients, accounting for the complex geometry of the parameter space.
+Combined with existing methodologies for fitting ARMA parameters, this new approach is demonstrated to frequently result in improved parameter estimates using a large number of simulated data.
+
+In Chapter~\ref{chpt:haiti}, I examine the role SSMs have in influencing policy decisions regarding infectious disease outbreaks.
+This is done by reviewing the statistical models that were used to analyze the 2019-2019 cholera outbreak in Haiti.
+Following this review, a retrospective analysis of the cholera outbreak is conducted using three previously proposed SSMs.
+Using the lessons learned by reviewing existing approaches, the retrospective analysis results in a reproducible workflow for developing models, evaluating model quality, and refining the resulting models in order to improve statistical outcomes.
+This project also demonstrates the efficacy of recently developed methodology for likelihood based inference of SpatPOMP models.
+This work has been been published in PLoS Computational Biology \citep{wheeler24}.
+
+Chapter~\ref{chpt:mpif} proposes a simulation-based algorithm designed to perform maximum likelihood estimation for a class of high-dimensional POMP models.
+This algorithm, called the Marginalized Panel Iterated Filter (MPIF), significantly enhances the capability of iterated filtering algorithms to estimate parameters for large collections of independent but related POMP models.
+POMP models are routinely fitted to univariate time series data, but seldom to collections of time series---called panel data.
+This suggests that there are practical difficulties in using existing approaches for this task.
+The MPIF algorithm improves empirical convergence rates of existing procedures by addressing the issue of particle depletion that occurs when performing iterated filtering on models that have high-dimensional parameter spaces.
+Theoretical support for the algorithm is provided through an analysis of iterating marginalized Bayes maps.
+Additionally, asymptotic theory demonstrating the convergence of general iterated filtering algorithms for PanelPOMP models without the marginalization step is presented.
+This work is currently being prepared for submission, and reflects joint work with my adviser and fellow Ph.D. student, Aaron Abkemeier.
+
+The final chapter provides a brief summary of the work presented in Chapters~\ref{chpt:arima}--\ref{chpt:mpif}.
+This is followed by a discussion on future work related to this thesis. 
