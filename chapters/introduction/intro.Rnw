@@ -32,11 +32,11 @@ The latent process can be modeled either as a discrete or continuous time proces
 
 For convenience, we adopt the notation that for any integers $a < b$, $\seq{a}{b}$ is the vector $(a, a+1, \ldots, b-1, b)$.
 Similarly, we write the entire collection of observations as $\bm{y}^*_{1:N} = (\bm{y}^*_1, \ldots, \bm{y}^*_N)$, and use the same basic notation for $Y_{1:N}$ and $X_{0:N}$.  
-The joint probability density or (mass function) of the observable and unobservable processes is assumed to exist, and can be written as $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}(\bm{x}_{0:N}, \bm{y}_{1:N}; \theta)$, where $\theta$ is a parameter vector $\theta \in \R^{d_\theta}$.
-The likelihood is a function of $\theta$, defined by the density of $\bm{Y}_{1:N}$ evaluated at the observed data $\bm{y}^*_{1:N}$, given by
+The joint probability density or (mass function) of the observable and unobservable processes is assumed to exist, and can be written as $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}(\bm{x}_{0:N}, \bm{y}_{1:N}; \, \paramVec)$, where $\paramVec$ is a parameter vector $\paramVec \in \R^{d_\paramVec}$.
+The likelihood is a function of $\paramVec$, defined by the density of $\bm{Y}_{1:N}$ evaluated at the observed data $\bm{y}^*_{1:N}$, given by
 \begin{eqnarray}
 \label{eq:likedef}
-\mathcal{L}(\theta) = f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N}^*;\paramVec\big) d\bm{x}_{0:N}.
+\mathcal{L}(\paramVec) = f_{\bm{Y}_{1:N}}\big(\bm{y}_{1:N}^*; \, \paramVec\big) = \int f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N}^*;\, \paramVec\big) \, d\bm{x}_{0:N}.
 \end{eqnarray}
 In all but the simplest models, a closed-form expression of the likelihood function is not readily available due to the high-dimensional integral involving the latent variables.
 
@@ -46,21 +46,21 @@ The latent process is assumed to be Markovian and independent of the measurement
 Additionally, the measurements are assumed to be conditionally independent given the current value of the latent process.
 In terms of joint and conditional density functions of variables at observation times, these assumptions imply that for all $n \in \seq{1}{N}$,
 $$
-f_{\bm{X}_{n} | \bm{X}_{1:n-1}}(\bm{x}_{n} | \bm{x}_{1:n-1}; \theta) = f_{\bm{X}_{n} | \bm{X}_{n-1}}(\bm{x}_{n} | \bm{x}_{n-1}; \theta),
+f_{\bm{X}_{n} | \bm{X}_{1:n-1}}(\bm{x}_{n} | \bm{x}_{1:n-1}; \, \paramVec) = f_{\bm{X}_{n} | \bm{X}_{n-1}}(\bm{x}_{n} | \bm{x}_{n-1}; \, \paramVec),
 $$
 and
 $$
-f_{\bm{Y}_{n} | \bm{X}_{1:N}, \bm{Y}_{-n}}(\bm{y}_{n} | \bm{x}_{0:N}, \bm{y}_{-n}; \theta) = f_{\bm{Y}_{n} | \bm{X}_{n}}(\bm{y}_{n} | \bm{x}_{n}; \theta),
+f_{\bm{Y}_{n} | \bm{X}_{1:N}, \bm{Y}_{-n}}(\bm{y}_{n} | \bm{x}_{0:N}, \bm{y}_{-n}; \, \paramVec) = f_{\bm{Y}_{n} | \bm{X}_{n}}(\bm{y}_{n} | \bm{x}_{n}; \, \paramVec),
 $$
 Using the notation that $\bm{Y}_{-n}$ is the collection of random variables $\bm{Y}_{1:N}$ without $\bm{Y}_{n}$.
 A schematic diagram representing a general POMP model is given in Figure~\ref{fig:pompDiagram}
 The additional assumptions of a POMP model can be used to refactor the joint density of latent and observable random variables as
 \begin{eqnarray}
 \label{eq:jointLik}
-f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}\big).
+f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}\big(\bm{x}_{0:N}, \bm{y}_{1:N};\, \paramVec\big) = f_{\bm{X}_0}\big(\bm{x}_0;\, \paramVec\big)\prod_{n = 1}^N f_{\bm{X}_n|\bm{X}_{n-1}}\big(\bm{x}_{n}|\bm{x}_{n-1}; \, \paramVec\big)f_{\bm{Y}_n|\bm{X}_{n}}\big(\bm{y}_n|\bm{x}_{n}; \, \paramVec\big).
 \end{eqnarray}
-This representation is useful as the entire model can be expressed in terms of three simple components, namely the \emph{initializer} $f_{\bm{X}_0}(\bm{x}_0; \theta)$, the \emph{process} or \emph{transition} model $f_{\bm{X}_{n} | \bm{X}_{n - 1}}(\bm{x}_n | \bm{x}_{n - 1}; \theta)$, and the \emph{measurement} model $f_{\bm{Y}_{n} | \bm{X}_n}(\bm{y}_n | \bm{x}_n ; \theta)$.
-Each of these pieces can depend arbitrarily on observation time and the individual components of the parameter vector $\theta$.
+This representation is useful as the entire model can be expressed in terms of three simple components, namely the \emph{initializer} $f_{\bm{X}_0}(\bm{x}_0; \, \paramVec)$, the \emph{process} or \emph{transition} model $f_{\bm{X}_{n} | \bm{X}_{n - 1}}(\bm{x}_n | \bm{x}_{n - 1}; \, \paramVec)$, and the \emph{measurement} model $f_{\bm{Y}_{n} | \bm{X}_n}(\bm{y}_n | \bm{x}_n ; \, \paramVec)$.
+Each of these pieces can depend arbitrarily on observation time and the individual components of the parameter vector $\paramVec$.
 
 \begin{figure}[!ht]
 <<pompDiagram, echo=FALSE, fig.height=3, fig.width=6>>=
