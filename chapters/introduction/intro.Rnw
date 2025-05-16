@@ -5,7 +5,7 @@ The importance of time series analysis has continued to grow with the demand for
 Time series data are abundant, as data are often generated over time in a way that introduces dependence between observations. 
 However, the analysis of time series presents a unique challenge for both statisticians and practitioners, as the temporal dependence between observations requires careful treatment.
 A unifying approach in time series analysis, known as state space modeling, assumes that observations from the system under investigation depend on an unobservable process.
-Constructing a state space model involves proposing equations that describe the evolution of this unobservable process over time and how observations are made.
+Constructing a state space model involves proposing equations that describe the evolution of this unobservable process over time and the unobserved process is related to observations.
 Common goals of state space modeling include making inferences about critical yet unobserved variables, incorporating real-world mechanisms into statistical models, and enabling likelihood based inference for models who that lack closed-form expressions of the likelihood function.
 
 The term state space model (SSM) has a number of synonyms including mechanistic model, partially observed Markov process (POMP) model, and hidden Markov model (HMM) \citep{king15}.
@@ -13,7 +13,7 @@ In some literature, these terms have alternatively been used to refer to particu
 % To avoid ambiguity, unifying notation and terminology is presented in this section.
 Throughout the dissertation, I follow the seminal work of \citet{durbin12} and use the term SSM to refer to the most general case.
 That is, the observed time series is assumed to be reliant on an unobservable collection of variables at each observation time, without any restrictions on relationships between variables.
-The term \emph{mechanistic} is reserved for models where the evolution of latent variables is dictated by equations intended to replicate real-world mechanisms, such as the transmission of infectious diseases among susceptible populations \citep{wheeler24}.
+The term \emph{mechanistic} is reserved for models where the evolution of latent variables is dictated by equations intended to replicate real-world mechanisms, such as the transmission of infectious diseases among susceptible populations \citep[e.g.,][]{wheeler24}.
 In most instances in this thesis and existing literature, the latent variables are treated as a Markov process, in which case the term POMP can be used.
 Finally, existing literature often uses the term HMM to refer to POMP models where the latent variables take values in a discrete and finite space \citep{eddy04,doucet01,glennie23,newman23}; this same definition is used here. 
 
@@ -30,7 +30,7 @@ The state space formulation introduces a collection of unobservable random varia
 Most often, models of interest include a description of how the latent process is initialized at some time $t_0 < t_1$, and the collection of latent variables is extended to include $\bm{X}_0$.
 The latent process can be modeled either as a discrete or continuous time process.
 
-For convenience, we adopt the notation that for any integers $a < b$, $\seq{a}{b}$ is the vector $(a, a+1, \ldots, b-1, b)$.
+For convenience, we adopt the notation that for any integers $a$ and $b$, $\seq{a}{b}$ is the vector $(a, a+1, \ldots, b-1, b)$, and use the convention that $\seq{a}{b} = \empty$ if $b < a$. 
 Similarly, we write the entire collection of observations as $\bm{y}^*_{1:N} = (\bm{y}^*_1, \ldots, \bm{y}^*_N)$, and use the same basic notation for $Y_{1:N}$ and $X_{0:N}$.  
 The joint probability density or (mass function) of the observable and unobservable processes is assumed to exist, and can be written as $f_{\bm{X}_{0:N}, \bm{Y}_{1:N}}(\bm{x}_{0:N}, \bm{y}_{1:N}; \, \paramVec)$, where $\paramVec$ is a parameter vector $\paramVec \in \R^{d_\paramVec}$.
 The likelihood is a function of $\paramVec$, defined by the density of $\bm{Y}_{1:N}$ evaluated at the observed data $\bm{y}^*_{1:N}$, given by
@@ -167,7 +167,7 @@ This is done by reviewing the statistical models that were used to analyze the 2
 Following this review, a retrospective analysis of the cholera outbreak is conducted using three previously proposed SSMs.
 Using the lessons learned by reviewing existing approaches, the retrospective analysis results in a reproducible workflow for developing models, evaluating model quality, and refining the resulting models in order to improve statistical outcomes.
 This project also demonstrates the efficacy of recently developed methodology for likelihood based inference of SpatPOMP models.
-This work has been been published in PLoS Computational Biology \citep{wheeler24}.
+This work has been been published in PLOS Computational Biology \citep{wheeler24}.
 
 Chapter~\ref{chpt:mpif} proposes a simulation-based algorithm designed to perform maximum likelihood estimation for a class of high-dimensional POMP models.
 This algorithm, called the Marginalized Panel Iterated Filter (MPIF), significantly enhances the capability of iterated filtering algorithms to estimate parameters for large collections of independent but related POMP models.
