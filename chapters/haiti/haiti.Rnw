@@ -1,4 +1,4 @@
-\chapter{Informing policy via dynamic models: Cholera in Haiti}
+\chapter{Informing Policy via Dynamic Models: Cholera in Haiti}
 \label{chpt:haiti}
 
 <<HaitiSetup, include=FALSE,echo=FALSE,results='hide'>>=

@@ -1,4 +1,4 @@
-\chapter{Iterating marginalized Bayes maps for likelihood maximization}
+\chapter{Iterating Marginalized Bayes Maps for Likelihood Maximization}
 \label{chpt:mpif}
 
 <<MPIFSetup, include=FALSE,echo=FALSE,results='hide'>>=
