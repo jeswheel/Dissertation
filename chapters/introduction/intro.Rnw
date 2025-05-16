@@ -125,7 +125,7 @@ grid.lines(x=18/24+X_offset,y=c(1,2)/3+c(1,-1)/12,arrow=arrow(length=unit(0.02,"
 
 popViewport()
 @
-\caption[Schematic of POMP model]{\label{fig:pompDiagram}A flow diagram representing an arbitrary POMP model.}
+\caption{\label{fig:pompDiagram}A flow diagram representing an arbitrary POMP model.}
 \end{figure}
 
 Though these additional assumptions do not generally give rise to a closed-form expression of the likelihood function, they do enable likelihood based inference in many scenarios.

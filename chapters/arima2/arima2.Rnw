@@ -332,7 +332,7 @@ ggpubr::ggarrange(
   common.legend = TRUE
 )
 @
-\caption[Multi-node MA(1) models]{\label{fig:multiMode}The profile log-likelihood of data simulated from four distinct MA(1) models, demonstrating a few examples of multimodal likelihood surfaces. The solid, black line indicates the true value of $\theta_1$; the dotted line is the CSS-initialization. The dashed lines correspond to the estimate $\hat{\theta}_1$ using \code{stats:arima} (red) and our proposed algorithm (implemented in \code{arima2::arima}, blue).}
+\caption[The profile log-likelihood of data simulated from four distinct MA(1) models.]{\label{fig:multiMode}The profile log-likelihood of data simulated from four distinct MA(1) models. The solid, black line indicates the true value of $\theta_1$; the dotted line is the CSS-initialization. The dashed lines correspond to the estimate $\hat{\theta}_1$ using \code{stats:arima} (red) and our proposed algorithm (implemented in \code{arima2::arima}, blue).}
 \end{figure}
 
 \subsection{A Novel Multi-start Algorithm}
@@ -528,7 +528,7 @@ wide_res %>%
   ylab("Proportion of Improved Fits") +
   xlab("Number of observations (n)")
 @
-\caption[Proportion of improved models]{\label{fig:simProps}Proportion of simulated data with improved likelihood from using multiple restarts (Algorithm~\ref{alg:mle}).}
+\caption[Proportion of simulated data with improved likelihood from using multiple restarts (Algorithm~\ref{alg:mle}).]{\label{fig:simProps}Proportion of simulated data with improved likelihood from using multiple restarts (Algorithm~\ref{alg:mle}).}
 \end{figure}
 
 Importantly, we do not claim to improve likelihood for all ARMA models and datasets.
@@ -610,7 +610,7 @@ ggpubr::ggarrange(
   label.x = c(0.16, 0)
 )
 @
-\caption[Confidence interval coverage]{\label{fig:pctCovered}Proportion of models that achieved nominal coverage of Bonferroni adjusted $95\%$ confidence intervals. The dashed line denotes the target coverage level. (A) Confidence intervals created using Fisher's information matrix. (B) Confidence intervals created using profile likelihoods.}
+\caption[Proportion of models that achieved nominal coverage of Bonferroni adjusted $95\%$ confidence intervals.]{\label{fig:pctCovered}Proportion of models that achieved nominal coverage of Bonferroni adjusted $95\%$ confidence intervals. The dashed line denotes the target coverage level. (A) Confidence intervals created using Fisher's information matrix. (B) Confidence intervals created using profile likelihoods.}
 \end{figure}
 
 \subsubsection{AIC Table Consistency}
@@ -680,7 +680,7 @@ simTables %>%
   scale_linetype_discrete(labels = restart_labels) +
   scale_y_continuous(limits = c(0.35, 1))
 @
-\caption[AIC table improvements]{\label{fig:AICtabRes}Data is generated from ARMA$(p, q)$ models with $(p, q) \in \{1, 2, 3\}^2$, and the corresponding AIC table is created. The Y-axis shows the percentage of tables that were consistent. M is the number of times a maxima is observed before the algorithm terminates, so $M=1$ corresponds to the standard maximization procedure.}
+\caption[Proportion of consistent AIC tables.]{\label{fig:AICtabRes}Proportion of consistent AIC tables. Data is generated from ARMA$(p, q)$ models with $(p, q) \in \{1, 2, 3\}^2$, and the corresponding AIC table is created. The Y-axis shows the percentage of tables that were consistent. M is the number of times a maxima is observed before the algorithm terminates, so $M=1$ corresponds to the standard maximization procedure.}
 \end{figure}
 
 The contemporary approach of using AIC---or any other information based criteria---to select model order involves fitting unnecessarily large models, leading to parameter redundancies that complicate likelihood optimization.
@@ -775,7 +775,7 @@ is_improved <- huron_tab_vals2 + tab_tol < huron_tab_vals
             \hline
         \end{tabular}
     \end{subtable}
-    \caption[AIC values of ARMA model for Lake Michigan-Huron]{\label{tab:huronTab}AIC values for an ARMA(p, q) model fit to Lake Michigan-Huron depths. Table~\ref{tab:AIC1} was computing using only a single parameter initialization. Table~\ref{tab:AIC2} was computed using Algorithm~\ref{alg:mle}. Highlighted cells show where the likelihood was improved (AIC reduced) using our algorithm.}
+    \caption[AIC values of ARMA models fit to Lake Michigan-Huron depths.]{\label{tab:huronTab}AIC values of ARMA models fit to Lake Michigan-Huron depths. Table~\ref{tab:AIC1} was computing using only a single parameter initialization. Table~\ref{tab:AIC2} was computed using Algorithm~\ref{alg:mle}. Highlighted cells show where the likelihood was improved (AIC reduced) using our algorithm.}
 \end{table}
 
 <<huronTab-latex, include=FALSE, eval=FALSE>>=
@@ -1050,7 +1050,7 @@ ggplot(all_roots, aes(x = real, y = im, col = mod, pch = mod)) +
   scale_size_manual(values = c(3.7, 2.7, 2.7)) +
   scale_color_brewer(palette = 'Dark2')
 @
-\caption[ARMA polynomial roots]{\label{fig:huronRoots}Inverted AR and MA polynomial roots to the fitted $\text{AR}(1)$ and $\text{ARMA}(2, 1)$ models to the Lake Michigan-Huron data using a single parameter initialization.}
+\caption[Inverted polynomial roots of ARMA models.]{\label{fig:huronRoots}Inverted polynomial roots of ARMA models. AR and MA polynomial roots to the fitted $\text{AR}(1)$ and $\text{ARMA}(2, 1)$ models to the Lake Michigan-Huron data using a single parameter initialization.}
 \end{figure}
 
 Both types of confidence intervals considered in this example rely on asymptotic justifications, but we can further investigate the finite sample properties using a simulation study.

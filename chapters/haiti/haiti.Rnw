@@ -285,8 +285,8 @@ ggplot(dep_plot_df, aes(x = date, y = cases + 1)) +
     )
   )
 @
-\caption[Weekly cholera cases]{\label{fig:CholeraData}
-Weekly reported cholera cases in Haiti from October 2010 to January 2019 for each of the 10 administrative departments.
+\caption[Weekly reported cholera cases in Haiti from October 2010 to January 2019.]{\label{fig:CholeraData}
+Weekly reported cholera cases in Haiti from October 2010 to January 2019. Data are displayed for each of the 10 administrative departments.
 }
 \end{figure}
 
@@ -763,7 +763,7 @@ Reporting rate
 \\\hline
 \end{tabular}
 \caption[Parameter estimates of the cholera models.]{\label{tab:params}
-References to the relevant equation are given in parentheses.
+Parameter estimates of the cholera models. References to the relevant equation are given in parentheses.
 Parameters that were fixed and not calibrated using the data are indicated with $\fixed$; all fixed parameters values were chosen to match the fixed parameter values of \citet{lee20}.
 Parameters that were added during our re-analysis and were not considered by Lee et al. are indicated with $^*$.
 Confidence intervals for model parameters are given in Appendix~\ref{sec:appendix_haiti_ci}.
@@ -802,7 +802,7 @@ Translations back into the notation of \citet{lee20} are given in Table~\ref{tab
     Process Over-dispersion & $\sigmaProc$ & --- & --- & $\sigma_w$\\\hline
   \end{tabular}
   \end{center}
-  \caption[Parameter translations to original model definitions]{\label{tab:translate}Translations between our common notation and notation used by Lee et al (2020).}
+  \caption{\label{tab:translate}Parameter translations between our common notation and notation used by Lee et al (2020).}
 \end{table}
 
 Each model describes the cholera dynamics as a partially observed Markov process (POMP).
@@ -1157,7 +1157,7 @@ Number of &
 \\
 \hline
 \end{tabular}
-\caption[AIC values for cholera models and benchmarks]{\label{tab:likes}AIC values for Models~1--3 and their benchmarks. Values in parentheses are corresponding values obtained using the models of \citet{lee20}. \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the model in \citet{lee20}. \textsuperscript{2}In \citet{lee20}, Model~3 was fit to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
+\caption[AIC values for cholera models and benchmarks.]{\label{tab:likes}AIC values for cholera models and benchmarks. Values in parentheses are corresponding values obtained using the models of \citet{lee20}. \textsuperscript{1}The reported likelihood is an upper bound of the likelihood of the model in \citet{lee20}. \textsuperscript{2}In \citet{lee20}, Model~3 was fit to a subset of the data (March 2014 onward, excluding data from Ouest in 2015-2016).
 On this subset, their model has a likelihood of $\Sexpr{myround(lee3_results$sub_ll_eval, 1)}$.
 On this same subset, our model has a likelihood of $\Sexpr{myround(mod3_eval_res$subset_ll['est'], 1)}$.
 Details of estimating the likelihood of the models used in \citet{lee20} are provided in Appendix~\ref{sec:appendix_haiti_lee20}.}
@@ -1212,8 +1212,8 @@ ggplot() +
   theme(axis.text = element_text(size = 8),
         axis.title = element_text(size = 10))
 @
-\caption[Trend in transmission rate confidence interval.]{\label{fig:betat}
-Monte Carlo adjusted profile (MCAP) of $\transmissionTrend$ for Model~1.
+\caption[Confidence interval for linear trend in transmission rate.]{\label{fig:betat}
+Confidence interval for linear trend in transmission rate. The confidence interval is calculated using Monte Carlo adjusted profile (MCAP) of $\transmissionTrend$ for Model~1.
 The blue curve is the MCAP, the vertical blue line indicates the MLE, and the vertical dashed lines indicate the $95\%$ confidence interval.
 }
 \end{figure}
@@ -1298,7 +1298,7 @@ ggplot() +
   )
 @
 \caption[Simulations from Model~1 compared to reported cholera cases.]{\label{fig:mod1fit}
-The black curve is observed data, the blue curve is median of 500 simulations from initial conditions using estimated parameters, and the vertical dashed line represents break-point when parameters are refit.
+Simulations from Model~1 compared to reported cholera cases. The black curve is observed data, the blue curve is median of 500 simulations from initial conditions using estimated parameters, and the vertical dashed line represents break-point when parameters are refit.
 }
 \end{figure}
 
@@ -1393,9 +1393,10 @@ ggplot() +
   scale_y_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) +
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
 @
-\caption[Simulated trajectory of Model~2]{\label{fig:mod2Traj}
+\caption[Simulated trajectory of cholera incidence using Model~2.]{\label{fig:mod2Traj}
+Simulated trajectory of cholera incidence using Model~2.
 The black line shows the nationally aggregated weekly cholera incidence data.
-The blue curve from 2012-2019 is the trajectory of the calibrated version of Model~2.
+The blue curve from 2012-2019 is the trajectory of the calibrated model.
 Projections under the various vaccination scenarios, which are discussed in detail in the  {\bf Forecasts} subsection are also included. The gray ribbons represent a $95\%$ interval obtained from the log-normal measurement model. To avoid over-plotting, measurement variance is only plotted for the V0 vaccination scenario.}
 \end{figure}
 
@@ -1466,7 +1467,7 @@ ggplot() +
   )
 @
 \caption[Simulations from Model~3 compared to reported cholera cases.]{\label{fig:h3spatsims}
-Simulations from initial conditions using the spatially coupled version of Model~3.
+Simulations from Model~3 compared to reported cholera cases. Simulations were obtained using the initial conditions of Model~3 calibrated to data.
 The black curve represents true case count, the blue line the median of 500 simulations from the model, and the gray ribbons representing $95\%$ confidence interval.
 }
 \end{figure}
@@ -1618,6 +1619,7 @@ gg_trans <- ggplot() +
 cowplot::plot_grid(gg_rain, gg_trans, align = "v", ncol = 1)
 @
 \caption[Seasonality of Model 1 transmission rates and weekly rainfall.]{\label{fig:h1SeasRain}
+Seasonality of Model 1 transmission rates and weekly rainfall.
 (Top) weekly rainfall in Haiti, lighter colors representing more recent years.
 (Bottom) estimated seasonality in the transmission rate (dashed line) plotted alongside mean rainfall (solid line).
 The outsized effect of rainfall in the fall may be due to Hurricane Matthew, which struck Haiti in October of 2016 and resulted in an increase of cholera cases in the nation.
@@ -1759,7 +1761,7 @@ ggplot(tidyr::drop_na(all_prob_elims), aes(x = time, y = elim_prob, col = mod)) 
   scale_x_date(date_labels = "'%y", breaks = seq.Date(from = as.Date("2010-01-01"), as.Date("2030-01-01"), by = '2 years'))
 @
 \caption[Probability of cholera elimination under Models~1 and 3.]{\label{fig:elimProbs}
-Probability of cholera elimination, defined as having zero cholera infectious for at least 52 consecutive weeks, based on 10 year simulations from calibrated versions of Models~1 and 3.
+Probability of cholera elimination under Models~1 and 3. Elimination is defined as having zero cholera infectious for at least 52 consecutive weeks, based on 10 year simulations from the calibrated models.
 Compare to Figure~3A of \citet{lee20}.}
 \end{figure}
 
