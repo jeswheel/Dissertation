@@ -184,7 +184,7 @@ h1_mles <- H1_profiles %>% slice_max(order_by = logLik) %>%
 @
 
 \begin{figure}[ht]
-<<m1Profs, fig.height=5, fig.width=6, echo=FALSE, warning=FALSE, message=FALSE>>=
+<<m1Profs, fig.height=5, fig.width=6, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'>>=
 # Create a mapping between department names and what should be shown in figures
 h1_plots <- list()
 for (i in 1:length(prof_params)) {
@@ -294,10 +294,9 @@ cowplot::plot_grid(
 \centering
 \caption[Model~1 parameter estimates and confidence intervals.]{\label{tab:mod1CI}Model~1 parameter estimates and their corresponding confidence intervals, obtained via the MCAP algorithm.}
 \vspace{2mm}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|L{3.60cm}|C{2.1cm}|C{1.9cm}|C{3.95cm}|}
 \hline
-\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
-\\
+\centering \textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval} \\
 \hline
 \hline
 
@@ -367,13 +366,13 @@ cowplot::plot_grid(
 \\
 \hline
 
-  Process noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_epi') %>% pull(value), 3)}$
+  Process noise {\footnotesize (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{Epi}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_epi') %>% pull(value), 3)}$
    &
   $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_epi') %>% pull(upper), 3)})$
 \\
 \hline
 
-  Process noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_end') %>% pull(value), 3)}$
+  Process noise {\footnotesize (wk\textsuperscript{1/2})} & $\sigmaProc: \mathrm{End}$ & $\Sexpr{myround(h1_mles %>% filter(prof_var == 'sig_sq_end') %>% pull(value), 3)}$
    &
   $(\Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(lower), 3)}, \Sexpr{myround(all_ci %>% filter(prof_var == 'sig_sq_end') %>% pull(upper), 3)})$
 \\
@@ -745,7 +744,7 @@ for (i in 1:length(prof_params)) {
 @
 
 \begin{figure}[ht]
-<<m2Profs, fig.height=3, fig.width=5, echo=FALSE, warning=FALSE, message=FALSE>>=
+<<m2Profs, fig.height=3, fig.width=5.5, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'>>=
 cowplot::plot_grid(
   plotlist = h2_plots, ncol = 3,
   align = 'h',
@@ -759,10 +758,9 @@ cowplot::plot_grid(
 \centering
 \caption[Model~2 parameter estimates and confidence intervals.]{\label{tab:mod2CI}Model~2 parameter estimates and their corresponding confidence intervals, obtained via profile likelihood.}
 \vspace{2mm}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|L{3.25cm}|C{2.1cm}|C{1.9cm}|C{4.2cm}|}
 \hline
-\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
-\\
+\centering \textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval} \\
 \hline
 \hline
 
@@ -944,7 +942,7 @@ h3_mles <- H3_MLE_evals %>%
 @
 
 \begin{figure}[ht]
-<<m3Profs, fig.height=4.6, fig.width=5.8, echo=FALSE, warning=FALSE, message=FALSE>>=
+<<m3Profs, fig.height=4.6, fig.width=5.8, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'>>=
 h3_plots <- list()
 for (i in 1:length(prof_params)) {
   p = prof_params[i]
@@ -1039,26 +1037,25 @@ cowplot::plot_grid(
 \centering
 \caption[Model~3 parameter estimates and confidence intervals.]{\label{tab:mod3CI}Model~3 parameter estimates and their corresponding confidence intervals, obtained via the MCAP algorithm.}
 \vspace{2mm}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|L{3.60cm}|C{2.1cm}|C{1.9cm}|C{4.3cm}|}
 \hline
-\textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval}
-\\
+\centering \textbf{Mechanism} & \textbf{Parameter} & \textbf{MLE} & $\bm{95\%}$ \textbf{Confidence Interval} \\
 \hline
 \hline
 
- Process Noise {\small (wk\textsuperscript{1/2})} & $\sigmaProc$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'std_W') %>% pull(value)) * sqrt(52), 3)}$
+ Process Noise {\footnotesize (wk\textsuperscript{1/2})} & $\sigmaProc$ & $\Sexpr{myround((h3_mles %>% filter(prof_var == 'std_W') %>% pull(value)) * sqrt(52), 3)}$
    &
   $(\Sexpr{myround((all_ci %>% filter(prof_var == 'std_W') %>% pull(lower)), 3)}, \Sexpr{myround((all_ci %>% filter(prof_var == 'std_W') %>% pull(upper)), 3)})$
 \\
 \hline
 
- Water Survival {\small (wk)} & $\Wremoval^{-1}$ & $\Sexpr{myround(52 / (h3_mles %>% filter(prof_var == 'mu_B') %>% pull(value)), 3)}$
+ Water Survival {\footnotesize (wk)} & $\Wremoval^{-1}$ & $\Sexpr{myround(52 / (h3_mles %>% filter(prof_var == 'mu_B') %>% pull(value)), 3)}$
    &
   $(\Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(upper)), 3)}, \Sexpr{myround(1 / (all_ci %>% filter(prof_var == 'mu_B') %>% pull(lower)), 3)})$
 \\
 \hline
 
- Human to Water Shedding {\small $\frac{\mathrm{km^2}}{\mathrm{wk}}$} & $\Wshed$ & $\Sexpr{signif((h3_mles %>% filter(prof_var == 'thetaI') %>% pull(value))/52, 3)}$
+ Human to Water Shedding {\footnotesize $\frac{\mathrm{km^2}}{\mathrm{wk}}$} & $\Wshed$ & $\Sexpr{signif((h3_mles %>% filter(prof_var == 'thetaI') %>% pull(value))/52, 3)}$
    &
   $(\Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(lower), 3)}, \Sexpr{signif(all_ci %>% filter(prof_var == 'thetaI') %>% pull(upper), 3)})$
 \\
@@ -1659,7 +1656,7 @@ The likelihoods for each department, compared to the corresponding benchmark mod
 The figure demonstrates that while the log-likelihood of the fitted model outperforms the auto-regressive negative binomial benchmark model at the aggregate level, Model~3 has lower likelihoods for some departments.
 
 \begin{figure}[!ht]
-<<h3UnitLikes, fig.height=3, fig.width=5.5, echo=FALSE>>=
+<<h3UnitLikes, fig.height=3, fig.width=5.5, echo=FALSE,fig.align='center'>>=
 ggplot(bench_M3_joined, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
   ylab("Unit") +
@@ -1815,7 +1812,7 @@ This result may be unsurprising in the context of the models that we are compari
 Because the cholera transmission in individual departments likely depends on the national prevalence of cholera and the Vibrio cholerae bacteria, our spatially-independent benchmark model that relies exclusively on the previous number of case within any given unit has a difficult time predicting a resurgence of cases.
 
 \begin{figure}[!ht]
-<<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE>>=
+<<finalUnitLLFig, fig.height=3, fig.width=5.5, echo=FALSE, fig.align='center'>>=
 ggplot(bench_M3_joined_final, aes(x = ll, y = reorder(unit, ll))) +
   geom_point(aes(col = type)) +
   ylab("Unit") +
