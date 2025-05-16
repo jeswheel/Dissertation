@@ -11,11 +11,17 @@ The following assumption provide sufficient conditions for Theorem~\ref{theorem:
   \begin{enumerate}
     \item $L(\theta; \mathbf{y}^*) > 0$ for all $\theta \in \Theta$ and $\sup_{(\theta, x_{u, n})}f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u,n}; \theta) < \infty$ for all $u \in \seq{1}{U}$ and $n \in \seq{1}{N_u}$. \label{assumption:1}
     \item The transition and measurement densities are sufficiently smooth functions of $\theta$, in the sense that for any $\theta, \theta' \in \Theta$, there exists a a continuous and strictly increasing function $g: [0, \infty) \rightarrow [0, \infty)$ and sequence of measurable functions $\varphi_{u, 0:N_u}: \mathcal{X}^2 \rightarrow \mathbb{R}$, that satisfy:
+%     \begin{align}
+% \big\vert \log\big( & f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u, n};\theta)
+% f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1};\theta)\big) \notag \\
+% & - \log\big(f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u, n};\theta')
+% f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1};\theta')\big) \big\vert \notag \\
+% & \leq g\big(\|\theta - \theta'\|\big)\varphi_{u, n}(x_{u, n-1}, x_{u, n}),
+% \end{align}
     \begin{align*}
-    \begin{split}
-    |&\log\big(f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u, n};\theta)f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1};\theta)\big) \\
-    & - \log\big(f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u, n};\theta')f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1};\theta')\big)| \leq g\big(\|\theta - \theta'\|\big)\varphi_{u, n}(x_{u, n-1}, x_{u, n}),
-    \end{split}
+    \big\vert\log\big( & f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u, n};\theta)f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1};\theta)\big) \\
+    & - \log\big(f_{Y_{u, n}|X_{u, n}}(y^*_{u, n}|x_{u, n};\theta')f_{X_{u, n}|X_{u, n-1}}(x_{u, n}|x_{u, n-1};\theta')\big)\big\vert \\
+    & \qquad\quad \leq g\big(\|\theta - \theta'\|\big)\varphi_{u, n}(x_{u, n-1}, x_{u, n}),
     \end{align*}
     With the constraint that for all $u\in \seq{1}{U}$, there exists a $\delta_u \in (0, \infty)$ such that
     \begin{align*}
