@@ -6,7 +6,7 @@ Time series data are abundant, as data are often generated over time in a way th
 However, the analysis of time series presents a unique challenge for both statisticians and practitioners, as the temporal dependence between observations requires careful treatment.
 A unifying approach in time series analysis, known as state space modeling, assumes that observations from the system under investigation depend on an unobservable process.
 Constructing a state space model involves proposing equations that describe the evolution of this unobservable process over time and the unobserved process is related to observations.
-Common goals of state space modeling include making inferences about critical yet unobserved variables, incorporating real-world mechanisms into statistical models, and enabling likelihood based inference for models who that lack closed-form expressions of the likelihood function.
+Common goals of state space modeling include making inferences about critical yet unobserved variables, incorporating real-world mechanisms into statistical models, or enabling likelihood based inference for models that lack closed-form expressions of the likelihood function.
 
 The term state space model (SSM) has a number of synonyms including mechanistic model, partially observed Markov process (POMP) model, and hidden Markov model (HMM) \citep{king15}.
 In some literature, these terms have alternatively been used to refer to particular instances of the more general model class \citep[e.g.,][]{glennie23}, resulting in some confusion.
