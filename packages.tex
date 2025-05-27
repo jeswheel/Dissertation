@@ -32,6 +32,8 @@
 \usepackage{xurl}
 \usepackage[ruled,noline,linesnumbered]{algorithm2e}
 \usepackage[table]{xcolor}
+% \usepackage{calc}
+% \usepackage{accents}
 % \usepackage{mathtools}
 % \DeclareMathOperator*{\argmax}{arg\,max}
 % 
@@ -117,6 +119,9 @@
 \newcommand\dist{d}
 \def\lik{L}
 \def\loglik{\ell}
+\newcommand\nclone{\tilde{n}}
+\newcommand\nstack{n'}
+\newcommand\addRV{Z}
 
 \newcolumntype{t}{>{\tiny}c}
 
@@ -170,9 +175,12 @@
 \newcommand\shared{\phi}
 \newcommand\specific{\psi}
 \newcommand\Nshared{A}
-\newcommand\nshared{a}
-\newcommand\Nspecific{B}
-\newcommand\nspecific{b}
+% \newcommand\nshared{a}
+\newcommand\nshared{d_\shared}
+% \newcommand\Nspecific{B}
+\newcommand\nspecific{d_\specific}
+\newcommand\BorelT{\mathcal{B}^{\nshared+\Unit\nspecific}}
+\newcommand\regFun{\gamma}
 \newcommand\dimSpecific{{\mathrm{dim}(\Psi)}}
 \newcommand\dimShared{{\mathrm{dim}(\Phi)}}
 \newcommand\argequals{{\,=\,}}
@@ -202,3 +210,5 @@
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}} % Custom column type for left-aligned text
 \newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}} % Custom column type for centered text
 
+% \newcommand{\dbtilde}[1]{\accentset{\approx}{#1}}
+% \newcommand{\vardbtilde}[1]{\tilde{\raisebox{0pt}[0.85\height]{$\tilde{#1}$}}}

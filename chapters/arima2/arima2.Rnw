@@ -129,7 +129,7 @@ Furthermore, as the latent process is defined using linear Gaussian updates, the
 The current standard approach for parameter estimation is to combine an Kalman filter evaluate with a numeric procedure such as the BFGS algorithm \citep{fletcher00} in order to maximize the likelihood.
 \begin{align}
   X_n &= TX_{n - 1} + Qw_n, \label{eq:trans} \\
-  y_n &= \begin{pmatrix} 1 & 0 & \ldots & 0\end{pmatrix} y_n. \label{eq:meas}
+  y_n &= \begin{pmatrix} 1 & 0 & \ldots & 0\end{pmatrix} X_n. \label{eq:meas}
 \end{align}
 
 Numeric black-box optimizers require an initial guess for parameter values.

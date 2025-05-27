@@ -642,7 +642,7 @@ ggplot(df_all_mu) +
   facet_wrap(~group, labeller = labeller(group = method_names)) + 
   theme(plot.margin = unit(c(0, 0, 0, 0), 'cm'))
 @
-\caption{\label{fig:DC}Data Cloning and Marginalized Data Cloning for two parameter model with Gaussian likelihoods and priors. The ellipses show the region of the parameter distribution that contains $95\%$ of the probability mass of the distribution. The black dashed line shows this region for the likelihood surface, and the red ``x" marks the MLE.}
+\caption[Data cloning compared to marginalized data cloning for Gaussian densities.]{\label{fig:DC}Data cloning compared to marginalized data cloning for Gaussian densities. The ellipses show the region of the parameter distribution that contains $95\%$ of the probability mass of the distribution. The black dashed line shows this region for the likelihood surface, and the red ``x" marks the MLE.}
 \end{figure}
 
 \section{Simulation Studies}
@@ -822,7 +822,7 @@ depletion_2 <- ggplot() +
 
 cowplot::plot_grid(depletion_1, depletion_2, nrow = 2, labels = "AUTO", rel_heights = c(0.425, 0.575))
 @
-\caption{\label{fig:depletion}Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}. (A) The total number of unique particles representing each parameter. The dashed horizontal line shows that MPIF maintains the number of particles for $\Psi_2$ over time. (B) Parameter particle swarm of a single update with and without marginalization compared to the true posterior distribution.}
+\caption[Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}.]{\label{fig:depletion}Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}. (A) The total number of unique particles representing each parameter. The dashed horizontal line shows that MPIF maintains the number of particles for $\Psi_2$ over time. (B) Parameter particle swarm of a single update with and without marginalization compared to the true posterior distribution.}
 \end{figure}
 
 \subsection{Stochastic Gompertz Population Model}\label{sec:gompertz}
@@ -994,8 +994,8 @@ gg_bigU <- IF_long_ntruth %>%
 
 cowplot::plot_grid(gg_smallU, gg_bigU, nrow = 2, rel_heights = c(0.4, 0.6))
 @
-\caption{\label{fig:gomp}Comparison of the MPIF and PIF algorithms for fitting the stochastic Gompertz population model. 
-The solid horizontal line shows the true maximum likelihood, determined via the Kalman filter and a numeric optimizer, an intractable approach for high-dimensional parameter spaces $(U > 100)$; in these cases, the dashed line indicates the likelihood at the data-generating parameters. 
+\caption[Comparing the MPIF and PIF algorithms for fitting the stochastic Gompertz model.]{\label{fig:gomp}Comparing the MPIF and PIF algorithms for fitting the stochastic Gompertz model.
+The solid horizontal line shows the true maximum likelihood, determined via the Kalman filter and a numeric optimizer, an intractable approach for high-dimensional parameter spaces $(U > 100)$; in these cases, the dashed line indicates the likelihood at the data-generating parameters.
 Each algorithm used 50 unique starting points.
 Vertical bars span the tenth percentile to the maximum likelihood values; lowest values were excluded due to poor likelihoods from the PIF algorithm.}
 \end{figure}
@@ -1165,7 +1165,8 @@ gg <- results_in |>
 
 print(gg)
 @
-\caption{\label{fig:measles1} Log-likelihoods yielded by the PIF and MPIF algorithms for the mechanistic measles model to the UK data. 
+\caption[Comparing the MPIF and PIF algorithms using a mechanistic model for measles.]{\label{fig:measles1} 
+Comparing the MPIF and PIF algorithms using a mechanistic model for measles.
 Rows correspond to a different number of particles $J$ used in Algorithm~\ref{alg:mpif}. 
 The log-likelihood is evaluated at iterations 20, 56, 92, 128, 164, and 200, marked by vertical grey lines.}
 \end{figure}
