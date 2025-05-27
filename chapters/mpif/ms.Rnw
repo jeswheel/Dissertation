@@ -227,7 +227,7 @@ Once calibrated to data, such models provide a quantitative description of the o
 Despite the growing ability of deep learning and other advanced machine learning techniques to extract useful information from complex data sets, mechanistic models continue to be important in modern science since mechanistic models are superior to machine learning models for interpretability of parameters \citep{baker18,hogg24}.
 The ability of mechanistic models to describe scientifically important yet unobservable system states \citep{andrade22} also facilitates predictions of the impact of interventions on the system, such as masking or vaccination efforts during a disease outbreak \citep{wheeler24}.  
 
-Contemporary applications of nonlinear mechanistic models for low-dimensional systems are abundant \citep{kramer24,he24,newman23}, yet examples of higher-dimensional panel equivalents remain sparse.
+Contemporary applications of nonlinear mechanistic models for low-dimensional systems are abundant \citep[e.g.,][]{kramer24,he24,newman23}, yet examples of higher-dimensional panel equivalents remain sparse.
 In principle, that could be explained by a lack of panel data, or by scientists being uninterested in applying mechanistic models to panel data.
 Alternatively, the lack of examples may be indicative that scientists have struggled, largely unsuccessfully, to use existing statistical methodology.
 Our work addresses this possibility by proposing a new algorithm that is effective on benchmark problems, theoretically supported, and easy to implement using existing software such as the R package \texttt{panelPomp} \citep{panelpomp}.
@@ -260,7 +260,7 @@ The marginalization step introduces a nonlinearity in the Bayes map that existin
 We provide theoretical guarantees of the MPIF algorithm for some special cases, and demonstrate that the algorithm remains effective in a more general setting via a simulation study.
 We then conduct a data analysis of a high-dimensional dataset of pre-vaccination measles case reports from 20 towns in the United Kingdom (UK).
 
-\section{Iterated filtering for panel models}
+\section{Iterated filtering for panel models}\label{sec:ppomp}
 
 % To set up mathematical notation for PanelPOMP models, we first give a formal definition of a POMP.
 % A POMP model comprises an unobserved Markov process $\mathbf{X}(t)$, where $t \in \mathcal{T}\subset \mathbb{R}$ and $\mathbf{X}(t)$ takes values in $\mathcal{X} \subset \mathbb{R}^{d_x}$.
@@ -275,14 +275,18 @@ We then conduct a data analysis of a high-dimensional dataset of pre-vaccination
 
 In a panel data analysis scenario, data are collected for each unit in the panel.
 Because the data generating process of each unit are assumed to be dynamically independent, we may model the panel data as a collection of related POMP models, which we call a PanelPOMP.
-Denoting the latent process for unit $u$ as $X_u(t)$ and its measurements as $Y_{u,n}$, a PanelPOMP can be expressed as a special case of a POMP model by writing $\mathbf{X}(t) = \{X_u(t)\}_{u = 1}^U$ and $\mathbf{Y}_{n} = \{Y_{u, n}\}_{u = 1}^U$, where we suppose the $U$ units are labeled $1,\dots, U$.
-In principle, the observation times $t_{u, n} \in \mathcal{T}$ do not need to match for each unit, and therefore we assume $t_n \in \{t_{u, 0:N_u}\}_{u=1}^U$ such that $t_{n} \geq t_{m}$ if $n \geq m$, where $t_{u, 0:N_u}$ denotes the observation times for unit $u$.
-The joint density of the PanelPOMP model can be written as
+We denote the collection of measurements on the units $\unit \in \seq{1}{\Unit}$ as $Y_{u, n}$.
+Often the observations occur at the same time for all units, in which case it is convenient to express the collection of POMP models as $\bm{X}(t) = \{X_u(t)\}_{u = 1}^U$ where $X_\unit(t)$ denotes the latent process for unit $\unit$ at time $t \in \mathcal{T}$.
+The measurements at time $t_n \in \mathcal{T}$ are similarly written as $\bm{Y}_{n} = \{Y_{u, n}\}_{u = 1}^U$.
+This notation also generalizes to the case where measurements are taken at distinct measurement times.
+In this scenario, we let $N_u$ be the number of observations for unit $u \in \seq{1}{U}$, and each observation time is denoted as $t_{u, n} \in \mathcal{T}_u \subset \mathcal{T}$. 
+We adopt the convention that if $t \notin \mathcal{T}_u$, $X_u(t) = 0_{d_x}$, and denote $X_{u}(t_{u, n}) = X_{u, n}$ for all measurement times $t_{u, n} \in \mathcal{T}_u$.
+The joint density of the model can be written as
 \begin{align}
 f_{\mathbf{X}_{0:N}, \mathbf{Y}_{1:N}}(\mathbf{x}_{0:N}, \mathbf{y}_{1:N}; \theta) &= \prod_{u = 1}^U f_{X_{u, 0:N_u}, Y_{u,1:N_u}}(x_{u, 0:N_u}, y_{u, 1:N}; \theta) \label{eq:ppomp} \\
 &\hspace{-2cm} = \prod_{u = 1}^Uf_{X_{u, 0}}(x_{u, 0};\theta)\prod_{n = 1}^{N_u}f_{Y_{u, n}|X_{u, n}}(y_{u, n} | x_{u, n} ;\theta)f_{X_{u, n} | X_{u, n-1}}(x_{u, n}|x_{u, n-1}; \theta), \label{eq:ppomp2}
 \end{align}
-where Eq.~\ref{eq:ppomp} arises from the assumption of dynamically independent units, and Eq.~\ref{eq:ppomp2} is a result of the Markov property of $X_{u}(t)$ and the conditional independence assumption on $Y_{u, n}$.
+where Eq.~\ref{eq:ppomp} arises from the assumption of dynamically independent units, and Eq.~\ref{eq:ppomp2} is a result of the Markov property of $X_{u}(t)$ and the conditional independence of $Y_{u, n}$.
 
 Our goal is to make inferences about the parameter $\theta$ by maximizing the likelihood function (Eq.~\ref{eq:likedef}).
 % \begin{align}
@@ -290,9 +294,9 @@ Our goal is to make inferences about the parameter $\theta$ by maximizing the li
 % \end{align}
 Although the unit densities in Eq.~\ref{eq:ppomp} can be factored as a result of the dynamic independence between measurement units, a defining feature of a panel model is that the parameter vector $\theta$ remains relevant across all the dynamic systems.
 Therefore, inference methodology used to obtain estimates of $\theta$ should use data from each unit in the PanelPOMP.
-A special case of particular interest arises when $\theta = (\phi, \psi_{1:U})$, where $\phi \in \Theta_\phi \subset \mathbb{R}^{d_\phi}$ is a vector of parameters that are shared across each unit, and $\psi_{u} \in \Theta_\psi \subset \mathbb{R}^{d_u}$ are parameters that are specific to unit $u$, formally,
+A special case of particular interest arises when $\theta = (\phi, \psi_{1:U})$, where $\phi \in \Theta_\phi \subset \mathbb{R}^{\nshared}$ is a vector of parameters that are shared across each unit, and $\psi_{u} \in \Theta_\psi \subset \mathbb{R}^{\nspecific}$ are parameters that are specific to unit $u$, formally,
 $$
-f_{X_{u, 0:N_u}, Y_{u,1:N_u}}(x_{u, 0:N_u}, y_{u, 1:N}; \theta) = f_{X_{u, 0:N_u}, Y_{u,1:N_u}}(x_{u, 0:N_u}, y_{u, 1:N}; \phi, \psi_u).
+f_{X_{u, 0:N_u}, Y_{u,1:N_u}}(x_{u, 0:N_u}, y_{u, 1:N}; \, \theta) = f_{X_{u, 0:N_u}, Y_{u,1:N_u}}(x_{u, 0:N_u}, y_{u, 1:N}; \, \phi, \psi_u).
 $$
 Algorithm~\ref{alg:mpif} describes an iterated filtering algorithms for PanelPOMP models that obtains the MLE for both shared $(\phi)$ and unit specific $(\psi_u)$ parameters.
 With $\mathrm{MARGINALIZE}=\mathrm{FALSE}$, this is the PIF algorithm of \citet{breto20}.
@@ -338,20 +342,20 @@ In other words, instead of resampling all parameter particles in line~\ref{mpif:
 }
 \end{algorithm}
 
-The algorithmic complexity of both PIF and MPIF is $O(JMNU)$, where $M$ represents the number of iterations, $J$ represents the number of particles, $U$ represents the number of units in the panel, and $N$ is the mean of $\{N_1, \ldots, N_U\}$.
+The algorithmic complexity of both PIF and MPIF is $O(JMNU)$, where $M$ represents the number of iterations, $J$ is the number of particles, $U$ the number of units in the panel, and $N$ is the mean of $\{N_1, \ldots, N_U\}$.
 However, because MPIF does not require tracking the history of each particle, we achieve a minor reduction in computational overhead associated with the PIF algorithm.
 This reduction translates to faster iteration speeds and lower memory requirements, but, more importantly, MPIF can converge more quickly and exhibit reduced Monte Carlo uncertainty.
 
 Central to the success of iterated filtering algorithms (and other data cloning algorithms) is the fact that iterative use of the posterior distribution from a Bayesian parameter update as the prior in subsequent iterations leads to a degenerate distribution centered at the MLE.
-This idea is key to deriving the proof of Theorem~\ref{theorem:pif}, which provides theoretical guarantees for special cases of Algorithm~\ref{alg:mpif}. 
+This idea is key to deriving the proof of Theorem~\ref{theorem:pif}, which provides theoretical guarantees for special cases of Algorithm~\ref{alg:mpif}.
 
 \begin{theorem}\label{theorem:pif}
-  Consider a PanelPOMP model defined by Eq.~\ref{eq:ppomp}.
-  Assume conditions \ref{assumption:1}--\ref{assumption:kernel} of Appendix~\ref{sec:assumptions} are satisfied, and write $\hat{\theta} = \argmax_{\theta} L(\theta;\mathbf{y}^*)$ from Eq.~\ref{eq:likedef}.
+  Consider a PanelPOMP model defined by Eq.~\ref{eq:ppomp}, and let $\Theta \subset \R^{\nshared + \Unit\nspecific}$ be a compact set that satisfies condition \ref{assumption:regular}.
+  Assume the conditions of Appendix~\ref{sec:assumptions} are satisfied and that there exists a $\delta > 0$ such that $\{\theta \in \Theta: |\theta - \hat{\theta}|_2 < \delta\} \subseteq \Theta$, where \linebreak $\hat{\theta} = \argmax_{\theta \in \Theta} L(\theta;\bm{y}^*)$.
   Denote the output of Algorithm~\ref{alg:mpif} without marginalization as $\Theta_{1:J}^{(M)}$.
   Then there exists some positive sequences $\{C_M\}_{M \geq 1}$ and $\{\epsilon_M\}_{M \geq 1}$ where $\lim_{M \rightarrow \infty}\epsilon_M = 0$ such that for all $(J, M) \in \mathbb{N}^2$,
   $$
-  E\bigg[\Big\vert\frac{1}{J}\sum_{i=1}^J \Theta_j^{(M)} - \hat{\theta}\Big\vert_2\bigg] \leq \frac{C_M}{\sqrt{J}} + \epsilon_M
+  E\bigg[\Big|\frac{1}{J}\sum_{i=1}^J \Theta_j^{(M)} - \hat{\theta}\Big|_2\bigg] \leq \frac{C_M}{\sqrt{J}} + \epsilon_M
   $$
 \end{theorem}
 \begin{proof}[Proof outline]
@@ -367,14 +371,14 @@ In the following section, we briefly discuss data cloning and its relationship t
 
 \section{Iterating marginalized Bayes maps}
 
-If we denote $\pi_i(\theta)$ as the posterior distribution of the parameter vector $\theta$ after the $i$th Bayesian update, and $\mathbf{y}^* = \mathbf{y}_{1:N}^*$ as the observed data, we can express an iterated Bayesian update as the following:
+If we denote $\pi_i(\theta)$ as the posterior distribution of the parameter vector $\theta$ after the $i$th Bayesian update, and $\bm{y}^* = \bm{y}_{1:N}^*$ as the observed data, we can express an iterated Bayesian update as the following:
 \begin{align*}
-\pi_1(\theta) &\propto f(\mathbf{y}^* ;\theta)\pi_0(\theta), \\
-\pi_2(\theta) &\propto f(\mathbf{y}^* ;\theta)\pi_1(\theta) \propto f^2(\mathbf{y}^* ;\theta)\pi_0(\theta),\\
+\pi_1(\theta) &\propto f(\bm{y}^* ;\, \theta)\pi_0(\theta), \\
+\pi_2(\theta) &\propto f(\bm{y}^* ;\, \theta)\pi_1(\theta) \propto f^2(\bm{y}^* ;\, \theta)\pi_0(\theta),\\
 &\vdots \\
-\pi_m(\theta) &\propto f^m(\mathbf{y}^* ;\theta)\pi_0(\theta).
+\pi_m(\theta) &\propto f^m(\bm{y}^* ;\, \theta)\pi_0(\theta).
 \end{align*}
-In this representation, $f(\mathbf{y}^*; \theta)$ is the likelihood function (Eq.~\ref{eq:likedef}), and $\pi_0(\theta)$ is the original prior distribution for $\theta$.
+In this representation, $f(\bm{y}^*; \,\theta)$ is the likelihood function (Eq.~\ref{eq:likedef}), and $\pi_0(\theta)$ is the original prior distribution for $\theta$.
 If we let $m\rightarrow \infty$, the effect of the initial prior distribution diminishes, and the $m$th posterior has all of its mass centered at the MLE.
 This can be shown by taking the limit of $\pi_m(\theta) / \pi_m(\hat{\theta})$ as $m$ goes to infinity: if $\theta = \hat{\theta}$, then the limit is one, and zero otherwise \citep{lele07}.
 
@@ -387,11 +391,9 @@ However, a well-known issue with particle filters is the difficulty in accuratel
 Consequently, a direct application of the iterated Bayes approach using particle filters for MLE estimation is impractical.
 
 Iterated filtering algorithms overcome the issues associated with particle depletion by introducing a random walk for model parameters, thereby rescuing the degenerate particle representation of model parameters.
-% at each observation time and treating fixed parameters as latent states that perform a random walk at each time step.
 Early analysis of this procedure showed that if the random walk standard deviations are small, then this modification still leads to an approximation of the iterated Bayes algorithm outlined above, where the final particle mass is still centered at the MLE \citep{ionides15}.
 The introduced perturbations of parameter values are necessary for inference, but they also introduce a loss of information \citep{liuwest01}.
 Therefore, in practice, the random perturbations are reduced as the number of iterations increases; recent theoretical analysis also demonstrates that the algorithm still concentrates on the MLE when perturbations are reduced over time \citep{chen24}.
-% \citet{chen24} demonstrate that the output of the algorithm still concentrates on the MLE in this scenario.
 
 Because PanelPOMP models are a special case of POMP models, this same approach can theoretically be used to estimate the MLE.
 However, the particle filter famously suffers from the curse-of-dimensionality.
@@ -406,37 +408,33 @@ Let $\theta = (\phi, \psi_{1:U})$ denote the parameter vector for the panel mode
 Similarly, we write $y_u^* = y^*_{u, 1:N_u}$ to denote the time series data for unit $u$.
 By stacking the times series into a single timeseries and iteratively filtering one at a time and ignoring parameter perturbations, the Bayes map that is approximated by a single sub-iteration of PIF can be written sequentially as:
 \begin{align}
-\pi_{m, u}(\theta) &\propto f_{u}(y^*_u;\theta)\, \pi_{m, u-1}(\theta) = f_{u}(y^*_u;\phi, \psi_u)\, \pi_{m, u-1}(\theta), \label{eq:PIFupdate}
+\pi_{m, u}(\theta) &\propto f_{u}(y^*_u;\, \theta)\, \pi_{m, u-1}(\theta) = f_{u}(y^*_u;\, \phi, \psi_u)\, \pi_{m, u-1}(\theta), \label{eq:PIFupdate}
 \end{align}
 where $\pi_{m, u}(\theta)$ is the parameter distribution at step $(m, u)$, and we adopt the convention that $\pi_{0, 0}(\theta) = \pi_0(\theta)$ is the initial prior density and $\pi_{m, U} = \pi_{m + 1, 0} = \pi_{m + 1}$.
-This update is completed for each unit $u \in \seq{1}{U}$ which we call unit-iterations, then for iterated for $m \in \seq{1}{M}$, which we call complete or full iterations. 
+This update is completed for each unit $u \in \seq{1}{U}$ which we call unit-iterations, then for iterated for $m \in \seq{1}{M}$, which we call complete or full iterations.
 
-An important observation regarding the representation in Eq.~\ref{eq:PIFupdate} is that each unit-specific likelihood function $f_{u}(y^*_u;\phi, \psi_u)$ contributes directly to the information about the shared parameter vector $\phi$ and its respective unit-specific parameter vector $\psi_u$, but not that of the unit-specific parameters $\{\psi_{k}\}_{k \neq u}$.
+An important observation regarding the representation in Eq.~\ref{eq:PIFupdate} is that each unit-specific likelihood function $f_{u}(y^*_u;\, \phi, \psi_u)$ contributes directly to the information about the shared parameter vector $\phi$ and its respective unit-specific parameter vector $\psi_u$, but not that of the unit-specific parameters $\{\psi_{k}\}_{k \neq u}$.
 Despite this, the Bayes update in the PIF algorithm necessitates updating the posterior distribution of all parameters at each unit-iteration.
 Because the parameter distributions are represented via Monte Carlo samples (called particles), this implies that the PIF algorithm re-weights particles based on a likelihood that is not directly connected to certain parameters.
-For example, the particles representing the distribution of $\psi_U$ have been resampled $U-1$ times before encountering the data $y^*_U$, the only subset of data containing direct information about $\psi_U$.
-This process can lead to significant particle depletion, particularly if $U$ is large (see Figure~\ref{fig:depletion}).
+For example, within a single $\nmif$-iteration, the particles representing the distribution of $\psi_U$ have been resampled $\sum_{\unit = 1}^{U - 1}N_u$ times before encountering the data $y^*_U$, the only subset of data containing direct information about $\psi_U$.
+This process can lead to significant particle depletion, particularly if $U$ or $N_u$ are large (see Figure~\ref{fig:depletion}).
 
 If the prior distribution used in Eq.~\ref{eq:PIFupdate} is marginally independent, then the posterior distribution of $\{\psi_{k}\}_{k \neq u}$ will be unchanged.
 In this case, the particles representing the density for these parameters do not need to be resampled, which would avoid the issue of particle depletion.
-The use of independent priors is common practice in Bayesian statistics, but each full-iteration of Eq.~\ref{eq:PIFupdate} introduces parameter dependence after each $m$-iteration via the likelihood function.
-% As the marginal likelihood at each sub-iteration $u$ only introduces dependence between $\phi$ and $\psi_u$, 
+The use of independent priors is common practice in Bayesian statistics, but each full-iteration of Eq.~\ref{eq:PIFupdate} introduces parameter dependence via the likelihood function.
 This observation leads to the proposal of the marginalized PIF algorithm (MPIF), where the intermediate posterior distributions are made independent before use as a prior distribution in the subsequent unit-iteration. 
 A representation of a unit-iteration following this approach is given in Eqs.~\ref{eq:margBayes} and~\ref{eq:MPIFupdate}.
-
 \begin{align}
-\tilde{\pi}_{m, u}(\theta) &\propto f_{u}(y^*_u;\phi, \psi_u)\, \pi_{m, u-1}(\theta) \label{eq:margBayes}\\
+\tilde{\pi}_{m, u}(\theta) &\propto f_{u}(y^*_u;\, \phi, \psi_u)\, \pi_{m, u-1}(\theta) \label{eq:margBayes}\\
 \pi_{m, u}(\theta) &\propto \int \! \tilde{\pi}_{m, u}(\theta) \, d\phi \, d\psi_u \, \times \int \! \tilde{\pi}_{m, u}(\theta) \, d\psi_{-u} \label{eq:MPIFupdate}.
 \end{align}
 
 Here we have described iterated filtering algorithms while ignoring parameter perturbations and Monte Carlo evaluations of the likelihood function. 
-Each of these components play an important role in the practicality of iterated filtering, but existing theoretical justifications rely on the convergence of data cloning to the MLE, and show that the convergence still holds in spite of the additional complexities. 
-The marginalization step introduced by the MPIF algorithm, however, introduces a nonlinearity in the data cloning procedure.
-
+Each of these components play an important role in the practicality of iterated filtering, but existing theoretical justifications rely on the convergence of data cloning to the MLE, and show that the convergence still holds in spite of the additional complexities.
 A natural question is whether iterating Eqs.~\ref{eq:margBayes}--\ref{eq:MPIFupdate} results in a probability distribution with all mass centered at the MLE(s), similar to the case without marginalization. 
 The non-linearization introduced by the marginalization, however, adds difficulty to the task of calculating, or bounding, the density.
 In particular, previous approaches that rely on the linearization of unnormalized Bayes updates \citep[e.g.,][]{ionides15} are no longer applicable.
-In the following subsection, we show that iterating Eq.~\ref{eq:MPIFupdate} does converge to the MLE when the likelihood is Gaussian. 
+In the following subsection, we show that iterating Eq.~\ref{eq:MPIFupdate} does converge to the MLE when the likelihood is Gaussian.
 
 \subsection{Consistency for Gaussian models}
 
@@ -444,11 +442,11 @@ For Gaussian models, conditioning and marginalization can be carried out exactly
 The properties of this analytically tractable special case is relevant to the broader class of models that is well approximated by Gaussian models, for example, models satisfying the widely studied property of local asymptotic normality (LAN) \citep{lecam00}.
 We show in Theorem~\ref{theorem:GG} that MPIF for a Gaussian model converges to the exact MLE as long as unit-specific parameters are not highly informative about shared parameters.
 
-As before, we assume there are $U \geq 1$ units, and the likelihood of each unit is defined by $L_u(\theta) = f_u(\mathbf{y}_u^*; \phi, \psi_u)$, and the likelihood of the entire model is $L(\theta) = \prod_{u = 1}^U L_{u}(\phi, \psi_u)$.
-In what follows, we assume $\phi \in \R$ and $\psi_u \in \R$ for all $u \in \seq{1}{U}$ in order to ease the notation and analysis. 
+As before, we assume there are $U \geq 1$ units, and the likelihood of each unit is defined by $L_u(\theta) = f_u(y_u^*; \, \phi, \psi_u)$, and the likelihood of the entire model is $L(\theta) = \prod_{u = 1}^U L_{u}(\phi, \psi_u)$.
+In what follows, we assume $\phi \in \R$ and $\psi_u \in \R$ for all $u \in \seq{1}{U}$ in order to ease the notation and analysis.
 
 \begin{theorem}
-  Let $f_u(\mathbf{y}_u^*; \phi, \psi_u)$ be the density that corresponds to a Gaussian distribution with mean $(\phi^*, \psi_u^*)$ and precision $\Lambda_u^* \in \R^{2\times2}$. 
+  Let $f_u(y_u^*; \, \phi, \psi_u)$ be the density that corresponds to a Gaussian distribution with mean $(\phi^*, \psi_u^*)$ and precision $\Lambda_u^* \in \R^{2\times2}$. 
 Assume that $\Lambda^*_u$ satisfies
 \begin{align}
 \big[\Lambda^*_{u}\big]_{1, 2}^2 <
@@ -475,8 +473,6 @@ In this case, the convergence condition in Eq.~(\ref{eq:GausAssumption}) becomes
 $$
 \rho < \frac{2}{\sqrt{U}\big(1 + 1/U\big)}. 
 $$
-% For small $U$, this condition is relatively weak, but becomes stronger as $U$ grows large. 
-% It is in the large $U$ scenario, however, where MPIF demonstrably results in a significant improvement relative to PIF (See Figure~\ref{fig:gomp}), which does not have similar constraints (Theorem~\ref{theorem:pif}).
 
 The proof of Theorem~\ref{theorem:GG} shows that the condition in Eq.~(\ref{eq:GausAssumption}) is sufficient for a convergence guarantee, but it may not be necessary. 
 Furthermore, even some asymptotic bias may be tolerable compared to alternative algorithms that fail to scale. 
@@ -488,16 +484,16 @@ Using a similar setup, we can now consider the behavior of the algorithm with pe
 Let $f * g$ denote the convolution of probability densities $f$ and $g$. 
 We assume that $h_{u, m}(\theta)$ is some perturbation density, and we modify the marginalized Bayes maps by adding this random noise at each unit-iteration.
 \begin{align}
-\tilde{\pi}'_{m, u}(\theta) &\propto f_{u}(y^*_u;\phi, \psi_u)\, \big(\pi'_{m, u-1} * h_{u, m}\big)(\theta) \label{eq:margBayesPerturb}\\
+\tilde{\pi}'_{m, u}(\theta) &\propto f_{u}(y^*_u;\, \phi, \psi_u)\, \big(\pi'_{m, u-1} * h_{u, m}\big)(\theta) \label{eq:margBayesPerturb}\\
 \pi'_{m, u}(\theta) &\propto \int \! \tilde{\pi}'_{m, u}(\theta) \, d\phi \, d\psi_u \, \times \int \! \tilde{\pi}'_{m, u}(\theta) \, d\psi_{-u} \label{eq:MPIFupdatePerturb},
 \end{align}
 Corollary~\ref{corollary:perturbed} shows that, under similar conditions as Theorem~\ref{theorem:GG}, marginalized data cloning with perturbations also converges to a point mass at the MLE if the likelihood is Gaussian.
 
 \begin{corollary}\label{corollary:perturbed}
-  Consider the setup of Theorem~\ref{theorem:GG}. If the parameter perturbations are Gaussian with covariance matrix $\sigma^2_m \Sigma_0$ for some initial covariance matrix $\Sigma_0 \in \R^{(U+1) \times (U+1)}$ and sequence $\sigma^2_m = o(1/m)$, then the $m$th iteration of Eqs.~\ref{eq:margBayesPerturb} and \ref{eq:MPIFupdatePerturb} corresponds to a Gaussian distribution with mean $\mu'_m \in \R^{U+1}$ and covariance $\Sigma'_m \in \R^{U+1\times U+1}$. If $\theta^* = (\phi^*, \psi^*_1, \ldots, \psi^*_{U})$ denotes the MLE, then $\vert\mu'_m - \theta^*\vert_2 \rightarrow 0$ and $\|\Sigma'_m\|_2 \rightarrow 0$.
+  Consider the setup of Theorem~\ref{theorem:GG}. If the parameter perturbations are Gaussian with covariance matrix $\sigma^2_m \Sigma_0$ for some initial covariance matrix $\Sigma_0 \in \R^{(U+1) \times (U+1)}$ and sequence $\sigma^2_m = o(1/m)$, then the $m$th iteration of Eqs.~\ref{eq:margBayesPerturb} and \ref{eq:MPIFupdatePerturb} corresponds to a Gaussian distribution with mean $\mu'_m \in \R^{U+1}$ and covariance $\Sigma'_m \in \R^{U+1\times U+1}$. If $\hat{\theta} = (\phi^*, \psi^*_1, \ldots, \psi^*_{U})$ denotes the MLE, then $|\mu'_m - \hat{\theta}|_2 \rightarrow 0$ and $\|\Sigma'_m\|_2 \rightarrow 0$.
 \end{corollary}
 
-The convergence of the Eqs.~\ref{eq:margBayesPerturb}-\ref{eq:MPIFupdatePerturb} can be partially explained using a well known heuristic in Bayesian analysis: a more dispersed prior typically results in a posterior distribution that more closely resembles the likelihood function. 
+The convergence of the Eqs.~\ref{eq:margBayesPerturb}--\ref{eq:MPIFupdatePerturb} can be partially explained using a common heuristic in Bayesian analysis: a more dispersed prior typically results in a posterior distribution that more closely resembles the likelihood function. 
 In an iterated Gaussian setting, adding noise at each step results in intermediate prior distributions that have the same mean, but larger variance.
 Therefore each iteration of Eq.~\ref{eq:margBayesPerturb} is expected to result in a mean closer to the MLE than the case without perturbations (Eq.~\ref{eq:margBayes}). 
 Following this logic, if the perturbations are chosen to ensure that they eventually approach zero, then the convergence of the unperturbed marginalized data cloning algorithm heuristically implies the convergence of the perturbed version of the algorithm. 
@@ -505,7 +501,7 @@ The proof of Corollary~\ref{corollary:perturbed} in Appendix~\ref{appendix:pertu
 
 In principle, the marginalization procedure can be applied at various steps in the data cloning process and one can obtain similar convergence results. 
 In Figure~\ref{fig:DC}, we demonstrate the difference between data cloning and marginalized data cloning for a two parameter model with Gaussian likelihoods and priors with only a single unit but applying the marginalization for all parameters.
-This useful visualization demonstrates how, even when the likelihoods can be computed exactly, the marginalization only makes small modifications to the intermediate distributions. 
+This useful visualization demonstrates how, even when the likelihoods can be computed exactly, the marginalization only makes small modifications to the intermediate distributions.
 
 \begin{figure}[ht]
 <<figDC, fig.height=3.25, fig.width=5>>=
@@ -646,20 +642,19 @@ ggplot(df_all_mu) +
   facet_wrap(~group, labeller = labeller(group = method_names)) + 
   theme(plot.margin = unit(c(0, 0, 0, 0), 'cm'))
 @
-\caption[Data cloning compared to marginalized data cloning for Gaussian densities.]{\label{fig:DC}Data cloning compared to marginalized data cloning for Gaussian densities. The ellipses show the region of the parameter distribution that contains $95\%$ of the probability mass of the distribution. The black dashed line shows this region for the likelihood surface, and the red ``x" marks the MLE.}
+\caption{\label{fig:DC}Data Cloning and Marginalized Data Cloning for two parameter model with Gaussian likelihoods and priors. The ellipses show the region of the parameter distribution that contains $95\%$ of the probability mass of the distribution. The black dashed line shows this region for the likelihood surface, and the red ``x" marks the MLE.}
 \end{figure}
 
 \section{Simulation Studies}
 
 \subsection{Marginalization to reduce particle depletion}\label{sec:depletion}
 
-In some cases, the marginalization step added to data cloning can result in faster convergence to the MLE if the marginalization increases the probability mass of the intermediate distributions in the direction of the MLE (Figure~\ref{fig:DC}). 
-The primary benefit and motivation of the marginalization step, however, is in improving the particle representations of the intermediate parameter distributions. 
+The primary benefit and motivation of the marginalization step is improving the particle representations of the intermediate parameter distributions. 
 In this sense, the marginalization step can be viewed as an attempt to take advantage of a bias-variance tradeoff. 
-The marginalization procedure introduces a small amount of bias in the Bayesian posterior at each step in order to greatly reduce the variance of the particle representations of the distribution. 
+The marginalization procedure introduces a small amount of bias in the Bayesian posterior at each step in order to greatly reduce the variance of the particle representations of the distribution.
 
 We demonstrate this idea via a simple simulation study that explores the particle representation of parameter distributions with and without marginalization for only a single unit-iteration within Algorithm~\ref{alg:mpif}. 
-For our model, we suppose there are $Y_{u, n}$ are independent and identically distributed ($\iid$) from a normal $\normal[\psi_u, 1]$ distribution, and do not specify a latent process model as it is irrelevant for this model.
+For our model, we suppose $Y_{u, n}$ are independent and identically distributed ($\iid$) from a normal $\normal[\psi_u, 1]$ distribution, and do not specify a latent process model as it is irrelevant for this model.
 We consider only $U = 2$ units, and $N_u = N = 100$ for all $u$.
 For our prior distribution, we let $\Theta_{1:J}^{(0)} \overset{\iid}{\sim} \normal \big[ \mu_0, \, \Sigma_0 \big]$, and use $J = 1000$ particles to represent the joint parameter density.
 This simple model and setup is selected so that the priors and likelihoods can be exactly calculated;
@@ -668,12 +663,12 @@ we can compare this to their particle representations using both versions of a s
 When iterating through unit $u = 1$, the Bayes map that is approximated by the un-marginalized filter requires an update to the particles that correspond to all model parameters for each time step $n \in \seq{1}{N_1}$. 
 This reduces the number of unique particles that represent the intermediate posterior distributions for parameter $\Psi_2$ (Figure~\ref{fig:depletion}A). 
 The number of unique particles representing $\Psi_1$ remains high as a result of the added parameter perturbations (line~\ref{line:perturbations}).
-On the other hand, the MPIF algorithm does not require resampling the $\Psi_2$ particles during the $u = 1$ iteration, and thus maintains the same number of unique particles during this update (dashed horizontal line in Figure~\ref{fig:depletion}A). 
+On the other hand, the MPIF algorithm does not require resampling the $\Psi_2$ particles during the $u = 1$ iteration, and thus maintains the same number of unique particles during this update (dashed horizontal line in Figure~\ref{fig:depletion}A).
 
 Figure~\ref{fig:depletion}B shows the filtered parameter particle swarm $\Theta_{1, 1:J}^{F, 1}$ after the single unit update under both versions of the algorithm compared to the Bayes posterior distribution that PIF approximates.
 Although the marginalized version of the algorithm does not directly approximate this distribution, the particle swarm suffers less from particle depletion. 
 This results in a better approximation of the intermediate posterior, despite introducing a small amount of bias.
-Theorem~\ref{theorem:GG} provides formal conditions where the effect of the added bias at each step still results in convergence to the MLE.
+Theorem~\ref{theorem:GG} provides sufficient conditions where the added bias at each step is negligible enough for the algorithm to converge to the MLE.
 
 \begin{figure}[ht]
 <<fig.height=4.5, fig.width=5>>=
@@ -719,7 +714,6 @@ for (i in 1:N) {
   reg_weights <- weights / sum(weights)
   prior1 <- prior1[sample(1:length(prior1), length(prior1), prob = reg_weights, replace = TRUE)]
   prior2 <- prior2[sample(1:length(prior1), length(prior1), prob = reg_weights, replace = TRUE)]
-  
   
   # Keep track of new particle distributions. 
   all_priors1[i+1, ] <- prior1
@@ -828,7 +822,7 @@ depletion_2 <- ggplot() +
 
 cowplot::plot_grid(depletion_1, depletion_2, nrow = 2, labels = "AUTO", rel_heights = c(0.425, 0.575))
 @
-\caption[Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}.]{\label{fig:depletion}Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}. (A) The total number of unique particles representing each parameter. The dashed horizontal line shows that MPIF maintains the number of particles for $\Psi_2$ over time. (B) Parameter particle swarm of a single update with and without marginalization compared to the true posterior distribution.}
+\caption{\label{fig:depletion}Updating parameter distributions with a single $u = 1$ iteration of both versions of Algorithm~\ref{alg:mpif}. (A) The total number of unique particles representing each parameter. The dashed horizontal line shows that MPIF maintains the number of particles for $\Psi_2$ over time. (B) Parameter particle swarm of a single update with and without marginalization compared to the true posterior distribution.}
 \end{figure}
 
 \subsection{Stochastic Gompertz Population Model}\label{sec:gompertz}
@@ -836,20 +830,14 @@ cowplot::plot_grid(depletion_1, depletion_2, nrow = 2, labels = "AUTO", rel_heig
 We demonstrate the efficacy of the MPIF algorithm by estimating the model parameters of a high-dimensional, nonlinear PanelPOMP model by fitting data simulated from a collection of stochastic Gompertz population models.
 This model is commonly used to describe population dynamics in Ecology and has been used as a benchmark for comparison between various algorithms in previous studies \citep{breto20}.
 The model assumes a latent state vector $X_{u, n}$ for each unit $u \in 1:U$ and $n \in 0:N$.
-For each unit $u$, the latent state has a one-step transition density that satisfies 
-
+For each unit $u$, the latent state has a one-step transition density that satisfies
 \begin{equation*}
 X_{u,n+1} = K_u^{1-e^{r_u}} \, X_{u, n}^{e^{-r_u}}\, \epsilon_{u, n},
 \end{equation*}
+where $K_u$ is the carrying capacity for the population in unit $u$, $r_u$ is a positive parameter that corresponds to the growth rate, and $\epsilon_{u, n}$ are $\iid$ lognormal random variables such that $\log \epsilon_{u, n} \overset{\iid}{\sim} \normal[0, \sigma_u^2]$.
 
-\noindent where $K_u$ is the carrying capacity for the population in unit $u$, $r_u$ is a positive parameter that corresponds to the growth rate, and $\epsilon_{u, n}$ are iid. log-normal random variables such that $\log \epsilon_{u, n} \sim \normal[0, \sigma_u^2]$.
-Measurements of the population are obtained via the density
-
-\begin{equation*}
-\log Y_{u, n} \sim \normal \left[\log X_{u, n}, \, \tau_u^2\right]
-\end{equation*}
-
-\noindent where $\tau_u$ is a positive variance parameter.
+Measurements of the population are obtained via the density $\log Y_{u, n} \overset{\iid}{\sim} \normal \left[\log X_{u, n}, \, \tau_u^2\right]$
+where $\tau_u$ is a positive variance parameter.
 This model is a convenient non-linear non-Gaussian PanelPOMP model because a logarithmic transformation makes the model a linear Gaussian process, and as such the exact likelihood of the model can be calculated by the Kalman filter \citep{kalman60}.
 
 For this simulation study, we generate data from several Gompertz population models, with equal number of observations $N$ in unit $u$, with values of $N \in \{20, 50, 100\}$ and values of $U$ ranging from $U=5$ to $U = 2500$.
@@ -867,11 +855,7 @@ Therefore for each model, 50 unique starting points are used; these starting poi
 The results of this simulation study with $N = 50$ are shown in Figure~\ref{fig:gomp}.
 For every combination of $\{U, N\}$ considered, and for all numbers of MIF iterations, the maximum likelihood obtained using MPIF was higher than the maximum obtained using PIF. 
 For large $U$, we also found that the worst performing Monte Carlo replicate of the MPIF algorithm often did better than the best performing replication of the PIF algorithm.
-% despite Theorem~\ref{theorem:pif} providing stronger theoretical support of the PIF algorithm.
-In the next section, we find similar results using a more complicated model to describe data that have previously been used as a means of comparing inference procedures. 
-
-% \eic{IS THERE A REASON THAT results0, results1, results2 ARE READ FROM SPECIFIC rds FILES NOT USING BAKE/STEW?}
-% \jwc{YES. TO HELP SPEED UP COMPUTATIONS, I USED THE BATCHTOOLS PACKAGE, WHICH HELPED TO ULTRA-PARALLIZATION. IT CANNOT READILY BE USED WITH BAKE / STEW. I PUSHED THE DATA FILES THOUGH, THEY ARE SMALL.}
+In the next section, we find similar results using a more complicated model to describe data that have previously been used as a means of comparing inference procedures.
 
 <<loadGompertz, echo=FALSE>>=
 results0 <- readRDS("data/GompertzRL3.rds")
@@ -945,7 +929,6 @@ IF_truth <- IF_longBig %>%
   filter(iter == 'truth') %>% 
   select(-iter) %>% 
   mutate(
-    # group = gsub("\\.", " ", as.character(group)),
     n_units = factor(n_units, levels = fct_orders)
   ) %>%
   group_by(n_units) %>% 
@@ -989,7 +972,6 @@ gg_bigU <- IF_long_ntruth %>%
   group_by(iter, BLOCK, n_units) %>%
   summarize(
     min = quantile(loglik, 0.10),
-    # min = min(loglik),
     median = median(loglik),
     logmeanexp = logmeanexp(loglik),
     mean = mean(loglik),
@@ -1012,8 +994,8 @@ gg_bigU <- IF_long_ntruth %>%
 
 cowplot::plot_grid(gg_smallU, gg_bigU, nrow = 2, rel_heights = c(0.4, 0.6))
 @
-\caption[Comparing the MPIF and PIF algorithms for fitting the stochastic Gompertz model.]{\label{fig:gomp}Comparing the MPIF and PIF algorithms for fitting the stochastic Gompertz model.
-The solid horizontal line shows the true maximum likelihood, determined via the Kalman filter and a numeric optimizer, an intractable approach for high-dimensional parameter spaces $(U > 100)$, so in these cases the dashed line indicates the likelihood at the data-generating parameters. 
+\caption{\label{fig:gomp}Comparison of the MPIF and PIF algorithms for fitting the stochastic Gompertz population model. 
+The solid horizontal line shows the true maximum likelihood, determined via the Kalman filter and a numeric optimizer, an intractable approach for high-dimensional parameter spaces $(U > 100)$; in these cases, the dashed line indicates the likelihood at the data-generating parameters. 
 Each algorithm used 50 unique starting points.
 Vertical bars span the tenth percentile to the maximum likelihood values; lowest values were excluded due to poor likelihoods from the PIF algorithm.}
 \end{figure}
@@ -1024,10 +1006,8 @@ We show how MPIF and PIF compare in an epidemiological model for weekly reported
 Pre-vaccination UK measles data has been used extensively to motivate innovative methods for inference on stochastic processes since \citet{bartlett60}, yet, fitting nonlinear Markov process models simultaneously to multiple cities with shared and unit-specific parameters remains a challenge, leading practitioners to consider linearizations that have uncertain consequences \citep{korevaar20}.
 We fit three different models to the data, all based on the susceptible-exposed-infectious-recovered (SEIR) model of \citet{he10}. 
 The state process, $X_u(t)=\big(S^{(u)}_t,E^{(u)}_t, I^{(u)}_t, R^{(u)}_t\big)$, tracks the number of susceptible, exposed, infected and recovered individuals in each unit, $u$. 
-The total population size, $\pop^{(u)}(t)$, is treated as known, interpolated from census data, and we use this constraint to avoid explicit specification of $R^{(u)}_t$.
+The total population size, $\pop^{(u)}(t)$, is treated as known, interpolated from census data using cubic splines, and we use this constraint to avoid explicit specification of $R^{(u)}_t$.
 State transitions are generated using an Euler approximation to a continuous-time Markov chain, with time step $\eulerstep=1$ day, as follows:
-% \eic{FOR COMPATIBILITY WITH R, AND ARGUABLY WITH THE NAME EULERMULTINOM, I'VE TREATED DELTA AS AN ADDITIONAL ARGUMENT RATHER THAN INCLUDING IT IN THE RATES}
-% \jwc{Sounds good to me, I'll check this with Aaron.}
 \begin{align*}
 A^{(u)}_{BS, t} &\sim \text{Pois}\big(\mu^{(u)}_{BS}(t)\, \eulerstep\big)
 \\
@@ -1043,10 +1023,7 @@ E^{(u)}_{t+\eulerstep} &= E^{(u)}_t + A^{(u)}_{SE, t} - A^{(u)}_{EI, t} - A^{(u)
 \\
 I^{(u)}_{t+\eulerstep} &= I^{(u)}_t + A^{(u)}_{EI, t} - A^{(u)}_{IR, t} - A^{(u)}_{ID, t}. 
 \end{align*}
-Here, $A^{(u)}_{BC,t}$ counts transitions from compartment $B$ into $C$ for unit $u$ between time $t$ and $t+\eulerstep$,  $\text{Pois}(\lambda)$ is a Poisson distribution with mean $\lambda$, $\Gamma^{(u)}(t)$ is a gamma process with mean $t$ and intensity $\sigma^{(u)}_{SE}$ \citep{breto09}, and $\text{Eulermultinom}(n, \mu_1,\mu_2,\eulerstep)$ is a multinomial distribution with $n$ independent trials and event probabilities given by 
-\begin{align*}
-	p_0 = \exp\big\{ -(\mu_1 + \mu_2)\eulerstep \big\} \qquad p_i = \frac{\mu_i}{\mu_1+\mu_2}\big(1-p_0\big).
-\end{align*}
+Here, $A^{(u)}_{BC,t}$ counts transitions from compartment $B$ into $C$ for unit $u$ between time $t$ and $t+\eulerstep$,  $\text{Pois}(\lambda)$ is a Poisson distribution with mean $\lambda$, $\Gamma^{(u)}(t)$ is a gamma process with mean $t$ and intensity $\sigma^{(u)}_{SE}$ \citep{breto09}, and $\text{Eulermultinom}(n, \mu_1,\mu_2,\eulerstep)$ is a multinomial distribution with $n$ independent trials and event probabilities given by $p_0 = \exp\big\{ -(\mu_1 + \mu_2)\eulerstep \big\}$ and $p_i = \frac{\mu_i}{\mu_1+\mu_2}\big(1-p_0\big)$.
 The Eulermultinom outcome is the number of events of type $p_1$ and $p_2$, which correspond to transitions out of the source compartment.
 The remaining events, of type $p_0$, correspond to individuals remaining in the source compartment.
 The rate of arrivals into the susceptible class, $\mu^{(u)}_{BS}(t)$, is given by
@@ -1055,34 +1032,29 @@ The rate of arrivals into the susceptible class, $\mu^{(u)}_{BS}(t)$, is given b
 	  c^{(u)} \, \delta\big( (t-\tau_c) \text{ mod } \tau_y\big)
 	    \int^t_{t-\tau_y}b^{(u)}(t- \tau_d -s)\, ds,
 \end{align*}
-where $\delta$ is the Dirac delta function, $b^{(u)}(t)$ is the births per year at time $t$ linearly interpolated from annual data, $\tau_d$ is the delay in transitions from $B$ to $S$, $\tau_y = 1$ year, and $\tau_c$ is the school admission day, i.e., the 251st day of the year. 
+where $\delta$ is the Dirac delta function, $b^{(u)}(t)$ is the births per year at time $t$ interpolated from annual data using cubic splines, $\tau_d$ is the delay in transitions from $B$ to $S$, $\tau_y = 1$ year, and $\tau_c$ is the school admission day, i.e., the 251st day of the year. 
 We set $\tau_d = 4$ years to describe the age at which individuals typically enter a high-transmission environment.
 
-The rate at which individuals enter state $E$ is $\mu^{(u)}_{SE}(t) = \bar{\mu}^{(u)}_{SE}(t) \, d\Gamma^{(u)}(t)/dt$, where $\bar{\mu}^{(u)}_{SE}(t)$ is the mean rate given by
-\begin{align*}
+The rate at which individuals enter state $E$ is $\mu^{(u)}_{SE}(t) = \bar{\mu}^{(u)}_{SE}(t) \, \frac{d\Gamma^{(u)}(t)}{dt}$, where $\bar{\mu}^{(u)}_{SE}(t)$ is the mean rate given by
+$
   \bar{\mu}^{(u)}_{SE}(t) =
     \frac{
       \beta^{(u)}(t)\, \big(I^{(u)}_t+\iota^{(u)}\big)
     }{
       \pop^{(u)}(t)
     },
-\end{align*}
+$
 where $\pop^{(u)}(t)$ is the city population at time $t$ interpolated from annual data, and $\iota^{(u)}$ is the average number of infected individuals visiting the city at any time. 
 The force of infection, $\beta^{(u)}(t)$, is given by
 \begin{align*}
-	\beta^{(u)}(t) = \begin{cases}
+	&\beta^{(u)}(t) = \begin{cases}
 		\beta^{(u)}_0 \big( 1+a^{(u)}(1-p)/p \big) & \text{during school term}\\
 		\beta^{(u)}_0 \big( 1-a^{(u)} \big) & \text{during vacation}\\
-	\end{cases}
+	\end{cases}\\
+  &\beta^{(u)}_0 = R^{(u)}_0\big( 1-\exp\big\{ -(\mu^{(u)}_{IR}(t)+\mu^{(u)}_{ID})\Delta\big\}\big)/\Delta.
 \end{align*}
-where $p = 0.7589$ is the proportion of the year occupied by the school term, and
-\begin{align*}
-	\beta^{(u)}_0 = R^{(u)}_0\big( 1-\exp\big\{ -(\mu^{(u)}_{IR}(t)+\mu^{(u)}_{ID})\big\}\big).
-\end{align*}
-The remaining transition rates are assumed to be constant:
-\begin{align*}
-	\mu^{(u)}_{EI}(t) = \sigma^{(u)} \qquad \mu^{(u)}_{IR}(t) = \gamma^{(u)} \qquad \mu^{(u)}_{SD} = \mu^{(u)}_{ED} = \mu^{(u)}_{ID} = 0.02 \, \text{yr}^{-1}.
-\end{align*}
+where $p = 0.7589$ is the proportion of the year occupied by the school term.
+The remaining transition rates are assumed to be constant: $\mu^{(u)}_{EI}(t) = \sigma^{(u)}$, $\mu^{(u)}_{IR}(t) = \gamma^{(u)}$, and $\mu^{(u)}_{SD} = \mu^{(u)}_{ED} = \mu^{(u)}_{ID} = 0.02 \, \text{yr}^{-1}$.
 Lastly, we follow \citet{he10} by using a discretized normal distribution for the number of cases reported: 
 \begin{align*}
  P\big(Y^{(u)}_n = y^{(u)} \big| Z^{(u)}_n = z^{(u)} \big) =
@@ -1098,7 +1070,6 @@ We use three different models based on the \cite{he10} model, with the key diffe
   \item The ``$\iota$-shared" model uses a log-log linear model between $\iota$ and the city population for year 1950, specifically $\log\big(\iota^{(u)}\big) = \iota_1 + \iota_2 \cdot \log\big(\pop^{(u)}(1950)\big)$.
   \item The ``7-shared" model uses the log-log linear model for $\iota$ and shared parameters for $c$, $R_0$, $\gamma$, $\sigma$, $\sigma_{SE}$, and $a$.
 \end{enumerate}
-Each model interpolates the birthrate using splines instead of linear interpolation.
 
 For each model, we run MPIF and PIF for 200 iterations, each search starting from one of 36 different parameter vectors randomly sampled from a hypercube where each dimension is slightly larger than the range spanned by the corresponding unit-specific MLE's in \cite{he10}. 
 We perform these searches using 500, 5000, and 10000 particles to discern how the fits yielded by MPIF and PIF differ based on the selected particle count. 
@@ -1139,8 +1110,8 @@ results_in = pomp::bake("data/measles.rds",{
 In practice, because iterated filtering algorithms are stochastic optimization algorithms, many Monte Carlo replicates are conducted from various initialization points, and final parameter estimates correspond to the search with the highest likelihood. 
 Because of this, we are primarily interested in how in the maximum estimate from each algorithm compares. 
 In Figure~\ref{fig:measles1}, we note that MPIF consistently yields larger sample maximums of the log-likelihood evaluations irrespective of the model or particle count we use. 
-By 200 iterations, we see that MPIF yields maximum log-likelihoods 70 to 105 units higher than PIF for the $\iota$-shared and $c$-shared models, or about 4 to 5 units per city. 
-MPIF has about half the advantage for the 7-shared model by 200 iterations, reflecting how MPIF provides the greatest benefit when there are more unit-specific parameters. 
+By 200 iterations, we see that maximum log-likelihoods obtained using MPIF are 70 to 105 units higher than PIF for the $\iota$-shared and $c$-shared models, or about 4 to 5 units per city. 
+MPIF has about half the advantage for the 7-shared model by 200 iterations. 
 
 Close inspection of the results show that for nearly all combinations of number of particles, iterations, and model specification, the MPIF algorithm outperforms the PIF algorithm. 
 However, in Figure~\ref{fig:measles1}, we can see that at the 20 and 56 iteration evaluations, the maximum obtained likelihood for the 7-shared model fit with 5000 particles is higher for the PIF algorithm than MPIF.   
@@ -1188,57 +1159,41 @@ gg <- results_in |>
     scale_y_continuous(limits = c(-41250, -40260)), 
     scale_y_continuous(limits = c(-41250, -40260)),
     scale_y_continuous(limits = c(-42500, -40260))
-  ))# + 
-  #theme(legend.position = 'inside', legend.position.inside = c(0.13, 0.15))
+  ))
 
 # CREDIT FOR CODE TO REMOVE UNUSED FACET COMBOS: https://stackoverflow.com/questions/49521848/remove-unused-facet-combinations-in-2-way-facet-grid
 
 print(gg)
 @
-\caption[Comparing the MPIF and PIF algorithms using a mechanistic model for measles.]{\label{fig:measles1} 
-Comparing the MPIF and PIF algorithms using a mechanistic model for measles.
+\caption{\label{fig:measles1} Log-likelihoods yielded by the PIF and MPIF algorithms for the mechanistic measles model to the UK data. 
 Rows correspond to a different number of particles $J$ used in Algorithm~\ref{alg:mpif}. 
 The log-likelihood is evaluated at iterations 20, 56, 92, 128, 164, and 200, marked by vertical grey lines.}
 \end{figure}
 
+
 \section{Discussion}\label{sec:mpifdiscussion}
 
-The issue of particle depletion when estimating the posterior distribution of parameter values using a particle filter is well known (see, for instance, Section~1.2 of \citet{chen24}). 
+The issue of particle depletion when estimating the posterior distribution of parameter values using a particle filter has previously been noted \citep[e.g.,][Section~1.2]{chen24}. 
 A key innovation of iterated filtering algorithms is that adding parameter perturbations helps revive the particle representations from a depleted state by adding artificial noise to the parameter particles. 
 These perturbations are precisely why the number of unique particles representing the distribution of $\Psi_1$ in Panel~A of Figure~\ref{fig:depletion} does not degenerate to zero over time.
 Given this observation, an alternative approach to solving the particle depletion issue that arises in higher dimensions would be to perturb all model parameters at each time-step. 
 This approach is supported by Theorem~\ref{theorem:pif}, and avoids the analytic challenges associated with adding the marginalization step.
-However, perturbing all model parameters at each step is equivalent to applying a vanilla iterated filtering algorithm to a PanelPOMP model, which generally performs worse on panel models than the PIF variation \citep{breto20}. 
+However, perturbing all model parameters at each step is equivalent to applying a vanilla iterated filtering algorithm to a PanelPOMP model, which generally performs worse on panel models than the PIF variation \citep{breto20}.
 
 \citet{liuwest01} note that the artificial noise introduced from parameter perturbations results in loss of information.
 This loss of information motivates the common practice in applications of iterated filtering of only perturbing model parameters when the data used to calculate the particle weights has direct relation with the parameters that are being perturbed.
-For instance, it is common practice to only perturb parameters that are unique to the initialization density $f_{X_{u, 0}}(x_{u, 0};\theta)$ at the first available observations, as these observations have the strongest signal for the initialization parameters. 
+For instance, it is common practice to only perturb parameters that are unique to the initialization density $f_{X_{u, 0}}(x_{u, 0};\, \theta)$ at the first available observations, as these observations have the strongest signal for the initialization parameters. 
 If initial parameters are perturbed at all observation times, then the signal from these initial observations gets lost over time. 
 This same principle serves as a motivator for the PIF algorithm and describes why PIF is more successful than vanilla iterated filtering algorithms applied to PanelPOMPs: perturbing unit-specific parameters while considering data from other units results in a significant loss of information.
 
 Therefore despite having theoretical guarantees, the challenge of iterating filtering for PanelPOMP models can be described as a tradeoff between particle depletion and a loss of signal due to parameter perturbations. 
 The MPIF algorithm introduced here is designed to address both of these challenges simultaneously by avoiding perturbations when the signal is weak, but not resampling unit-specific parameters using weights calculated with data from other units. 
 The cost of this modification is a small amount of bias for the particle representation of the posterior distribution at each step. 
-Theorem~\ref{theorem:GG} formally demonstrates that the affect of the bias can be completely negated if the log-likelihood is quadratic, which is the limiting behavior of all likelihood surfaces. 
+Theorem~\ref{theorem:GG} formally demonstrates that the affect of the bias can be completely negated if the log-likelihood is quadratic, which is the limiting behavior of all likelihood surfaces.
 
 Finally, Theorem~\ref{theorem:pif} does provide some stronger guarantees for MPIF under additional constraints on the PanelPOMP model that we have not yet mentioned. 
 In a model with only unit-specific parameters ($\Phi = \emptyset$), for instance, MPIF is equivalent to conducting IF2 independently on each unit, and therefore the convergence results of Theorem~\ref{theorem:pif} apply. 
 Similarly, if the model only contains shared parameters ($\Psi_{1:U} = \emptyset$), then MPIF is equivalent to PIF, and once again stronger theoretical guarantees are available. 
 This equivalency also provides some intuition as to when MPIF will outperform its alternatives. 
 In a model consisting primarily of shared parameters, MPIF behaves very similarly to PIF and adds a smaller advantage relative to the case when there are more unit-specific parameters. 
-We have seen this pattern in our results, as the gain in log-likelihood obtained via MPIF was smallest for the measles model with only one unit specific parameter. 
-
-% \bigskip
-% \begin{center}
-% {\large\bf SUPPLEMENTARY MATERIAL}
-% \end{center}
-% 
-% \begin{description}
-% 
-% \item[Supplemental Text:] This file contains a detailed description of all simulation studies performed in the article. (PDF)
-% 
-% \end{description}
-% 
-% \FloatBarrier
-% \newpage
-
+We have seen this pattern in our results, as the gain in log-likelihood obtained via MPIF was smallest for the measles model with only one unit specific parameter.
