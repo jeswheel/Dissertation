@@ -301,7 +301,7 @@ Despite their autonomy, the four independent teams obtained a consensus that an 
 These forecasts are inconsistent with the prolonged period with no confirmed cholera cases between February, 2019 and September, 2022 \citep{trevisin22}.
 Though cholera has recently reemerged in Haiti \citep{rubin22,PAHO23}, the inability to accurately forecast cholera incidence from 2019-2022 prompts us to consider retrospectively what may have been done differently in order to obtain more reliable conclusions, leading to recommendations for future studies.
 
-The discrepancy between the model-based conclusions of \citet{lee20} and the prolonged absence of cholera in Haiti has been debated \citep{francois20,rebaudetComment20,henrys20,leeReply20}.
+The discrepancy between the model-based conclusions of \citet{lee20} and the prolonged absence of cholera in Haiti has been debated \citep[Lee et al., 2020a;][]{francois20,rebaudetComment20,henrys20}. \nocite{leeReply20}
 Suggested origins of this discrepancy include the use of unrealistic models \citep{rebaudetComment20} and unrealistic criteria for cholera elimination \citep{henrys20}.
 We find a more nuanced conclusion: attention to methodological details in model fitting, diagnosis and forecasting can improve each of the proposed model's ability to quantitatively describe observed data.
 This improved ability may result in more accurate forecasts and facilitates the exploration of model assumptions.
@@ -533,7 +533,7 @@ The danger in using forecasting techniques which rely on associative models to p
 To successfully predict the effect of an intervention, a model should therefore both provide a quantitative explanation of existing data and should have a causal interpretation: a manipulation of the system should correspond quantitatively with the corresponding change to the model.
 This motivates the development of mechanistic models, which provides a statistical fit to the available data while also supporting a causal interpretation.
 Despite their limited ability to project the effect of interventions on a system, associative models can be effectively used to make inference on an certain features of a system.
-In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \citep{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,richterman19,bengtsson15,richterman19inverse,li16adjusting}.
+In our literature review, there were 14 studies that used associative models to describe various aspects of the cholera epidemic \citep[Richterman et al., 2019a, 2019b;][]{hulland19,moise20,piarroux11,matias17,eisenberg13,rebaudet19CATI,ivers15,raila17,cuneo17,charles14,bengtsson15,li16adjusting}. \nocite{richterman19a}\nocite{richterman19b}
 
 The four mechanistic models of \citet{lee20} were deliberately developed with limited coordination.
 This allows us to treat the models as fairly independently developed expert approaches to understanding cholera transmission.
