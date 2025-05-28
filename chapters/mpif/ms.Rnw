@@ -240,7 +240,7 @@ An extensively used approach in ecology, known as \emph{data cloning} \citep{lel
 Data cloning is equivalent to performing a Bayesian update on multiple copies of the data when the data are independent and identically distributed.
 \citet{ionides15} developed an extension of data cloning for nonlinear non-Gaussian state space models by treating the model parameters as latent states, and performing a random walk for these parameters at each observation time.
 By iteratively applying a particle filter \citep{arulampalam02} to this extended model and decreasing the random walk standard deviations over time, it can be shown that the parameters will converge to the MLE after a sufficiently large number of iterations \citep{ionides15, chen24}.
-This algorithm, known as IF2, has seen extensive use for inference on low dimensional dynamic models, especially in epidemiological contexts \citep[e.g.,][]{pons-salort18,stocks18,subramanian21,fox22}.
+This algorithm, known as IF2, has seen extensive use for inference on low dimensional dynamic models, especially in epidemiological contexts \citep[e.g.,][]{pons-salort18,stocks20,subramanian21,fox22}.
 
 In panel models, the iterated filtering algorithm must be extended to handle the Monte Carlo error that grows exponentially with the number of units.
 To address this, \citet{breto20} proposed an algorithm called the panel iterated filter (PIF).
