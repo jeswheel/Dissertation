@@ -18,7 +18,17 @@ Existing procedures for this task exist, though the lack of applications in exis
 The utility of the proposed algorithm is demonstrated on a series of simulation studies, and is found to be superior to existing alternatives for maximum likelihood.
 Theoretical support for the new algorithm is provided via an analysis of iterating a Bayesian inference update followed by a marginalization procedure.
 
-Likelihood based inference for state space models is a large and challenging topic, and this thesis only presents a few innovations to solve this problem.
+Recent advances in machine learning and artificial intelligence (AI) have significantly enhanced researchers' ability to extract information from complex data sets.
+Consequently, much of the recent enthusiasm and effort in statistics and computational science over the last decade has been dedicated to expanding the limits, capabilities, and applications of these fields.
+While the excitement surrounding machine learning and AI is well-justified, state-space models (SSMs) also play a crucial role in advancing scientific understanding \citep{baker18,hogg24}.
+For example, SSMs offer greater interpretability compared to machine learning algorithms, making them valuable for inferring features of dynamic systems.
+Moreover, by incorporating real-world mechanisms into their formulations, SSMs have the potential to improve predictions and provide more reliable estimates of the impacts of system interventions.
+This latter task is particularly challenging for machine learning algorithms, which depend on existing data, as hypothetical interventions represent counterfactual scenarios not present in the data.
+
+Advances in SSM methodology may also play a crucial role in advancing machine learning and AI.
+As summarized by \citet{lin24}, the large language models that have been the driving force behind the success of generative AI are based on non-mechanistic SSMs treated as input-output mapping modules.
+As a result, innovations in likelihood based inference for SSMs could lead to novel techniques for designing and calibrating AI models in ways that are not yet fully understood.
+Likelihood based inference for state space models is a large and challenging topic, and this thesis only presents a few innovations related to this problem.
 Below, I outline several future projects that build on the work presented in this dissertation.
 
 \subsection*{Estimation for Nested PanelPOMP models}
@@ -48,17 +58,28 @@ Additionally, the combination of MPIF and automatic differentiation may facilita
 As an example, consider a continuous time compartmental model outlined in Appendix~\ref{subsec:smcs}.
 Transition rates between compartments are generally expressed as functions of latent and exogenous variables, denoted $f(\bm{X}(t), \bm{Z}(t))$.
 Rather than predetermining the function $f$, automatic differentiation software may enable treating $f$ as a flexible function that needs to be estimated.
-A similar idea has been explored previously \citep{noordijk24,dandekar20}, though only in the context of deterministic ODE models. 
+A similar idea has been explored previously \citep{noordijk24,dandekar20}, though only in the context of deterministic ODE models, or SDE models with non-mechanistic latent dynamics \citep{lin24}.
+In the later approach, a neural network is used to approximate an unknown function that describes the latent process. 
+This has the advantage of allowing felxible description of latet states, but it loses the benefits of being mechanistic.
+Automatic differentiation for particle filters instead may allow for retaining the general mechanistic framework of a SSM, while permitting extra flexibility for model components where a mechanistic representation is not readily available \citep{dandekar20}. 
 
-\subsection*{Applications in Ecology and Epidemiology}
+\subsection*{Applications in Ecology, Agriculture, and Epidemiology}
 
 The MPIF algorithm presented in Chapter~\ref{chpt:mpif} results in an improved capacity to calibrate PanelPOMP models to data via maximum likelihood.
-Given the prevalence of panel data and applications of POMP models to univariate time series, this innovation may lead to a number of collaborative research projects in Ecology and Epidemiology.
-Two application areas I feel are particularly promising are fisheries and livestock management.
+Given the prevalence of panel data and applications of POMP models to univariate time series, this innovation may lead to a number of collaborative research projects in epidemiology.
+Iterated filtering has been a poplar approach for modeling infectious disease outbreaks at a single measurement location using nonlinear, overdispersed stochastic models \citep[e.g.,][]{stocks20}. 
+The MPIF algorithm facilitates fitting similar models to outbreaks measured at various distinct locations, which can be particularly useful at the onset of disease outbreaks, when there is limited amounts of data available at a single measurement location.
 
+In addition to novel applications in epidemiology, there are several areas of research where I feel that PanelPOMP methodology can lead to novel scientific insights.
+Two application areas I feel are particularly promising are fisheries and agriculture.
 Fisheries have a rich history of using state space models, though typically inference is performed using Lapacian approximations of the likelihood \citep[e.g.,][]{auger17}.
 In addition to comparing whether this approach is a more reliable approximation that those built on sequential Monte Carlo methodologies, studying infectious diseases prevalent in native river and lake species may be uniquely well suited for PanelPOMP methodology: population dynamics in each river or lake are independent from other locations, yet share many similar features that should be estimated simultaneously.
-Recently published research on livestock management \citep{skolstrup22} used linear Gaussian state space models to estimate the effects of interventions at dairy farms, and methodologies enabling nonlinear models may be a natural next step. 
+Alternatively, the MPIF methodology may be used to model the nonlinear stochastic dynamics that arise from distinct fish populations competing for the same finite resources \citep{rosenthal22}.
+Fish popultations exhibit many of the same obstacles for inference that were outlined by \citet{bjornstad01}, and iterated filtering based algorithms have been successfully used to the same challenges in infectious disease outbreaks.
+
+Livestock populations also exhibit nonlinear, stochastic features of biological systems, and may be well suited for applying PanelPOMP methodology.
+Recently published research on livestock management \citep{skolstrup22} used linear Gaussian state space models to estimate the effects of interventions at dairy farms, and methodologies enabling nonlinear models may be a natural next step.
+The MPIF algorithm may be used to fit nonlinear SSMs for large collections independent time series data, and could be useful for controling infectious disease outbreaks such as recent avian flu outbreaks \citep{pinotti24}.
 
 \subsection*{Likelihood based inference for ARIMA models}
 

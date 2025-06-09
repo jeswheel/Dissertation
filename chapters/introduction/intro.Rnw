@@ -8,14 +8,15 @@ A unifying approach in time series analysis, known as state space modeling, assu
 Constructing a state space model involves proposing equations that describe the evolution of this unobservable process over time and the unobserved process is related to observations.
 Common goals of state space modeling include making inferences about critical yet unobserved variables, incorporating real-world mechanisms into statistical models, or enabling likelihood based inference for models that lack closed-form expressions of the likelihood function.
 
-The term state space model (SSM) has a number of synonyms including mechanistic model, partially observed Markov process (POMP) model, and hidden Markov model (HMM) \citep{king15}.
+The term state space model (SSM) is often used interchangeably with several synonyms, including mechanistic model, partially observed Markov process (POMP) model, and hidden Markov model (HMM) \citep{king16}.
 In some literature, these terms have alternatively been used to refer to particular instances of the more general model class \citep[e.g.,][]{glennie23}, resulting in some confusion.
 % To avoid ambiguity, unifying notation and terminology is presented in this section.
-Throughout the dissertation, I follow the seminal work of \citet{durbin12} and use the term SSM to refer to the most general case.
+Throughout the dissertation, I follow the seminal work of \citet{durbin12} and use the term SSM to refer to the most general case of latent-variable models for time series data.
 That is, the observed time series is assumed to be reliant on an unobservable collection of variables at each observation time, without any restrictions on relationships between variables.
-The term \emph{mechanistic} is reserved for models where the evolution of latent variables is dictated by equations intended to replicate real-world mechanisms, such as the transmission of infectious diseases among susceptible populations \citep[e.g.,][]{wheeler24}.
-In most instances in this thesis and existing literature, the latent variables are treated as a Markov process, in which case the term POMP can be used.
-Finally, existing literature often uses the term HMM to refer to POMP models where the latent variables take values in a discrete and finite space \citep{eddy04,doucet01,glennie23,newman23}; this same definition is used here. 
+In other literature, the term \emph{mechanistic} is used for models that focus on the causality of input-output relationships \citep{baker18} and does not require that the model is a SSM or is used for time series analysis.
+Here, the term mechanistic is reserved for SSMs where the evolution of latent variables is dictated by equations intended to replicate real-world mechanisms, such as the transmission of infectious diseases among susceptible populations \citep[e.g.,][]{wheeler24}.
+All SSMs considered in this thesis treat the latent variables as a Markov process, in which case the term POMP can be used.
+Finally, the term HMM is often used to refer to POMP models where the latent variables take values in a discrete and finite space \citep{eddy04,doucet01,glennie23,newman23}, and the same convention is used here. 
 
 \section{Defining State Space Models and Notation}\label{sec:intro-POMP}
 
@@ -125,7 +126,7 @@ grid.lines(x=18/24+X_offset,y=c(1,2)/3+c(1,-1)/12,arrow=arrow(length=unit(0.02,"
 
 popViewport()
 @
-\caption{\label{fig:pompDiagram}A flow diagram representing an arbitrary POMP model.}
+\caption[A flow diagram representing an arbitrary POMP model.]{\label{fig:pompDiagram}A flow diagram representing an arbitrary POMP model. Figure was built using modified source code from the online course: ``Simulation Based Inference for Epidemiological Dynamics" \citep{king25}.}
 \end{figure}
 
 Though these additional assumptions do not generally give rise to a closed-form expression of the likelihood function, they do enable likelihood based inference in many scenarios.

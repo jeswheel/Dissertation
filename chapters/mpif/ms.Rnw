@@ -229,7 +229,8 @@ The ability of mechanistic models to describe scientifically important yet unobs
 
 Contemporary applications of nonlinear mechanistic models for low-dimensional systems are abundant \citep[e.g.,][]{kramer24,he24,newman23}, yet examples of higher-dimensional panel equivalents remain sparse.
 In principle, that could be explained by a lack of panel data, or by scientists being uninterested in applying mechanistic models to panel data.
-Alternatively, the lack of examples may be indicative that scientists have struggled, largely unsuccessfully, to use existing statistical methodology.
+However, previous studies have leveraged simple linear models for panel data and have argued for the importance of fitting models to entire collections of data rather to independent time series \citep[e.g.,][]{wiens14}.
+A more plausible explanation is that the lack of examples may be indicative that scientists have struggled, largely unsuccessfully, to use existing statistical methodology.
 Our work addresses this possibility by proposing a new algorithm that is effective on benchmark problems, theoretically supported, and easy to implement using existing software such as the R package \texttt{panelPomp} \citep{panelpomp}.
 
 Various previously proposed algorithms, both frequentist and Bayesian, are capable in principle of fitting mechanistic models to panel data.
