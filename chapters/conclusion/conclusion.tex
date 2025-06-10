@@ -23,7 +23,7 @@ Consequently, much of the recent enthusiasm and effort in statistics and computa
 While the excitement surrounding machine learning and AI is well-justified, state-space models (SSMs) also play a crucial role in advancing scientific understanding \citep{baker18,hogg24}.
 For example, SSMs offer greater interpretability compared to machine learning algorithms, making them valuable for inferring features of dynamic systems.
 Moreover, by incorporating real-world mechanisms into their formulations, SSMs have the potential to improve predictions and provide more reliable estimates of the impacts of system interventions.
-This latter task is particularly challenging for machine learning algorithms, which depend on existing data, as hypothetical interventions represent counterfactual scenarios not present in the data.
+This latter task is particularly challenging for machine learning algorithms, which depend on existing data, as hypothetical interventions represent counter factual scenarios not present in the data.
 
 Advances in SSM methodology may also play a crucial role in advancing machine learning and AI.
 As summarized by \citet{lin24}, the large language models that have been the driving force behind the success of generative AI are based on non-mechanistic SSMs treated as input-output mapping modules.
@@ -60,7 +60,7 @@ Transition rates between compartments are generally expressed as functions of la
 Rather than predetermining the function $f$, automatic differentiation software may enable treating $f$ as a flexible function that needs to be estimated.
 A similar idea has been explored previously \citep{noordijk24,dandekar20}, though only in the context of deterministic ODE models, or SDE models with non-mechanistic latent dynamics \citep{lin24}.
 In the later approach, a neural network is used to approximate an unknown function that describes the latent process. 
-This has the advantage of allowing felxible description of latet states, but it loses the benefits of being mechanistic.
+This has the advantage of allowing flexible description of latent states, but it loses the benefits of being mechanistic.
 Automatic differentiation for particle filters instead may allow for retaining the general mechanistic framework of a SSM, while permitting extra flexibility for model components where a mechanistic representation is not readily available \citep{dandekar20}. 
 
 \subsection*{Applications in Ecology, Agriculture, and Epidemiology}
@@ -75,11 +75,11 @@ Two application areas I feel are particularly promising are fisheries and agricu
 Fisheries have a rich history of using state space models, though typically inference is performed using Lapacian approximations of the likelihood \citep[e.g.,][]{auger17}.
 In addition to comparing whether this approach is a more reliable approximation that those built on sequential Monte Carlo methodologies, studying infectious diseases prevalent in native river and lake species may be uniquely well suited for PanelPOMP methodology: population dynamics in each river or lake are independent from other locations, yet share many similar features that should be estimated simultaneously.
 Alternatively, the MPIF methodology may be used to model the nonlinear stochastic dynamics that arise from distinct fish populations competing for the same finite resources \citep{rosenthal22}.
-Fish popultations exhibit many of the same obstacles for inference that were outlined by \citet{bjornstad01}, and iterated filtering based algorithms have been successfully used to the same challenges in infectious disease outbreaks.
+Fish populations exhibit many of the same obstacles for inference that were outlined by \citet{bjornstad01}, and iterated filtering based algorithms have been successfully used to the same challenges in infectious disease outbreaks.
 
 Livestock populations also exhibit nonlinear, stochastic features of biological systems, and may be well suited for applying PanelPOMP methodology.
 Recently published research on livestock management \citep{skolstrup22} used linear Gaussian state space models to estimate the effects of interventions at dairy farms, and methodologies enabling nonlinear models may be a natural next step.
-The MPIF algorithm may be used to fit nonlinear SSMs for large collections independent time series data, and could be useful for controling infectious disease outbreaks such as recent avian flu outbreaks \citep{pinotti24}.
+The MPIF algorithm may be used to fit nonlinear SSMs for large collections independent time series data, and could be useful for controlling infectious disease outbreaks such as recent avian flu outbreaks \citep{pinotti24}.
 
 \subsection*{Likelihood based inference for ARIMA models}
 
